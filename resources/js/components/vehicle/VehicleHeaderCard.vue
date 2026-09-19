@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { ImagePlus, Pencil, Settings2 } from '@lucide/vue';
+import { ImagePlus, Pencil } from '@lucide/vue';
 import { computed } from 'vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,6 @@ const props = defineProps<{
     mileage: MileageSummary;
     fuel: FuelBenchmark | null;
 }>();
-
-defineEmits<{ intervals: [] }>();
 
 const spec = computed(() =>
     [
@@ -139,14 +137,6 @@ const lastReading = computed(() => {
                             <Pencil :stroke-width="1.5" />
                             Edit
                         </Link>
-                    </Button>
-                    <Button
-                        variant="outline"
-                        class="h-[34px] px-3.5 text-[13px]"
-                        @click="$emit('intervals')"
-                    >
-                        <Settings2 :stroke-width="1.5" />
-                        Intervals
                     </Button>
                 </div>
             </div>

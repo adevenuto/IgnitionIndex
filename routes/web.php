@@ -30,12 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('vehicle-photos/{photo}/thumb', [VehiclePhotoController::class, 'thumbnail'])
         ->name('vehicle-photos.thumbnail');
 
-    // Quick calibrate runs straight after adding a car, so the gauges start
-    // from something real rather than a screen of grey rings.
-    Route::get('vehicles/{vehicle}/calibrate', [VehicleIntervalController::class, 'create'])
-        ->name('vehicles.calibrate');
-    Route::post('vehicles/{vehicle}/calibrate', [VehicleIntervalController::class, 'store'])
-        ->name('vehicles.calibrate.store');
+    // Gauges are calibrated one at a time from the gauge wall. There is no
+    // separate calibrate screen: adding a car lands on the wall itself.
     Route::patch('vehicle-intervals/{interval}', [VehicleIntervalController::class, 'update'])
         ->name('vehicle-intervals.update');
 

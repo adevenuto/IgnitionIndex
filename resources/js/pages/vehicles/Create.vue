@@ -6,7 +6,6 @@ import type { PaletteColor } from '@/components/VehicleColorPicker.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { garage } from '@/routes';
 import { store } from '@/actions/App/Http/Controllers/VehicleController';
 
 defineProps<{
@@ -14,22 +13,13 @@ defineProps<{
     colors: PaletteColor[];
     minYear: number;
 }>();
-
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Garage', href: garage() },
-            { title: 'Add Vehicle', href: garage() },
-        ],
-    },
-});
 </script>
 
 <template>
     <Head title="Add a Vehicle" />
 
     <div
-        class="mx-auto w-full max-w-[var(--content-max)] px-5 pb-8 md:max-w-2xl"
+        class="mx-auto w-full max-w-[var(--content-max)] px-5 pb-8 md:max-w-2xl md:pb-0"
     >
         <h1 class="text-h1 mb-1">Add a Vehicle</h1>
         <p class="text-muted-foreground text-body mb-6">
@@ -69,8 +59,13 @@ defineOptions({
             <!--
                 Sticky on desktop only: on mobile the bottom nav and FAB already
                 occupy that space, and a second fixed bar would collide.
+
+                data-flush-bottom drops the scroll container's bottom padding
+                (see AppShell) so the stuck bar reaches the bottom edge of the
+                window.
             -->
             <div
+                data-flush-bottom
                 class="bg-background md:border-border -mx-5 flex justify-end gap-3 px-5 md:sticky md:bottom-0 md:z-10 md:border-t md:py-4"
             >
                 <Button type="submit" size="lg" :disabled="processing">

@@ -1,15 +1,5 @@
 import type { GaugeDisplayStatus } from '@/types/gauges';
 
-/**
- * Mirrors config('vehicles.gauges.soon').
- *
- * Only the calibrate screen needs this: it previews a status for an answer the
- * user has not saved yet, so there is no server-computed status to read. Every
- * other gauge takes its status from the backend. Guarded by
- * tests/Unit/DesignTokenSyncTest.php so the two cannot drift.
- */
-export const SOON_THRESHOLD = 0.75;
-
 /*
  * How a gauge's state is drawn.
  *

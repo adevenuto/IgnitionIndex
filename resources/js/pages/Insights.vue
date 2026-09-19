@@ -2,18 +2,6 @@
 import { Head } from '@inertiajs/vue3';
 import { ChartColumn } from '@lucide/vue';
 import EmptyState from '@/components/EmptyState.vue';
-import { insights } from '@/routes';
-
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Insights',
-                href: insights(),
-            },
-        ],
-    },
-});
 </script>
 
 <template>

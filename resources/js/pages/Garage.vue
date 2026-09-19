@@ -8,7 +8,6 @@ import VehicleCard from '@/components/VehicleCard.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useQuickAdd } from '@/composables/useQuickAdd';
-import { garage } from '@/routes';
 import { create, show } from '@/routes/vehicles';
 import type { GarageVehicle, ServiceTypeOption } from '@/types/garage';
 
@@ -17,12 +16,6 @@ const props = defineProps<{
     serviceTypes: ServiceTypeOption[];
     expenseCategories: string[];
 }>();
-
-defineOptions({
-    layout: {
-        breadcrumbs: [{ title: 'Garage', href: garage() }],
-    },
-});
 
 const staleVehicles = computed(() =>
     props.vehicles.filter((vehicle) => vehicle.mileage.needs_reading),
