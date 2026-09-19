@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { readAll, update } from '@/routes/notifications';
-import { notifications as notificationsRoute } from '@/routes';
 
 /*
  * Everything the app has told this user, newest first.
@@ -29,12 +28,6 @@ defineProps<{
     notifications: { data: Item[]; total: number };
     unreadCount: number;
 }>();
-
-defineOptions({
-    layout: {
-        breadcrumbs: [{ title: 'Notifications', href: notificationsRoute() }],
-    },
-});
 
 function open(item: Item): void {
     if (!item.read) {

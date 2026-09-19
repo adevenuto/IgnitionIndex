@@ -11,16 +11,24 @@ use App\Models\Vehicle;
  *
  * Until now an interval row only appeared once a service was logged against it,
  * which meant a brand-new car had no gauges at all. Seeding up front means the
- * cluster exists immediately — every item uncalibrated until the owner says
- * when it was last done, which is what the quick-calibrate flow is for.
+ * cluster exists immediately, and adding a car lands straight on its gauge wall
+ * — every item uncalibrated until the owner sets a last-done date on the gauge
+ * itself.
  *
  * Existing rows are left alone: a user override must survive this being run
  * again.
  */
 class SeedVehicleIntervals
 {
-    /** The gauge wall shows three large dials (design doc §6). */
-    private const PINNED_LIMIT = 3;
+    /**
+     * The three large dials on the gauge wall (design doc §6), named rather
+     * than "the first three in the catalogue".
+     *
+     * Sort order is the catalogue's own idea of importance and it put tire
+     * rotation and the engine air filter up front. These three are what an
+     * owner actually recognises as the headline items on a car they just added.
+     */
+    public const PINNED_KEYS = ['oil-change', 'brake-pads', 'coolant'];
 
     public function handle(Vehicle $vehicle): void
     {
@@ -32,8 +40,6 @@ class SeedVehicleIntervals
             ? (int) $vehicle->intervals()->max('position') + 1
             : 0;
 
-        $pinned = $vehicle->intervals()->where('is_pinned', true)->count();
-
         $types = ServiceType::query()
             ->whereNotIn('id', $existing)
             ->orderBy('sort_order')
@@ -43,17 +49,12 @@ class SeedVehicleIntervals
             $isActive = $type->default_interval_months !== null
                 || $type->default_interval_miles !== null;
 
-            // Open a new vehicle with a full gauge wall rather than an empty one.
-            $shouldPin = $isActive && $pinned < self::PINNED_LIMIT;
-
-            if ($shouldPin) {
-                $pinned++;
-            }
-
             $vehicle->intervals()->create([
                 'service_type_id' => $type->id,
                 'position' => $position++,
-                'is_pinned' => $shouldPin,
+                // A named set, so the pinned three are the same on every
+                // vehicle and cannot drift when the catalogue is reordered.
+                'is_pinned' => $isActive && in_array($type->key, self::PINNED_KEYS, true),
                 'interval_months' => $type->default_interval_months,
                 'interval_miles' => $type->default_interval_miles,
                 'source' => IntervalSource::Default,

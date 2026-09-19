@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -8,17 +9,28 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import { breadcrumbsFor, type CrumbProps } from '@/lib/breadcrumbs';
 
-type Props = {
-    breadcrumbs: BreadcrumbItemType[];
-};
+/*
+ * Takes no props on purpose.
+ *
+ * The trail is a function of the page Inertia is currently showing, so it is read
+ * from here rather than handed down. usePage() is reactive, which means every
+ * visit — including a redirect back to the garage after a vehicle is deleted —
+ * recomputes the trail instead of inheriting the previous page's.
+ */
+const page = usePage();
 
-defineProps<Props>();
+const breadcrumbs = computed(() =>
+    breadcrumbsFor(page.component, page.props as unknown as CrumbProps),
+);
 </script>
 
 <template>
-    <Breadcrumb class="text-[12px] text-(--color-neutral-700)">
+    <Breadcrumb
+        v-if="breadcrumbs.length"
+        class="text-[12px] text-(--color-neutral-700)"
+    >
         <BreadcrumbList class="gap-(--space-3) text-[12px] sm:gap-(--space-3)">
             <template v-for="(item, index) in breadcrumbs" :key="index">
                 <BreadcrumbItem>

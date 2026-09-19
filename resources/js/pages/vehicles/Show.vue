@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { Pencil } from '@lucide/vue';
+import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import GaugeGallery from '@/components/vehicle/GaugeGallery.vue';
 import VehicleHeaderCard from '@/components/vehicle/VehicleHeaderCard.vue';
@@ -10,10 +9,8 @@ import RecallAlert from '@/components/RecallAlert.vue';
 import GaugeEditDialog from '@/components/GaugeEditDialog.vue';
 import GaugeDial from '@/components/GaugeDial.vue';
 import QuickAddSheet from '@/components/QuickAddSheet.vue';
-import { Button } from '@/components/ui/button';
 import { useQuickAdd } from '@/composables/useQuickAdd';
 import { garage } from '@/routes';
-import { calibrate, edit, show } from '@/routes/vehicles';
 import type {
     FuelBenchmark,
     Gauge,
@@ -36,23 +33,6 @@ const props = defineProps<{
     serviceTypes: ServiceTypeOption[];
     expenseCategories: string[];
 }>();
-
-/*
- * Breadcrumbs are set here rather than in defineOptions because defineOptions is
- * compiled at build time and cannot see setup bindings — so it can name the
- * parent but never this vehicle, which left "Garage" rendering as the current
- * page: dead text with no way back.
- *
- * setLayoutProps is Inertia's dynamic equivalent. Its store is reset in
- * swapComponent on any navigation that does not preserve state, so this does
- * not leak onto the next page.
- */
-setLayoutProps({
-    breadcrumbs: [
-        { title: 'Garage', href: garage() },
-        { title: props.vehicle.name, href: show(props.vehicle.id) },
-    ],
-});
 
 /*
  * Reminder emails deep-link here as ?log=visit, so the loop is
@@ -80,15 +60,6 @@ const { claimQuickAdd } = useQuickAdd();
 claimQuickAdd(() => {
     quickAddOpen.value = true;
 });
-
-const specs = [
-    props.vehicle.year,
-    props.vehicle.make,
-    props.vehicle.model,
-    props.vehicle.trim,
-]
-    .filter(Boolean)
-    .join(' ');
 </script>
 
 <template>
@@ -97,20 +68,15 @@ const specs = [
     <div class="mx-auto flex w-full max-w-[1400px] flex-col gap-(--space-6)">
         <VehicleSwitcher :vehicles="vehicles" />
 
-        <VehicleHeaderCard
-            :vehicle="vehicle"
-            :mileage="mileage"
-            :fuel="fuel"
-            @intervals="router.visit(calibrate(vehicle.id))"
-        />
+        <VehicleHeaderCard :vehicle="vehicle" :mileage="mileage" :fuel="fuel" />
 
         <!-- An open safety recall outranks everything else on the page. -->
         <RecallAlert v-if="recalls.length" :recalls="recalls" />
 
         <!--
-            A vehicle added before schedules existed has no intervals at all.
-            Without this the section renders as a bare heading with no way
-            forward, which is worse than saying so.
+            Every vehicle is seeded with the full catalogue, so an empty wall
+            means the catalogue itself is missing rather than anything the owner
+            can fix. Saying so beats a bare heading.
         -->
         <BlueprintFrame
             v-if="!gauges.length"
@@ -120,13 +86,10 @@ const specs = [
             <div>
                 <p class="font-display text-title">No gauges yet</p>
                 <p class="text-[13px] text-(--color-neutral-700)">
-                    Tell us roughly when things were last done and they'll start
-                    counting down.
+                    This car has no service schedule attached. That is on us —
+                    try again shortly.
                 </p>
             </div>
-            <Button as-child size="sm">
-                <Link :href="calibrate(vehicle.id)"> Set up gauges </Link>
-            </Button>
         </BlueprintFrame>
 
         <GaugeGallery v-else :gauges="gauges" @select="editGauge" />

@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { Form, Head, Link, setLayoutProps } from '@inertiajs/vue3';
+import { Form, Head, Link } from '@inertiajs/vue3';
+import DeleteVehicle from '@/components/DeleteVehicle.vue';
 import VehicleFields from '@/components/VehicleFields.vue';
 import type { PaletteColor } from '@/components/VehicleColorPicker.vue';
 import type { VehiclePhotoSummary } from '@/types/garage';
 import { Button } from '@/components/ui/button';
-import { garage } from '@/routes';
-import { edit, show, update } from '@/routes/vehicles';
+import { show } from '@/routes/vehicles';
 import { update as updateAction } from '@/actions/App/Http/Controllers/VehicleController';
 
-const props = defineProps<{
+defineProps<{
     vehicle: {
         id: number;
+        /** Vehicle::displayName() — what to call this car in prose. */
+        name: string;
         nickname: string | null;
         vin: string | null;
         year: number | null;
@@ -25,31 +27,13 @@ const props = defineProps<{
     colors: PaletteColor[];
     minYear: number;
 }>();
-
-// defineOptions cannot see props, so a static breadcrumb can only name the
-// parent — which then renders as the current page with no way back.
-setLayoutProps({
-    breadcrumbs: [
-        { title: 'Garage', href: garage() },
-        {
-            title:
-                props.vehicle.nickname ||
-                [props.vehicle.year, props.vehicle.make, props.vehicle.model]
-                    .filter(Boolean)
-                    .join(' ') ||
-                'Vehicle',
-            href: show(props.vehicle.id),
-        },
-        { title: 'Edit', href: edit(props.vehicle.id) },
-    ],
-});
 </script>
 
 <template>
     <Head title="Edit Vehicle" />
 
     <div
-        class="mx-auto w-full max-w-[var(--content-max)] px-5 pb-8 md:max-w-2xl"
+        class="mx-auto w-full max-w-[var(--content-max)] px-5 pb-8 md:max-w-2xl md:pb-0"
     >
         <h1 class="text-h1 mb-6">Edit Vehicle</h1>
 
@@ -73,10 +57,27 @@ setLayoutProps({
             </p>
 
             <!--
+                Inside the edit form, which is safe: DialogContent renders
+                through reka-ui's DialogPortal, so the confirm dialog's own form
+                lands on document.body rather than nested inside this one.
+            -->
+            <DeleteVehicle
+                class="mt-4"
+                :vehicle="vehicle"
+                :name="vehicle.name"
+            />
+
+            <!--
                 Sticky on desktop only: on mobile the bottom nav and FAB already
                 occupy that space, and a second fixed bar would collide.
+
+                data-flush-bottom drops the scroll container's bottom padding
+                (see AppShell) so the stuck bar reaches the bottom edge of the
+                window. Actions stay the last thing on the page, below the
+                danger zone.
             -->
             <div
+                data-flush-bottom
                 class="bg-background md:border-border -mx-5 flex justify-end gap-3 px-5 md:sticky md:bottom-0 md:z-10 md:border-t md:py-4"
             >
                 <!--

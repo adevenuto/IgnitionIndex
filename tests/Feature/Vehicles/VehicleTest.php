@@ -3,6 +3,7 @@
 use App\Enums\EventType;
 use App\Models\User;
 use App\Models\Vehicle;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -33,8 +34,8 @@ test('adding a vehicle records its starting odometer as an event', function () {
 
     $vehicle = Vehicle::firstOrFail();
 
-    // Straight into quick calibrate, so the gauges start from something real.
-    $response->assertRedirect(route('vehicles.calibrate', $vehicle));
+    // Straight to the car itself, gauge wall and all.
+    $response->assertRedirect(route('vehicles.show', $vehicle));
 
     expect($vehicle->user_id)->toBe($this->user->id)
         ->and($vehicle->last_odometer)->toBe(47_320)
@@ -91,6 +92,40 @@ test('a user can delete their own vehicle', function () {
     $this->delete(route('vehicles.destroy', $vehicle))->assertRedirect(route('garage'));
 
     expect(Vehicle::whereKey($vehicle->id)->exists())->toBeFalse();
+});
+
+test('the edit page names the vehicle for the breadcrumb and the remove dialog', function () {
+    // Both read vehicle.name rather than reassembling one from the fields, so
+    // the payload has to carry it. Without this the breadcrumb silently falls
+    // back to "Vehicle" on a car that has a perfectly good name.
+    $vehicle = Vehicle::factory()->for($this->user)->create([
+        'nickname' => null, 'year' => 2019, 'make' => 'Toyota', 'model' => 'RAV4',
+    ]);
+
+    $this->get(route('vehicles.edit', $vehicle))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('vehicles/Edit')
+            ->where('vehicle.name', '2019 Toyota RAV4'));
+});
+
+test('removing a vehicle takes its schedule and history with it', function () {
+    // The confirm dialog on the edit page promises entries and gauges go too.
+    // Both hang off cascading foreign keys, so nothing in the controller would
+    // fail if that stopped being true.
+    $this->post(route('vehicles.store'), [
+        'make' => 'Toyota', 'model' => 'RAV4', 'odometer' => 1000,
+    ])->assertSessionHasNoErrors();
+
+    $vehicle = Vehicle::firstOrFail();
+
+    expect($vehicle->intervals()->count())->toBeGreaterThan(0)
+        ->and($vehicle->events()->count())->toBeGreaterThan(0);
+
+    $this->delete(route('vehicles.destroy', $vehicle));
+
+    expect(DB::table('vehicle_intervals')->where('vehicle_id', $vehicle->id)->count())->toBe(0)
+        ->and(DB::table('events')->where('vehicle_id', $vehicle->id)->count())->toBe(0);
 });
 
 test('history lists events newest first', function () {

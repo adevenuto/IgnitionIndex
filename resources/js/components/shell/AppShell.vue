@@ -54,8 +54,20 @@ function onAdd(): void {
                 <ShellRail />
             </aside>
 
+            <!--
+                This is the scroll container, so its padding-bottom is also the
+                floor a `position: sticky; bottom: 0` child can reach — the
+                sticky constraint is the scrollport inset by this padding, and no
+                negative offset on the child gets past it. A page that ends in a
+                full-bleed sticky action bar marks that bar [data-flush-bottom]
+                and gets the padding dropped, so the bar sits on the bottom edge
+                of the window rather than floating above a band of dead space.
+
+                Desktop only: below md those bars are not sticky, and the padding
+                is what keeps the last field clear of the bottom nav and FAB.
+            -->
             <main
-                class="flex min-w-0 flex-1 flex-col gap-[26px] overflow-y-auto px-[30px] pt-[26px] pb-10 max-md:px-5"
+                class="flex min-w-0 flex-1 flex-col gap-[26px] overflow-y-auto px-[30px] pt-[26px] pb-10 max-md:px-5 md:has-[[data-flush-bottom]]:pb-0"
             >
                 <slot />
             </main>

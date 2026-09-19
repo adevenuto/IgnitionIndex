@@ -4,7 +4,6 @@ import { ClipboardList } from '@lucide/vue';
 import EmptyState from '@/components/EmptyState.vue';
 import EventRow from '@/components/EventRow.vue';
 import { Button } from '@/components/ui/button';
-import { history } from '@/routes';
 import type { HistoryEvent } from '@/types/garage';
 
 type Paginated = {
@@ -16,12 +15,6 @@ type Paginated = {
 defineProps<{
     events: Paginated;
 }>();
-
-defineOptions({
-    layout: {
-        breadcrumbs: [{ title: 'History', href: history() }],
-    },
-});
 </script>
 
 <template>

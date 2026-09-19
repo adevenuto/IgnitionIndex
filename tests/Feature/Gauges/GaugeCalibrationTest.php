@@ -46,51 +46,44 @@ test('a freshly added vehicle is uncalibrated, not overdue', function () {
         ->and($gauges->uncalibratedCount())->toBeGreaterThan(0);
 });
 
-test('the calibrate screen offers the four common items', function () {
-    $vehicle = Vehicle::factory()->for($this->user)->create();
-    app(SeedVehicleIntervals::class)->handle($vehicle);
+test('adding a vehicle lands on it with the whole gauge wall showing', function () {
+    $this->post(route('vehicles.store'), [
+        'make' => 'Toyota', 'model' => 'RAV4', 'odometer' => 1000,
+    ])->assertRedirect(route('vehicles.show', Vehicle::firstOrFail()));
 
-    $this->get(route('vehicles.calibrate', $vehicle))
+    $this->get(route('vehicles.show', Vehicle::firstOrFail()))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('vehicles/Calibrate')
-            ->has('intervals', 4)
-            ->where('intervals.0.name', 'Oil & Filter Change')
-            ->has('estimates', 6));
+            ->component('vehicles/Show')
+            // Not a subset: the point of landing here is seeing everything the
+            // car has, with the pinned three drawn large.
+            ->has('gauges', ServiceType::whereNotNull('default_interval_months')
+                ->orWhereNotNull('default_interval_miles')
+                ->count()));
 });
 
-test('calibrating sets a last done date from the rough answer', function () {
+test('the pinned three are the named ones, not the first three in the catalogue', function () {
     $vehicle = Vehicle::factory()->for($this->user)->create();
     app(SeedVehicleIntervals::class)->handle($vehicle);
 
-    $oil = $vehicle->intervals()
-        ->whereHas('serviceType', fn ($q) => $q->where('key', 'oil-change'))
-        ->firstOrFail();
+    $pinned = $vehicle->intervals()
+        ->where('is_pinned', true)
+        ->with('serviceType')
+        ->get()
+        ->pluck('serviceType.key');
 
-    $this->post(route('vehicles.calibrate.store', $vehicle), [
-        'answers' => [
-            ['interval_id' => $oil->id, 'estimate' => '3_6', 'odometer' => 38_000],
-        ],
-    ])->assertRedirect(route('vehicles.show', $vehicle));
-
-    $oil->refresh();
-
-    expect($oil->last_done_at)->not->toBeNull()
-        ->and($oil->last_done_odometer)->toBe(38_000)
-        ->and($oil->last_done_at->diffInMonths(now()))->toBeGreaterThanOrEqual(3);
+    expect($pinned->sort()->values()->all())
+        ->toBe(['brake-pads', 'coolant', 'oil-change']);
 });
 
-test('answering not sure leaves the item uncalibrated rather than inventing a date', function () {
+test('every gauge on a new vehicle starts unset', function () {
     $vehicle = Vehicle::factory()->for($this->user)->create();
     app(SeedVehicleIntervals::class)->handle($vehicle);
 
-    $oil = $vehicle->intervals()->firstOrFail();
-
-    $this->post(route('vehicles.calibrate.store', $vehicle), [
-        'answers' => [['interval_id' => $oil->id, 'estimate' => 'not_sure']],
-    ]);
-
-    expect($oil->refresh()->last_done_at)->toBeNull();
+    // Nothing is guessed at setup, so the wall opens as grey rings and the owner
+    // sets each one by tapping it.
+    expect($vehicle->intervals()->whereNotNull('last_done_at')->count())->toBe(0)
+        ->and($vehicle->intervals()->whereNotNull('last_done_odometer')->count())->toBe(0);
 });
 
 test('changing an interval marks it as a user override', function () {
@@ -122,13 +115,6 @@ test('setting only a last done date does not mark an override', function () {
     ]);
 
     expect($interval->refresh()->source)->toBe(IntervalSource::Default);
-});
-
-test('a user cannot calibrate another user vehicle', function () {
-    $other = Vehicle::factory()->create();
-
-    $this->get(route('vehicles.calibrate', $other))->assertForbidden();
-    $this->post(route('vehicles.calibrate.store', $other), ['answers' => []])->assertForbidden();
 });
 
 test('a user cannot change an interval on another user vehicle', function () {
