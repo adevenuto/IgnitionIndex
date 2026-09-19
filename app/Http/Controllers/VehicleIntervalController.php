@@ -2,123 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Vehicles\SeedVehicleIntervals;
 use App\Enums\IntervalSource;
-use App\Enums\LastDoneEstimate;
-use App\Models\Vehicle;
 use App\Models\VehicleInterval;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Inertia\Inertia;
-use Inertia\Response;
 
 /**
- * Calibrating and overriding a vehicle's schedule.
+ * Overriding one item on a vehicle's schedule.
  *
- * Two entry points onto the same rows: the quick-calibrate flow right after a
- * car is added, and per-item edits from the vehicle's gauge cluster.
+ * There used to be a second entry point: a quick-calibrate screen that ran
+ * straight after a car was added and asked "roughly when did you last do these?"
+ * about four items. It asked before the owner had seen the gauges it was talking
+ * about, and it is gone — calibrating is now the same gesture as any other
+ * change to a gauge, made on the gauge.
  */
 class VehicleIntervalController extends Controller
 {
-    /** The items worth asking about up front, in order. */
-    private const CALIBRATE_KEYS = [
-        'oil-change', 'tire-rotation', 'brake-pads', 'registration',
-    ];
-
-    /**
-     * Quick calibrate: "roughly when did you last do these?" so the gauges
-     * start from something real instead of all grey.
-     */
-    /**
-     * @return array<string, int>
-     */
-    private static function calibrateOrder(): array
-    {
-        return array_flip(self::CALIBRATE_KEYS);
-    }
-
-    public function create(Vehicle $vehicle, SeedVehicleIntervals $seed): Response
-    {
-        Gate::authorize('update', $vehicle);
-
-        // A vehicle added before schedules existed has no interval rows, which
-        // would make this screen empty and the flow a dead end. Seeding is
-        // idempotent, so this is safe to run every time.
-        if ($vehicle->intervals()->doesntExist()) {
-            $seed->handle($vehicle);
-        }
-
-        $intervals = $vehicle->intervals()
-            ->with('serviceType')
-            ->whereHas('serviceType', fn ($query) => $query->whereIn('key', self::CALIBRATE_KEYS))
-            ->get()
-            ->sortBy(fn (VehicleInterval $i): int => self::calibrateOrder()[$i->serviceType->key] ?? PHP_INT_MAX)
-            ->values()
-            ->map(fn (VehicleInterval $i): array => [
-                'id' => $i->id,
-                'name' => $i->serviceType->name,
-                'interval_months' => $i->interval_months,
-                'interval_miles' => $i->interval_miles,
-                'last_done_at' => $i->last_done_at?->toDateString(),
-                'last_done_odometer' => $i->last_done_odometer,
-            ]);
-
-        return Inertia::render('vehicles/Calibrate', [
-            'vehicle' => [
-                'id' => $vehicle->id,
-                'name' => $vehicle->displayName(),
-                'last_odometer' => $vehicle->last_odometer,
-            ],
-            'intervals' => $intervals,
-            'estimates' => LastDoneEstimate::options(),
-        ]);
-    }
-
-    /**
-     * Save the quick-calibrate answers in one go. "Not sure" leaves an item
-     * uncalibrated rather than inventing a date for it.
-     */
-    public function store(Request $request, Vehicle $vehicle): RedirectResponse
-    {
-        Gate::authorize('update', $vehicle);
-
-        $validated = $request->validate([
-            'answers' => ['nullable', 'array'],
-            'answers.*.interval_id' => ['required', 'integer'],
-            'answers.*.estimate' => ['required', 'string'],
-            'answers.*.odometer' => ['nullable', 'integer', 'min:0', 'max:2000000'],
-        ]);
-
-        $intervals = $vehicle->intervals()->get()->keyBy('id');
-
-        foreach ($validated['answers'] ?? [] as $answer) {
-            $interval = $intervals->get($answer['interval_id']);
-            $estimate = LastDoneEstimate::tryFrom($answer['estimate']);
-
-            if ($interval === null || $estimate === null) {
-                continue;
-            }
-
-            $date = $estimate->toDate();
-
-            if ($date === null) {
-                continue;
-            }
-
-            $interval->forceFill([
-                'last_done_at' => $date->toDateString(),
-                // Without an odometer the mileage axis has no baseline, so it
-                // simply does not participate until a service is logged.
-                'last_done_odometer' => $answer['odometer'] ?? null,
-            ])->save();
-        }
-
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Gauges calibrated.')]);
-
-        return to_route('vehicles.show', $vehicle);
-    }
-
     /**
      * Per-item edit from the gauge cluster: last-done, and the interval itself.
      */

@@ -126,9 +126,10 @@ class VehicleController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Vehicle added.')]);
 
-        // Straight into quick calibrate — the brief's "setup is the wow". It is
-        // skippable, and skipping lands on the vehicle either way.
-        return to_route('vehicles.calibrate', $vehicle);
+        // Straight to the car itself, with its whole gauge wall showing. The old
+        // quick-calibrate detour asked four questions before the owner had seen
+        // what they were answering about; a gauge is calibrated by tapping it.
+        return to_route('vehicles.show', $vehicle);
     }
 
     public function show(Request $request, Vehicle $vehicle): Response
@@ -211,6 +212,11 @@ class VehicleController extends Controller
                 ...$vehicle->only([
                     'id', 'nickname', 'vin', 'year', 'make', 'model', 'trim', 'engine', 'color',
                 ]),
+                // What to call this car in prose, on the one screen that also
+                // carries the fields it is derived from. Sent rather than
+                // reassembled client-side so the breadcrumb, the remove dialog
+                // and every other screen name it the same way.
+                'name' => $vehicle->displayName(),
                 'photos' => $vehicle->photos()->get()->map(fn (VehiclePhoto $photo): array => [
                     'id' => $photo->id,
                     'url' => route('vehicle-photos.thumbnail', $photo),

@@ -6,6 +6,7 @@ use App\Models\ServiceType;
 use App\Models\Vehicle;
 use App\Models\VehicleInterval;
 use App\Support\VehicleGauges;
+use Database\Seeders\ServiceTypeSeeder;
 use Illuminate\Support\Carbon;
 
 /*
@@ -47,8 +48,10 @@ test('gauges keep their position order rather than sorting by urgency', function
 });
 
 test('seeding a vehicle pins exactly three active intervals', function () {
-    // The catalogue is global and not seeded into the test database.
-    ServiceType::factory()->count(6)->create();
+    // Named explicitly rather than leaning on the catalogue migration: the
+    // pinned set is chosen by key now, and factory types carry random keys and
+    // would pin nothing at all.
+    $this->seed(ServiceTypeSeeder::class);
 
     $vehicle = Vehicle::factory()->create();
 
