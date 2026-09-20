@@ -246,6 +246,70 @@
     }
 
     /*
+      A card picked up, and the card it would trade with.
+
+      §4 rules out the usual vocabulary here — "cards keep a hairline border and
+      a near-transparent fill, never a drop shadow", and ui/button/index.ts
+      records the matching precedent that nothing in a blueprint system deforms,
+      so a press is a background step rather than a squash. No scale, no shadow,
+      no tilt. The same job is done with what the system does have: the hairline
+      goes dashed and accent, the fill takes an accent wash, and the corner
+      registration marks brighten — the drawing's own way of saying "this one".
+
+      Doubled for specificity, as ii-awaiting-setup is: these override utilities
+      from the same layer (bg-(--color-neutral-100), hover:bg-accent-100) and a
+      tie would be settled by source order.
+    */
+    .ii-card-lifted.ii-card-lifted,
+    .ii-card-target.ii-card-target {
+        border-color: var(--color-accent);
+        transition:
+            background-color var(--dur-fast) var(--ease-standard),
+            border-color var(--dur-fast) var(--ease-standard),
+            opacity var(--dur-fast) var(--ease-standard);
+    }
+
+    .ii-card-lifted.ii-card-lifted {
+        border-style: dashed;
+        background-color: color-mix(
+            in oklab,
+            var(--color-accent) 7%,
+            transparent
+        );
+        opacity: 0.7;
+    }
+
+    .ii-card-target.ii-card-target {
+        background-color: color-mix(
+            in oklab,
+            var(--color-accent) 14%,
+            transparent
+        );
+    }
+
+    .ii-card-lifted .ii-corner,
+    .ii-card-target .ii-corner {
+        color: var(--color-accent);
+        transition: color var(--dur-fast) var(--ease-standard);
+    }
+
+    /*
+      The landing. Position only — the card travels from where its partner was
+      to where it now is, with a touch of overshoot so it arrives rather than
+      merely appears. Nothing scales, and the transform is cleared the moment it
+      lands so it can never interfere with hit testing.
+    */
+    .ii-card-landing {
+        transition: transform var(--dur-slow) cubic-bezier(0.34, 1.28, 0.64, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ii-card-landing {
+            transition: none;
+        }
+    }
+
+    /*
       An arrow that leans toward where it is about to take you, on hover and on
       keyboard focus. Put this on the arrow; put `group` on the control.
 

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { Pin } from '@lucide/vue';
 import { computed, nextTick, toRef, watch } from 'vue';
+import { toast } from 'vue-sonner';
 import GaugeDial from '@/components/GaugeDial.vue';
 import GaugeLegend from '@/components/GaugeLegend.vue';
 import GaugeDragHandle from '@/components/vehicle/GaugeDragHandle.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
 import { useAnnouncer } from '@/composables/useAnnouncer';
+import { useCardLanding } from '@/composables/useCardLanding';
 import { useCardSwap } from '@/composables/useCardSwap';
 import { useGaugeOrder } from '@/composables/useGaugeOrder';
 import {
@@ -36,6 +38,7 @@ const { gauges, order, swap } = useGaugeOrder(
     props.vehicleId,
 );
 const { message, announce } = useAnnouncer();
+const { land } = useCardLanding('data-gauge-id');
 
 const pinned = computed(() => gauges.value.filter((gauge) => gauge.is_pinned));
 const rest = computed(() => gauges.value.filter((gauge) => !gauge.is_pinned));
@@ -103,11 +106,32 @@ const {
     onSwap: async (sourceId, targetId) => {
         const moved = nameOf(sourceId);
         const partner = nameOf(targetId);
+        const wasPinned = byId.value.get(sourceId)?.is_pinned ?? false;
 
-        const saved = swap(sourceId, targetId);
+        let saved: Promise<void> = Promise.resolve();
 
-        await nextTick();
+        // Measure, swap, then play both cards to their new places.
+        await land([sourceId, targetId], () => {
+            saved = swap(sourceId, targetId);
+        });
+
         restoreFocus(sourceId);
+
+        /*
+         * Only when the pinned set changed. A move inside one region already
+         * announced itself by happening under the user's finger; promoting or
+         * demoting a gauge is the consequential half, and it is the one thing
+         * about a swap you might not notice you did.
+         */
+        if (wasPinned !== (byId.value.get(sourceId)?.is_pinned ?? false)) {
+            const nowPinned = byId.value.get(sourceId)?.is_pinned ?? false;
+
+            toast.success(
+                nowPinned
+                    ? `${moved} pinned. ${partner} moved down.`
+                    : `${moved} unpinned. ${partner} is now pinned.`,
+            );
+        }
 
         // Again once the server has answered: that response re-renders the wall
         // a second time and drops focus all over again.
@@ -157,13 +181,19 @@ function cardLabel(gauge: Gauge): string {
     return `${gauge.name}, ${gauge.label}.${gauge.is_pinned ? ' Pinned.' : ''} Adjust.`;
 }
 
-/** Dimmed while picked up; outlined while it is the one being traded with. */
+/**
+ * Picked up, or about to be traded with.
+ *
+ * Both treatments live in app.css as ii-card-* — they are design-system states
+ * built from the hairline, the fill and the corner marks, since §4 leaves no
+ * shadow, scale or tilt to reach for.
+ */
 function cardState(gauge: Gauge): string {
     if (liftedId.value === gauge.id) {
-        return 'opacity-60 border-dashed';
+        return 'ii-card-lifted';
     }
 
-    return candidateId.value === gauge.id ? 'border-(--color-accent)' : '';
+    return candidateId.value === gauge.id ? 'ii-card-target' : '';
 }
 </script>
 
