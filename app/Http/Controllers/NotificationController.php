@@ -34,14 +34,62 @@ class NotificationController extends Controller
         ]);
     }
 
+    /**
+     * Mark one notice read, and optionally follow it to whatever it is about.
+     *
+     * `?go=1` exists because marking read and going somewhere were two Inertia
+     * visits racing each other: the PATCH would cancel the navigation, so the
+     * same click sometimes moved and sometimes just sat there. One request does
+     * both, and it still works with no JavaScript at all.
+     */
     public function update(Request $request, string $notification): RedirectResponse
     {
-        $request->user()->notifications()
+        $record = $request->user()->notifications()
             ->whereKey($notification)
-            ->firstOrFail()
-            ->markAsRead();
+            ->firstOrFail();
+
+        $record->markAsRead();
+
+        if ($request->boolean('go')) {
+            $path = $this->pathOf($record);
+
+            if ($path !== null) {
+                return redirect()->to($path);
+            }
+        }
 
         return back();
+    }
+
+    /**
+     * The stored destination as a path on THIS host.
+     *
+     * Payload urls are absolute, built by route() from APP_URL whenever the
+     * notice was written — which is not necessarily the host serving the
+     * request now. Redirecting to the absolute url sends an Inertia XHR
+     * cross-origin, where it cannot swap the page and the click appears to do
+     * nothing. Keeping only the path sidesteps that, and means a destination
+     * can never point off-site however the payload was written.
+     */
+    private function pathOf(DatabaseNotification $notification): ?string
+    {
+        /** @var array<string, mixed> $data */
+        $data = $notification->data;
+        $url = is_string($data['url'] ?? null) ? $data['url'] : null;
+
+        if ($url === null) {
+            return null;
+        }
+
+        $path = parse_url($url, PHP_URL_PATH);
+
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        $query = parse_url($url, PHP_URL_QUERY);
+
+        return is_string($query) && $query !== '' ? "{$path}?{$query}" : $path;
     }
 
     public function readAll(Request $request): RedirectResponse
