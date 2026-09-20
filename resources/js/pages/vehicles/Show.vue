@@ -102,7 +102,12 @@ claimQuickAdd(() => {
             </div>
         </BlueprintFrame>
 
-        <GaugeGallery v-else :gauges="gauges" @select="editGauge" />
+        <GaugeGallery
+            v-else
+            :gauges="gauges"
+            :vehicle-id="vehicle.id"
+            @select="editGauge"
+        />
     </div>
 
     <GaugeEditDialog

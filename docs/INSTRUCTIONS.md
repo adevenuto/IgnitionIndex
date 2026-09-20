@@ -39,9 +39,6 @@ override in `app.css`, so nothing is visibly wrong — clear them per primitive 
 is next touched.
 
 ### Known gaps (none are bugs)
-- No **pinning UI**. `position` and `is_pinned` exist, are backfilled and render, but
-  nothing lets a user change which three gauges are pinned. Suggested home for the
-  toggle: the Intervals modal.
 - The top-bar **search** and the rail's **Upgrade to Fleet** cell are inert — both are
   in the design, neither has a backend. Search deliberately swallows Enter.
 - The landing **hero has no photo**. The design calls for a garage/engine-bay shot and
@@ -112,6 +109,11 @@ Every one of these was hit during the redesign. None are caught by any check.
   frontend speaks only `GaugeDisplayStatus`.
 - **Gauges render in `position` order, never by urgency** (design §6). A gauge that
   moves as its status changes moves under the pointer.
+- **The wall is rearranged by SWAPPING two gauges**, never by inserting and shifting
+  (`SwapGaugePositions`). Exchanging `position` and `is_pinned` between exactly two
+  rows is what keeps the pinned count at three and positions unique *by construction*
+  rather than by validation, and it leaves the inactive intervals — which hold
+  positions but never render — untouched.
 - **`percent` is uncapped** — 112% is a real reading. Only the arc and needle clamp.
 - **The soon threshold is `config('vehicles.gauges.soon')` = 0.75.** The calibrate
   screen mirrors it in `lib/gauge.ts` because it previews an unsaved answer; the two
@@ -225,12 +227,8 @@ Phases 0–3 are done and the design migration is finished. **Finish going live 
 follow `docs/LARAVEL_CLOUD_DEPLOYMENT.md` from wherever its checkboxes stop. After that,
 **Phase 4 (Insights) is next.**
 
-Two things are worth doing first, both small:
-1. **Build the pinning UI** so the three pinned gauges can be chosen — the one piece of
-   the gauge wall the schema supports but the interface does not expose. Suggested home
-   is the Intervals modal, alongside interval configuration, so the schedule is managed
-   in one place.
-2. **Clear the seven remaining `rounded-full`** in `components/ui/*` and
+One small thing is worth doing first:
+1. **Clear the seven remaining `rounded-full`** in `components/ui/*` and
    `TwoFactorSetupModal` — tidying, not a defect, since the override already squares
    them.
 
