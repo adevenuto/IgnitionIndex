@@ -206,8 +206,9 @@ Only if the database connection is refused for lack of TLS:
       Confirmed 2026-09-18, twice: once on the original account and again on a fresh
       register-delete-reregister pass. **No "Invalid signature" 403** — Cloud's proxy
       already presents requests as `https`, so `trustProxies` is *not* needed here
-- [ ] **Photos:** upload a photo, **redeploy**, confirm it still loads — proves it lives in
-      the bucket, not on the ephemeral filesystem
+- [x] **Photos:** upload a photo, **redeploy**, confirm it still loads — proves it lives in
+      the bucket, not on the ephemeral filesystem. Confirmed 2026-09-18: a photo uploaded
+      to a real vehicle survived a redeploy
 - [ ] **Queue:** from the Commands tab, `php artisan reminders:send --force`; the job shows
       in the managed queue dashboard and the email arrives
 - [ ] **Scheduler:** `php artisan schedule:list` shows `reminders:send` and `recalls:check`
