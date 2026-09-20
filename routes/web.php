@@ -4,6 +4,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VehicleGaugeOrderController;
 use App\Http\Controllers\VehicleIntervalController;
 use App\Http\Controllers\VehiclePhotoController;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // separate calibrate screen: adding a car lands on the wall itself.
     Route::patch('vehicle-intervals/{interval}', [VehicleIntervalController::class, 'update'])
         ->name('vehicle-intervals.update');
+
+    // Rearranging the wall is vehicle-scoped, unlike the route above: it names
+    // two intervals and needs something to check them both against.
+    Route::patch('vehicles/{vehicle}/gauge-order', [VehicleGaugeOrderController::class, 'update'])
+        ->name('vehicles.gauge-order.update');
 
     Route::post('vehicles/{vehicle}/events', [EventController::class, 'store'])
         ->name('vehicles.events.store');

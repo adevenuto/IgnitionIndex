@@ -246,6 +246,94 @@
     }
 
     /*
+      The thumbtack on a pinned card.
+
+      Lucide's Pin is two paths wanting two treatments: a closed head that takes
+      the accent fill, and the needle — which is a bare line, so it has no area
+      to fill and only a stroke to colour. The component takes one set of props,
+      so the split happens here: the head stays steel, the needle goes to ink
+      and is drawn longer, which is what makes the shape read as a tack pushed
+      into the card rather than a solid blob.
+
+      Selected by its `d`, not by position. If a Lucide upgrade redraws the icon
+      this simply stops matching and the needle renders plain, where
+      `path:first-of-type` would confidently restyle whatever moved into that
+      slot. The scale is anchored at the needle's top so it grows downward, and
+      1.4 lands its tip exactly on the 24-unit viewBox edge — no clipping, and
+      no need to let the icon overflow its box.
+    */
+    .ii-pin path[d='M12 17v5'] {
+        stroke: var(--color-text);
+        transform-box: view-box;
+        transform-origin: 12px 17px;
+        transform: scaleY(1.4);
+    }
+
+    /*
+      A card picked up, and the card it would trade with.
+
+      §4 rules out the usual vocabulary here — "cards keep a hairline border and
+      a near-transparent fill, never a drop shadow", and ui/button/index.ts
+      records the matching precedent that nothing in a blueprint system deforms,
+      so a press is a background step rather than a squash. No scale, no shadow,
+      no tilt. The same job is done with what the system does have: the hairline
+      goes dashed and accent, the fill takes an accent wash, and the corner
+      registration marks brighten — the drawing's own way of saying "this one".
+
+      Doubled for specificity, as ii-awaiting-setup is: these override utilities
+      from the same layer (bg-(--color-neutral-100), hover:bg-accent-100) and a
+      tie would be settled by source order.
+    */
+    .ii-card-lifted.ii-card-lifted,
+    .ii-card-target.ii-card-target {
+        border-color: var(--color-accent);
+        transition:
+            background-color var(--dur-fast) var(--ease-standard),
+            border-color var(--dur-fast) var(--ease-standard),
+            opacity var(--dur-fast) var(--ease-standard);
+    }
+
+    .ii-card-lifted.ii-card-lifted {
+        border-style: dashed;
+        background-color: color-mix(
+            in oklab,
+            var(--color-accent) 7%,
+            transparent
+        );
+        opacity: 0.7;
+    }
+
+    .ii-card-target.ii-card-target {
+        background-color: color-mix(
+            in oklab,
+            var(--color-accent) 14%,
+            transparent
+        );
+    }
+
+    .ii-card-lifted .ii-corner,
+    .ii-card-target .ii-corner {
+        color: var(--color-accent);
+        transition: color var(--dur-fast) var(--ease-standard);
+    }
+
+    /*
+      The landing. Position only — the card travels from where its partner was
+      to where it now is, with a touch of overshoot so it arrives rather than
+      merely appears. Nothing scales, and the transform is cleared the moment it
+      lands so it can never interfere with hit testing.
+    */
+    .ii-card-landing {
+        transition: transform var(--dur-slow) cubic-bezier(0.34, 1.28, 0.64, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ii-card-landing {
+            transition: none;
+        }
+    }
+
+    /*
       An arrow that leans toward where it is about to take you, on hover and on
       keyboard focus. Put this on the arrow; put `group` on the control.
 
