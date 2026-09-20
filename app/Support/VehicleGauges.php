@@ -74,6 +74,24 @@ readonly class VehicleGauges
     }
 
     /**
+     * Nothing on this vehicle has a starting point yet, so it can tell the
+     * owner nothing until one is supplied.
+     *
+     * Defined here rather than re-derived per screen: the garage card gets a
+     * summary and the vehicle page gets the whole gauge list, so two views of
+     * the same fact would otherwise be computed two different ways and drift.
+     * An empty cluster is NOT awaiting setup — a vehicle with no schedule at
+     * all is our bug to fix, not something the owner can act on.
+     */
+    public function awaitingSetup(): bool
+    {
+        return $this->gauges->isNotEmpty()
+            && $this->gauges->every(
+                fn (IntervalProgress $g): bool => $g->status === GaugeStatus::Uncalibrated,
+            );
+    }
+
+    /**
      * Sorted for display by the user's fixed order.
      *
      * Deliberately NOT by urgency. Design doc §6 forbids reordering overdue

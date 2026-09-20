@@ -106,6 +106,39 @@
          system's values so transitions stay coherent during migration. ── */
     --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* ── The uncalibrated needle's attention sweep, used by the gauge-setup
+         prompt. Rotation only: §4 forbids deformation, so nothing scales or
+         squashes — this is a needle moving the way a needle moves.
+
+         It rests at the stop for most of the cycle. A needle that never stops
+         reads as a broken instrument rather than an invitation, and the long
+         pause is what makes the sweep register as a deliberate gesture when it
+         comes round. Always paired with motion-safe:. ── */
+    --animate-gauge-sweep: gauge-sweep 4.5s var(--ease-standard) infinite;
+
+    @keyframes gauge-sweep {
+        /* -120deg is the stop: where GaugeDial parks an uncalibrated needle.
+           Every frame carries it, because a CSS transform replaces the SVG
+           transform attribute outright rather than composing with it. */
+        0%,
+        12% {
+            transform: rotate(-120deg);
+        }
+        30% {
+            transform: rotate(-36deg);
+        }
+        42% {
+            transform: rotate(-72deg);
+        }
+        54% {
+            transform: rotate(-50deg);
+        }
+        72%,
+        100% {
+            transform: rotate(-120deg);
+        }
+    }
+
     /* ── Product palette. These map product.css's names into Tailwind's colour
          namespace; the Industry palette needs no entry here because tokens.css
          already registers it via @theme. ── */
@@ -158,6 +191,88 @@
     .rounded-full {
         border-radius: 0;
     }
+
+    /*
+      Anchors an SVG rotation to the dial's hub.
+
+      A CSS transform on an SVG child defaults to spinning about the element's
+      own bounding box, which for the needle is its tip — so it orbits instead
+      of sweeping. view-box + the hub's user-space coordinates put the pivot
+      where the pin is, matching the `rotate(a 60 62)` the attribute uses.
+    */
+    .gauge-needle-pivot {
+        transform-box: view-box;
+        transform-origin: 60px 62px;
+    }
+
+    /*
+      The surface a vehicle wears while its gauges have no starting point —
+      the §2 "due soon" amber, on the vehicle page's prompt and on its card in
+      the garage, so the same car reads the same way in both places.
+
+      Amber rather than rust on purpose: nothing here is overdue, because
+      nothing is running yet. Rust is reserved for a real overdue service.
+    */
+    /*
+      Doubled so it beats the single-class utilities it overrides — the button
+      variants set their own border and background from this same layer, and a
+      specificity tie would be settled by source order, which is not something
+      a call site should have to reason about.
+    */
+    .ii-awaiting-setup.ii-awaiting-setup {
+        border-color: var(--status-due);
+        background-color: color-mix(
+            in oklab,
+            var(--status-due) 8%,
+            transparent
+        );
+        transition: background-color var(--dur-fast) var(--ease-standard);
+    }
+
+    /*
+      A hover that is not motion.
+
+      The amber overrides the button variants' own hover fill, so without this
+      the only feedback left is the arrow leaning — which is exactly the thing
+      prefers-reduced-motion switches off, leaving those users with a control
+      that does not answer at all.
+    */
+    .ii-awaiting-setup.ii-awaiting-setup:hover {
+        background-color: color-mix(
+            in oklab,
+            var(--status-due) 16%,
+            transparent
+        );
+    }
+
+    /*
+      An arrow that leans toward where it is about to take you, on hover and on
+      keyboard focus. Put this on the arrow; put `group` on the control.
+
+      Shared rather than written per call site: the garage card's chevron and
+      the inbox's action button do the same thing for the same reason, and two
+      copies of a 3px nudge drift into two different 3px nudges.
+    */
+    .ii-arrow-nudge {
+        transition: transform var(--dur-fast) var(--ease-standard);
+    }
+
+    .group:hover .ii-arrow-nudge,
+    .group:focus-visible .ii-arrow-nudge {
+        transform: translateX(3px);
+    }
+
+    /* Decoration, so it goes entirely rather than merely instantly. */
+    @media (prefers-reduced-motion: reduce) {
+        .ii-arrow-nudge {
+            transition: none;
+        }
+
+        .group:hover .ii-arrow-nudge,
+        .group:focus-visible .ii-arrow-nudge {
+            transform: none;
+        }
+    }
 }
 
 @layer base {
@@ -175,6 +290,26 @@
 
     * {
         @apply border-border outline-ring/50;
+    }
+
+    /*
+      Tailwind v4's Preflight sets buttons to `cursor: default`, which left
+      every <button> in the app — colour swatches, select triggers, Save, the
+      password reveal — looking inert on hover. This restores the v3 behaviour
+      for anything that is actually a control.
+
+      Disabled is excluded so a dead button does not advertise itself as
+      clickable. It sits in @layer base rather than as a utility so that a
+      deliberate `cursor-default` on a control still wins — utilities are a
+      later layer, which beats specificity.
+
+      Dropdown and select menu items are untouched: they are [role=menuitem]
+      and [role=option], not buttons, and keep the native menu convention of
+      an arrow cursor.
+    */
+    button:not(:disabled),
+    [role='button']:not([aria-disabled='true']) {
+        cursor: pointer;
     }
 
     body {

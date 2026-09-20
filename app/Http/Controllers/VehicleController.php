@@ -15,6 +15,7 @@ use App\Models\Recall;
 use App\Models\ServiceType;
 use App\Models\Vehicle;
 use App\Models\VehiclePhoto;
+use App\Notifications\SetUpGaugesNotification;
 use App\Support\IntervalProgress;
 use App\Support\VehicleGauges;
 use Illuminate\Http\RedirectResponse;
@@ -62,6 +63,7 @@ class VehicleController extends Controller
                     'due_count' => $gauges->needingAttention()->count(),
                     'open_recall_count' => $vehicle->recalls_count,
                     'uncalibrated_count' => $gauges->uncalibratedCount(),
+                    'awaiting_setup' => $gauges->awaitingSetup(),
                     'mileage' => $gauges->mileageToArray(),
                 ];
             });
@@ -124,6 +126,14 @@ class VehicleController extends Controller
             'notes' => 'Starting reading',
         ]);
 
+        // Only on the first car. The wall of grey rings needs explaining once;
+        // someone adding their third vehicle has already met it, and three
+        // identical nudges for three cars added in one sitting is how an inbox
+        // becomes something people stop opening.
+        if ($request->user()->vehicles()->count() === 1) {
+            $request->user()->notify(new SetUpGaugesNotification($vehicle));
+        }
+
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Vehicle added.')]);
 
         // Straight to the car itself, with its whole gauge wall showing. The old
@@ -180,6 +190,7 @@ class VehicleController extends Controller
                 'avg_miles_per_month' => $gauges->mileage->milesPerDay === null
                     ? null
                     : (int) round($gauges->mileage->milesPerDay * IntervalProgress::DAYS_PER_MONTH),
+                'awaiting_setup' => $gauges->awaitingSetup(),
                 'services_due_count' => $gauges->needingAttention()->count(),
                 'services_overdue_count' => $gauges->gauges
                     ->filter(fn (IntervalProgress $g): bool => $g->status === GaugeStatus::Overdue)
