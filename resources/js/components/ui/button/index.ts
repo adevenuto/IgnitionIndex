@@ -30,10 +30,15 @@ export { default as Button } from "./Button.vue"
  * somewhere that is not a service state. Outlined, it still reads as danger
  * without claiming a large area.
  *
+ * cursor-pointer is on the base rather than left to the element: `as-child` is
+ * used throughout, so a Button is as often a <label> (the photo picker) or an
+ * <a> as it is a <button>, and only the shared class reaches all three. Disabled
+ * buttons are unaffected — they already carry pointer-events-none.
+ *
  * A future `npx shadcn-vue add button` will revert this file.
  */
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap border font-display text-[14px]/[1.2] font-semibold transition-colors duration-[var(--dur-fast)] ease-standard disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap border font-display text-[14px]/[1.2] font-semibold transition-colors duration-[var(--dur-fast)] ease-standard disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
   {
     variants: {
       variant: {

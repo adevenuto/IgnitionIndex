@@ -222,7 +222,11 @@ function removeLineItem(index: number) {
                     value="1"
                     default-value
                 />
-                <Label for="full_tank" class="text-body font-normal">
+                <!-- Clicking the text toggles the box, so it says so. -->
+                <Label
+                    for="full_tank"
+                    class="text-body cursor-pointer font-normal"
+                >
                     Filled the tank
                     <span class="text-muted-foreground">
                         — needed for MPG

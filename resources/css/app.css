@@ -177,6 +177,26 @@
         @apply border-border outline-ring/50;
     }
 
+    /*
+      Tailwind v4's Preflight sets buttons to `cursor: default`, which left
+      every <button> in the app — colour swatches, select triggers, Save, the
+      password reveal — looking inert on hover. This restores the v3 behaviour
+      for anything that is actually a control.
+
+      Disabled is excluded so a dead button does not advertise itself as
+      clickable. It sits in @layer base rather than as a utility so that a
+      deliberate `cursor-default` on a control still wins — utilities are a
+      later layer, which beats specificity.
+
+      Dropdown and select menu items are untouched: they are [role=menuitem]
+      and [role=option], not buttons, and keep the native menu convention of
+      an arrow cursor.
+    */
+    button:not(:disabled),
+    [role='button']:not([aria-disabled='true']) {
+        cursor: pointer;
+    }
+
     body {
         @apply bg-background text-foreground font-sans;
     }
