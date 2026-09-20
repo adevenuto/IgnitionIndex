@@ -63,7 +63,7 @@ const lastReading = computed(() => {
 </script>
 
 <template>
-    <BlueprintFrame class="grid grid-cols-1 gap-0 p-0 md:grid-cols-[420px_1fr]">
+    <BlueprintFrame class="grid grid-cols-1 gap-0 p-0 xl:grid-cols-[420px_1fr]">
         <!--
           The photo is washed into the steel accent (§4). The clipping lives on
           an INNER wrapper so the frame's corner marks, which sit outside the
