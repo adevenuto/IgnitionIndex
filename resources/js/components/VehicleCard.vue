@@ -38,12 +38,18 @@ const specs = computed(() =>
 </script>
 
 <template>
+    <!-- `group` so the chevron can answer a hover anywhere on the card. -->
     <Link
         :href="show(vehicle.id)"
-        class="ease-standard block transition-colors duration-[var(--dur-fast)]"
+        class="ease-standard group block transition-colors duration-[var(--dur-fast)]"
         :data-test="`vehicle-card-${vehicle.id}`"
     >
-        <Card>
+        <!--
+            The same surface and the same sweeping needle as the vehicle page's
+            setup prompt, off the same server-computed flag, so a car waiting on
+            its gauges reads identically in the grid and on its own page.
+        -->
+        <Card :class="vehicle.awaiting_setup && 'ii-awaiting-setup'">
             <CardContent>
                 <div class="flex items-start gap-3">
                     <div class="min-w-0 flex-1">
@@ -101,6 +107,7 @@ const specs = computed(() =>
                         variant="mini"
                         :percent="(vehicle.worst?.raw_progress ?? 0) * 100"
                         :status="vehicle.worst?.display_status ?? 'unknown'"
+                        :sweep="vehicle.awaiting_setup"
                     />
 
                     <div class="min-w-0 flex-1">
@@ -143,7 +150,7 @@ const specs = computed(() =>
                     </div>
 
                     <ChevronRight
-                        class="size-5 shrink-0 text-(--color-neutral-500)"
+                        class="ii-arrow-nudge size-5 shrink-0 text-(--color-neutral-500)"
                     />
                 </div>
             </CardContent>

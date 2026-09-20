@@ -84,7 +84,11 @@ defineProps<{
             </div>
 
             <div class="flex items-center justify-between">
-                <Label for="remember" class="flex items-center space-x-3">
+                <!-- Clicking the text toggles the box, so it says so. -->
+                <Label
+                    for="remember"
+                    class="flex cursor-pointer items-center space-x-3"
+                >
                     <Checkbox id="remember" name="remember" :tabindex="3" />
                     <span>Remember me</span>
                 </Label>

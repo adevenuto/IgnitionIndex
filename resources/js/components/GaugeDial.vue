@@ -32,8 +32,14 @@ const props = withDefaults(
         status: GaugeDisplayStatus;
         variant?: 'large' | 'mini';
         class?: HTMLAttributes['class'];
+        /**
+         * Sweep the needle on a loop to draw the eye. Opt-in, and honoured only
+         * on an uncalibrated dial: a needle that wanders on a gauge showing a
+         * real reading would be lying about the reading.
+         */
+        sweep?: boolean;
     }>(),
-    { variant: 'large', class: undefined },
+    { variant: 'large', class: undefined, sweep: false },
 );
 
 /** 44 × (240° in radians) = 44 × 4.18879. */
@@ -65,6 +71,8 @@ const ticks = computed(() =>
 );
 
 const isMini = computed(() => props.variant === 'mini');
+
+const sweeping = computed(() => props.sweep && uncalibrated.value);
 </script>
 
 <template>
@@ -105,7 +113,17 @@ const isMini = computed(() => props.variant === 'mini');
             />
         </g>
 
-        <g :transform="needle">
+        <!--
+            The animation sets `transform` in CSS, which replaces this attribute
+            rather than composing with it — hence the keyframes carrying the
+            resting angle themselves.
+        -->
+        <g
+            :transform="needle"
+            :class="
+                sweeping && 'gauge-needle-pivot motion-safe:animate-gauge-sweep'
+            "
+        >
             <path
                 :d="
                     isMini

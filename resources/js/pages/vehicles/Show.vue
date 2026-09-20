@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import GaugeGallery from '@/components/vehicle/GaugeGallery.vue';
+import GaugeSetupPrompt from '@/components/vehicle/GaugeSetupPrompt.vue';
 import VehicleHeaderCard from '@/components/vehicle/VehicleHeaderCard.vue';
 import VehicleSwitcher from '@/components/vehicle/VehicleSwitcher.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
@@ -72,6 +73,15 @@ claimQuickAdd(() => {
 
         <!-- An open safety recall outranks everything else on the page. -->
         <RecallAlert v-if="recalls.length" :recalls="recalls" />
+
+        <!--
+            Below the recall, above the wall it is about. A recall is a safety
+            notice and outranks housekeeping, however new the car is.
+        -->
+        <GaugeSetupPrompt
+            v-if="vehicle.awaiting_setup"
+            :count="gauges.length"
+        />
 
         <!--
             Every vehicle is seeded with the full catalogue, so an empty wall
