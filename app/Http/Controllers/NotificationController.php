@@ -110,9 +110,15 @@ class NotificationController extends Controller
         return [
             'kind' => is_string($data['type'] ?? null) ? $data['type'] : 'unknown',
             'vehicle_name' => is_string($data['vehicle_name'] ?? null) ? $data['vehicle_name'] : null,
-            'title' => is_string($data['service'] ?? null)
-                ? $data['service']
-                : (is_string($data['component'] ?? null) ? $data['component'] : 'Update'),
+            // An explicit title wins. The other two are how the service and
+            // recall notifications have always named themselves — by the thing
+            // the notice is about — but a notice that is not about one named
+            // part has nothing to put there and would fall through to "Update".
+            'title' => is_string($data['title'] ?? null)
+                ? $data['title']
+                : (is_string($data['service'] ?? null)
+                    ? $data['service']
+                    : (is_string($data['component'] ?? null) ? $data['component'] : 'Update')),
             'detail' => is_string($data['detail'] ?? null) ? $data['detail'] : null,
             'url' => is_string($data['url'] ?? null) ? $data['url'] : null,
         ];

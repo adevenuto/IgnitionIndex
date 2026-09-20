@@ -22,6 +22,8 @@ export type GarageVehicle = {
     due_count: number;
     open_recall_count: number;
     uncalibrated_count: number;
+    /** Every gauge still without a starting point; see VehicleGauges::awaitingSetup(). */
+    awaiting_setup: boolean;
     mileage: MileageSummary;
 };
 
@@ -68,6 +70,8 @@ export type VehicleDetail = {
     last_odometer: number | null;
     last_odometer_at: string | null;
     avg_miles_per_month: number | null;
+    /** Every gauge still without a starting point; see VehicleGauges::awaitingSetup(). */
+    awaiting_setup: boolean;
     services_due_count: number;
     services_overdue_count: number;
 };

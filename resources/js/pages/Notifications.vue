@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { BellOff, ShieldAlert, Wrench } from '@lucide/vue';
+import { ArrowRight, BellOff, Gauge, ShieldAlert, Wrench } from '@lucide/vue';
 import EmptyState from '@/components/EmptyState.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,22 @@ defineProps<{
     notifications: { data: Item[]; total: number };
     unreadCount: number;
 }>();
+
+/*
+ * Which notices carry an explicit call to action, and what it says.
+ *
+ * A due-service reminder deep-links into a pre-filled log form, where the card
+ * itself being the link is enough. A setup nudge is asking for something the
+ * reader has not done yet and may not realise is outstanding, so it gets a
+ * button that names the task.
+ */
+const ACTIONS: Record<string, string> = {
+    gauge_setup: 'Set up gauges',
+};
+
+function actionFor(item: Item): string | undefined {
+    return ACTIONS[item.kind];
+}
 
 function open(item: Item): void {
     if (!item.read) {
@@ -83,11 +99,18 @@ function formatWhen(iso: string | null): string {
 
         <ul role="list" class="flex flex-col gap-3">
             <li v-for="item in notifications.data" :key="item.id">
+                <!--
+                    A notice with its own call to action is NOT a link itself:
+                    an <a> inside an <a> is invalid, and browsers resolve it by
+                    dropping the inner one — which would be the button.
+                -->
                 <component
-                    :is="item.url ? Link : 'div'"
-                    :href="item.url ?? undefined"
+                    :is="item.url && !actionFor(item) ? Link : 'div'"
+                    :href="
+                        actionFor(item) ? undefined : (item.url ?? undefined)
+                    "
                     class="block"
-                    @click="open(item)"
+                    @click="actionFor(item) ? undefined : open(item)"
                 >
                     <Card :class="item.read ? '' : 'ring-primary/30 ring-1'">
                         <CardContent class="flex items-start gap-3">
@@ -96,6 +119,10 @@ function formatWhen(iso: string | null): string {
                             >
                                 <ShieldAlert
                                     v-if="item.kind === 'recall'"
+                                    class="size-5"
+                                />
+                                <Gauge
+                                    v-else-if="item.kind === 'gauge_setup'"
                                     class="size-5"
                                 />
                                 <Wrench v-else class="size-5" />
@@ -120,6 +147,45 @@ function formatWhen(iso: string | null): string {
                                     {{ formatWhen(item.created_at) }}
                                 </p>
                             </div>
+
+                            <!--
+                                Spelled out rather than leaving the whole card
+                                quietly clickable: this notice exists to get
+                                someone to do one specific thing, and "there is
+                                a next step here" should not be something you
+                                have to discover by hovering.
+
+                                On the row rather than under it, in the space
+                                the card already leaves empty; self-center holds
+                                it against the text block whose own items are
+                                top-aligned.
+                            -->
+                            <!--
+                                Wears the same amber as the card it sends you
+                                to, so the notice and its destination read as
+                                one thing.
+                            -->
+                            <Button
+                                v-if="actionFor(item) && item.url"
+                                as-child
+                                variant="outline"
+                                class="ii-awaiting-setup group ml-auto shrink-0 self-center"
+                            >
+                                <!--
+                                    One PATCH that marks read and redirects
+                                    onward. Marking read as a second visit
+                                    alongside a plain link cancels the
+                                    navigation about half the time.
+                                -->
+                                <Link
+                                    :href="`${update.url(item.id)}?go=1`"
+                                    method="patch"
+                                    as="button"
+                                >
+                                    {{ actionFor(item) }}
+                                    <ArrowRight class="ii-arrow-nudge" />
+                                </Link>
+                            </Button>
                         </CardContent>
                     </Card>
                 </component>
