@@ -254,13 +254,24 @@ function cardState(gauge: Gauge): string {
                         />
                         <!--
                             The pin replaces the word "Pinned". It inherits
-                            ii-eyebrow's colour through currentColor; the meaning
-                            it used to carry moves into the overlay's aria-label,
-                            not onto a decorative icon.
+                            the meaning it used to carry moves into the overlay's
+                            aria-label, not onto a decorative icon.
+
+                            Filled AND stroked. The fill is a departure from §4's
+                            "no filled icons", taken because an outline at this
+                            size read as texture rather than a symbol — but the
+                            stroke has to stay: Lucide draws the needle as
+                            `M12 17v5`, a bare line with no area, so fill alone
+                            renders the head and silently deletes the spike,
+                            leaving a blob that no longer reads as a pin.
+
+                            Accent, not the rust it would be natural to reach
+                            for: red here means overdue, and this card's own tag
+                            may say ON INTERVAL right beside it.
                         -->
                         <Pin
-                            class="size-3 shrink-0"
-                            :stroke-width="2"
+                            class="ii-pin size-[18px] shrink-0 fill-current text-(--color-accent)"
+                            :stroke-width="1.5"
                             aria-hidden="true"
                         />
                         <span v-if="gauge.basis" class="truncate">

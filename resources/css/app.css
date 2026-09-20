@@ -246,6 +246,30 @@
     }
 
     /*
+      The thumbtack on a pinned card.
+
+      Lucide's Pin is two paths wanting two treatments: a closed head that takes
+      the accent fill, and the needle — which is a bare line, so it has no area
+      to fill and only a stroke to colour. The component takes one set of props,
+      so the split happens here: the head stays steel, the needle goes to ink
+      and is drawn longer, which is what makes the shape read as a tack pushed
+      into the card rather than a solid blob.
+
+      Selected by its `d`, not by position. If a Lucide upgrade redraws the icon
+      this simply stops matching and the needle renders plain, where
+      `path:first-of-type` would confidently restyle whatever moved into that
+      slot. The scale is anchored at the needle's top so it grows downward, and
+      1.4 lands its tip exactly on the 24-unit viewBox edge — no clipping, and
+      no need to let the icon overflow its box.
+    */
+    .ii-pin path[d='M12 17v5'] {
+        stroke: var(--color-text);
+        transform-box: view-box;
+        transform-origin: 12px 17px;
+        transform: scaleY(1.4);
+    }
+
+    /*
       A card picked up, and the card it would trade with.
 
       §4 rules out the usual vocabulary here — "cards keep a hairline border and
