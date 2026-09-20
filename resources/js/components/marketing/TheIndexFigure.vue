@@ -115,6 +115,55 @@ const LAYERS: { name: string; kind: LayerKind }[] = [
     { name: 'Fleet', kind: 'outline' },
 ];
 
+/* ── Vehicles on the plane ───────────────────────────────────────────────── */
+
+/*
+ * Three vehicles on the ground, one in each state the gauges report.
+ *
+ * 407abf6 took the earlier markers off, and was right to: their chips were
+ * IDENTITY colours — the one place §7 allows a non-system colour — which read
+ * as noise on an otherwise monochrome drawing, and removing the colour left
+ * four unexplained blank diamonds behind.
+ *
+ * These are the §2 status colours instead, and the legend under the figure
+ * names them. That is the difference: the plane now says something a reader can
+ * decode, and it is the same three states the product actually draws, so the
+ * drawing and the gauge wall cannot disagree.
+ *
+ * Literal hexes, per the note at the top of this file — they are the system's
+ * own values (#c08a2e due, #b4442f overdue) and must not be swapped for
+ * var(--status-*), which would flatten the drawing's depth if a token moved.
+ */
+const TILE = 0.17;
+const CHIP = 0.095;
+
+const vehicles = computed(() =>
+    (
+        [
+            // Ordered back to front, so severity increases toward the reader.
+            [ACCENT, 1.58, 1.02],
+            ['#c08a2e', 1.98, 1.36],
+            ['#b4442f', 1.46, 1.58],
+        ] as [string, number, number][]
+    ).map(([color, x, y]) => ({
+        key: `${x}-${y}`,
+        color,
+        plate: polygon([
+            project(x - TILE, y - TILE),
+            project(x + TILE, y - TILE),
+            project(x + TILE, y + TILE),
+            project(x - TILE, y + TILE),
+        ]),
+        // Lifted one unit so the chip cannot z-fight the plate it sits on.
+        chip: polygon([
+            project(x - CHIP, y - CHIP, 1),
+            project(x + CHIP, y - CHIP, 1),
+            project(x + CHIP, y + CHIP, 1),
+            project(x - CHIP, y + CHIP, 1),
+        ]),
+    })),
+);
+
 /* ── Ground plane ────────────────────────────────────────────────────────── */
 
 const ground = computed(() =>
@@ -266,7 +315,7 @@ const connectors = computed(() =>
         viewBox="0 0 760 736"
         :class="cn('block h-auto w-full', props.class)"
         role="img"
-        aria-label="Isometric diagram of the Ignition Index data model: vehicles, readings and intervals feed the gauges layer, with fleet roll-up drawn as an additional layer for teams."
+        aria-label="Isometric diagram of the Ignition Index data model: vehicles, readings and intervals feed the gauges layer, with fleet roll-up drawn as an additional layer for teams. Three vehicles sit on the ground plane, marked on interval, due soon and overdue."
     >
         <!-- Ground plane -->
         <polygon :points="ground" fill="#ececed" />
@@ -399,6 +448,21 @@ const connectors = computed(() =>
             >
                 {{ input.value }}
             </text>
+        </g>
+
+        <!--
+            Drawn last, so the markers sit on top of the plane and its grid.
+            They occupy the front-right of the ground, clear of the stack's
+            footprint and of the odometer callout on the left.
+        -->
+        <g v-for="vehicle in vehicles" :key="vehicle.key">
+            <polygon
+                :points="vehicle.plate"
+                :fill="PAPER"
+                stroke="rgba(29,31,32,0.35)"
+                stroke-width="1.6"
+            />
+            <polygon :points="vehicle.chip" :fill="vehicle.color" />
         </g>
     </svg>
 </template>
