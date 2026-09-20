@@ -2,6 +2,7 @@
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Check } from '@lucide/vue';
 import GaugeDial from '@/components/GaugeDial.vue';
+import GaugeLegend from '@/components/GaugeLegend.vue';
 import TheIndexFigure from '@/components/marketing/TheIndexFigure.vue';
 import ShellCheckerStrip from '@/components/shell/ShellCheckerStrip.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
@@ -302,6 +303,20 @@ const navLinks = [
                         <BlueprintFrame class="gap-0 p-(--space-6)">
                             <TheIndexFigure />
                         </BlueprintFrame>
+
+                        <!--
+                            The same three states the gauge wall names, in the
+                            same component, so the homepage cannot promise a
+                            palette the product has stopped using.
+
+                            Below the frame rather than inside the drawing:
+                            407abf6 took colour off the plane deliberately,
+                            because identity chips read as noise against an
+                            otherwise monochrome blueprint. These are §2 status
+                            colours doing a caption's job, which is a different
+                            thing from colouring the figure itself.
+                        -->
+                        <GaugeLegend />
                     </figure>
                 </div>
             </section>

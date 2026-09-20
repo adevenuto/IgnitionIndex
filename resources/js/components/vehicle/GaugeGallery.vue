@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import GaugeDial from '@/components/GaugeDial.vue';
+import GaugeLegend from '@/components/GaugeLegend.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
 import {
     gaugeColor,
@@ -31,12 +32,6 @@ const rest = computed(() => props.gauges.filter((gauge) => !gauge.is_pinned));
  * alternative — dropping a gauge to make the count even — would hide data.
  */
 const needsFiller = computed(() => rest.value.length % 2 === 1);
-
-const legend = [
-    { label: 'On interval', color: 'var(--color-accent)' },
-    { label: 'Due soon', color: 'var(--status-due)' },
-    { label: 'Overdue', color: 'var(--status-overdue)' },
-];
 </script>
 
 <template>
@@ -52,20 +47,7 @@ const legend = [
                 </p>
             </div>
 
-            <ul class="flex gap-[18px] text-[12px] text-(--color-neutral-700)">
-                <li
-                    v-for="entry in legend"
-                    :key="entry.label"
-                    class="flex items-center gap-(--space-2)"
-                >
-                    <span
-                        class="size-2 flex-none"
-                        :style="{ background: entry.color }"
-                        aria-hidden="true"
-                    />
-                    {{ entry.label }}
-                </li>
-            </ul>
+            <GaugeLegend />
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
