@@ -126,13 +126,12 @@ class VehicleController extends Controller
             'notes' => 'Starting reading',
         ]);
 
-        // Only on the first car. The wall of grey rings needs explaining once;
-        // someone adding their third vehicle has already met it, and three
-        // identical nudges for three cars added in one sitting is how an inbox
-        // becomes something people stop opening.
-        if ($request->user()->vehicles()->count() === 1) {
-            $request->user()->notify(new SetUpGaugesNotification($vehicle));
-        }
+        // Every car, not just the first. This was once first-only, to keep the
+        // inbox quiet — but every new vehicle shows the "your gauges aren't set"
+        // banner on its own page, so firing for some and not others left the two
+        // contradicting each other. A notice belongs to a vehicle, and each
+        // vehicle earns its own.
+        $request->user()->notify(new SetUpGaugesNotification($vehicle));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Vehicle added.')]);
 
