@@ -46,6 +46,31 @@ const lastDoneOdometer = ref('');
  */
 const intervalYears = ref('');
 const intervalMonths = ref('');
+const intervalMiles = ref('');
+
+/*
+ * "I have never had this done."
+ *
+ * Distinct from uncalibrated, which means we do not know. Never is knowledge:
+ * the interval has been running since the car was new, so the mileage axis
+ * counts from odometer 0 and the gauge can finally say something.
+ *
+ * Stored as last_done_odometer = 0 with no date — no new column, because that
+ * pair already means exactly this to IntervalProgress.
+ */
+const neverDone = ref(false);
+
+/**
+ * Only where it can produce a reading.
+ *
+ * The time axis is deliberately left out of "never": we know the odometer, but
+ * nothing tells us when the car entered service, and IntervalProgress does not
+ * guess dates — that is the rule that stops it announcing an oil change is
+ * overdue when it was done last week. So on a gauge with no mileage interval,
+ * "Never" could only leave it exactly as uncalibrated as it already was, and a
+ * control that cannot do anything should not be offered.
+ */
+const canBeNever = computed(() => Number(intervalMiles.value) > 0);
 
 function splitInterval(months: number | null): void {
     if (months === null) {
@@ -99,12 +124,31 @@ watch(
                     ? ''
                     : String(props.gauge.last_done_odometer);
             splitInterval(props.gauge.interval_months);
+            intervalMiles.value =
+                props.gauge.interval_miles === null
+                    ? ''
+                    : String(props.gauge.interval_miles);
+            // The stored signature of "never": counted from new, with no date.
+            neverDone.value =
+                props.gauge.last_done_at === null &&
+                props.gauge.last_done_odometer === 0;
         }
     },
     { immediate: true },
 );
 
+function toggleNever(): void {
+    neverDone.value = !neverDone.value;
+
+    // Odometer 0 is the claim being made; the date is cleared because "never"
+    // has no date, and leaving the old one would contradict it.
+    lastDoneAt.value = '';
+    lastDoneOdometer.value = neverDone.value ? '0' : '';
+}
+
 function chooseBucket(months: number): void {
+    neverDone.value = false;
+
     const date = new Date();
     date.setMonth(date.getMonth() - months);
 
@@ -193,19 +237,39 @@ function inYearsAndMonths(months: number): string {
                         >
                             {{ bucket.label }}
                         </Button>
+
+                        <Button
+                            v-if="canBeNever"
+                            type="button"
+                            size="sm"
+                            :variant="neverDone ? 'default' : 'surface'"
+                            :aria-pressed="neverDone"
+                            @click="toggleNever()"
+                        >
+                            Never
+                        </Button>
                     </div>
 
+                    <!--
+                        Never answers the question, so the date field goes with
+                        it rather than sitting there empty inviting a
+                        contradiction. The button stays pressed and toggles back.
+                    -->
                     <Input
+                        v-if="!neverDone"
                         id="last_done_at"
                         v-model="lastDoneAt"
                         name="last_done_at"
                         type="date"
                         :max="todayIso()"
                     />
+                    <p v-else class="text-muted-foreground text-xs">
+                        Counting from new — the gauge runs on mileage from 0.
+                    </p>
                     <InputError :message="errors.last_done_at" />
                 </div>
 
-                <div class="grid gap-1.5">
+                <div v-if="!neverDone" class="grid gap-1.5">
                     <Label for="last_done_odometer">
                         Odometer then
                         <span class="text-muted-foreground font-normal">
@@ -228,6 +292,17 @@ function inYearsAndMonths(months: number): string {
                 </div>
 
                 <!--
+                    Both fields must still reach the server: a name absent from
+                    the request is simply not validated, so fill() would leave
+                    the old date and odometer in place and "never" would save as
+                    nothing at all.
+                -->
+                <template v-else>
+                    <input type="hidden" name="last_done_at" value="" />
+                    <input type="hidden" name="last_done_odometer" value="0" />
+                </template>
+
+                <!--
                     No longer behind an "Adjust how often" button. How often a
                     service comes round is part of the schedule, not an advanced
                     setting, and hiding it meant the dialog could not answer the
@@ -237,13 +312,18 @@ function inYearsAndMonths(months: number): string {
                 <div class="grid gap-3">
                     <div class="grid gap-1.5">
                         <Label for="interval_miles">Every (miles)</Label>
+                        <!--
+                            Bound rather than uncontrolled so "Never" can appear
+                            the moment a mileage interval exists, instead of
+                            only after a save.
+                        -->
                         <Input
                             id="interval_miles"
+                            v-model="intervalMiles"
                             name="interval_miles"
                             type="number"
                             inputmode="numeric"
                             min="0"
-                            :default-value="gauge.interval_miles ?? undefined"
                             placeholder="—"
                         />
                         <InputError :message="errors.interval_miles" />
