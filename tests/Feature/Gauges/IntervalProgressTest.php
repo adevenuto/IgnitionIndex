@@ -37,6 +37,43 @@ test('an interval with no history is uncalibrated, not overdue', function () {
         ->and($progress->label())->toBe('Not set');
 });
 
+test('never done counts from new, and is not the same as uncalibrated', function () {
+    // "Never" is knowledge, where uncalibrated is the absence of it: the
+    // interval has been running since the car was new, so the mileage axis
+    // counts from odometer 0 and the gauge can finally report something.
+    $progress = progressFor(
+        [
+            'interval_months' => 60,
+            'interval_miles' => 30_000,
+            'last_done_at' => null,
+            'last_done_odometer' => 0,
+        ],
+        ['odometer' => 15_375],
+    );
+
+    expect($progress->status)->toBe(GaugeStatus::Healthy)
+        ->and($progress->axis)->toBe(BindingAxis::Mileage)
+        // 15,375 of 30,000 — a bit past halfway.
+        ->and($progress->progress)->toBe(0.5125)
+        ->and($progress->label())->toBe('14,625 mi to go');
+});
+
+test('never done leaves the time axis alone', function () {
+    // Nothing tells us when the car entered service, and IntervalProgress does
+    // not guess dates. A time-only interval therefore stays uncalibrated even
+    // when marked never — which is why the dialog does not offer it there.
+    $progress = progressFor([
+        'interval_months' => 12,
+        'interval_miles' => null,
+        'last_done_at' => null,
+        'last_done_odometer' => 0,
+    ]);
+
+    expect($progress->timeProgress)->toBeNull()
+        ->and($progress->axis)->toBe(BindingAxis::None)
+        ->and($progress->status)->toBe(GaugeStatus::Uncalibrated);
+});
+
 test('mileage binds when miles run out first', function () {
     // 4,500 of 5,000 miles used; only 1 month of 6 elapsed.
     $progress = progressFor([

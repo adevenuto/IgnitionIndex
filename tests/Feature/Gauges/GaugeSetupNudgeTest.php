@@ -33,15 +33,23 @@ test('adding the first vehicle leaves a set-up-gauges notice in the inbox', func
     Notification::assertSentTo($this->user, SetUpGaugesNotification::class);
 });
 
-test('the second vehicle does not nudge again', function () {
-    Notification::fake();
-
+test('every vehicle gets its own notice, and each names its own car', function () {
     addVehicle();
     addVehicle(['make' => 'Honda', 'model' => 'Civic']);
 
-    // Once, for the first car only — three cars added in one sitting must not
-    // produce three identical notices.
-    Notification::assertSentToTimes($this->user, SetUpGaugesNotification::class, 1);
+    // This was once first-car-only. Every new vehicle shows the "gauges aren't
+    // set" banner on its own page, so skipping the notice for later cars had
+    // the two contradicting each other about the same vehicle.
+    $notices = $this->user->notifications()->get();
+
+    expect($notices)->toHaveCount(2)
+        ->and($notices->pluck('data.vehicle_name')->sort()->values()->all())
+        ->toBe(['Honda Civic', 'Toyota RAV4']);
+
+    // Each points at the car it is about, not merely at the garage.
+    $ids = Vehicle::pluck('id')->sort()->values();
+    expect($notices->pluck('data.vehicle_id')->sort()->values()->all())
+        ->toBe($ids->all());
 });
 
 test('the nudge stays in the app rather than going out by email', function () {
@@ -78,7 +86,7 @@ test('the inbox renders the notice with its own title rather than falling back',
             ->component('Notifications')
             ->where('notifications.data.0.kind', 'gauge_setup')
             // Falls back to "Update" if payload() cannot read a plain title.
-            ->where('notifications.data.0.title', 'Set up your gauges')
+            ->where('notifications.data.0.title', 'Welcome to the garage')
             ->where('notifications.data.0.vehicle_name', '2019 Toyota RAV4')
             ->where('unreadCount', 1));
 });

@@ -117,6 +117,31 @@ test('setting only a last done date does not mark an override', function () {
     expect($interval->refresh()->source)->toBe(IntervalSource::Default);
 });
 
+test('resubmitting the same interval does not mark an override', function () {
+    // The edit dialog no longer hides the interval fields behind a toggle, so
+    // every save now posts them whether or not they were touched. Only a real
+    // change may promote the row to a user override — otherwise setting a
+    // last-done date would quietly opt the gauge out of future default refreshes.
+    $vehicle = Vehicle::factory()->for($this->user)->create();
+    $interval = VehicleInterval::factory()->for($vehicle)
+        ->for(ServiceType::factory())
+        ->create([
+            'interval_months' => 60,
+            'interval_miles' => 60_000,
+            'source' => IntervalSource::Default,
+        ]);
+
+    $this->patch(route('vehicle-intervals.update', $interval), [
+        'last_done_at' => now()->subMonths(2)->toDateString(),
+        // 5 years and no months, as the split fields recombine it.
+        'interval_months' => 60,
+        'interval_miles' => 60_000,
+    ]);
+
+    expect($interval->refresh()->source)->toBe(IntervalSource::Default)
+        ->and($interval->interval_months)->toBe(60);
+});
+
 test('a user cannot change an interval on another user vehicle', function () {
     $interval = VehicleInterval::factory()->for(Vehicle::factory())
         ->for(ServiceType::factory())->create();
