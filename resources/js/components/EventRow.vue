@@ -83,7 +83,7 @@ const secondary = computed(() =>
             @click="$emit('select')"
         >
             <Card
-                class="ease-standard transition-colors duration-[var(--dur-fast)] group-hover:border-(--color-accent) group-hover:bg-hover-surface"
+                class="ease-standard group-hover:bg-hover-surface transition-colors duration-[var(--dur-fast)] group-hover:border-(--color-accent)"
             >
                 <CardContent class="flex items-start gap-3">
                     <span

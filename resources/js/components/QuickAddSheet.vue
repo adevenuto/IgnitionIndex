@@ -58,8 +58,8 @@ const subtitle = () =>
     props.event
         ? props.event.vehicle_name
         : props.vehicles.length > 1
-        ? 'Choose a vehicle below'
-        : (props.vehicles[0]?.name ?? '');
+          ? 'Choose a vehicle below'
+          : (props.vehicles[0]?.name ?? '');
 </script>
 
 <template>
