@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\IntervalSource;
 use App\Models\VehicleInterval;
+use App\Rules\LastDoneOdometer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -28,7 +29,17 @@ class VehicleIntervalController extends Controller
 
         $validated = $request->validate([
             'last_done_at' => ['nullable', 'date', 'before_or_equal:today'],
-            'last_done_odometer' => ['nullable', 'integer', 'min:0', 'max:2000000'],
+            'last_done_odometer' => [
+                'nullable', 'integer', 'min:0', 'max:2000000',
+                // Checked against the date being saved, which is the one in
+                // this request when it carries one.
+                new LastDoneOdometer(
+                    $interval->vehicle,
+                    $request->has('last_done_at')
+                        ? $request->string('last_done_at')->toString()
+                        : $interval->last_done_at?->toDateString(),
+                ),
+            ],
             'interval_months' => ['nullable', 'integer', 'min:1', 'max:240'],
             'interval_miles' => ['nullable', 'integer', 'min:100', 'max:200000'],
             'is_active' => ['sometimes', 'boolean'],
@@ -43,6 +54,12 @@ class VehicleIntervalController extends Controller
         // is what stops a later default/VIN refresh from overwriting it.
         if ($changedInterval && $interval->isDirty(['interval_months', 'interval_miles'])) {
             $interval->source = IntervalSource::UserOverride;
+        }
+
+        // A last-done typed in here is the owner's, not a visit's. Unlinking it
+        // is what stops a later edit to some older visit from overwriting it.
+        if ($interval->isDirty(['last_done_at', 'last_done_odometer'])) {
+            $interval->last_done_event_id = null;
         }
 
         $interval->save();

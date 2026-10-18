@@ -39,6 +39,9 @@ export type Gauge = {
     label: string;
     miles_remaining: number | null;
     days_remaining: number | null;
+    /** Each axis on its own, uncapped; null where that axis is not running. */
+    time_progress: number | null;
+    mile_progress: number | null;
     interval_months: number | null;
     interval_miles: number | null;
     last_done_at: string | null;

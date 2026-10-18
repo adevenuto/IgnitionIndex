@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form } from '@inertiajs/vue3';
+import { Form, router } from '@inertiajs/vue3';
 import { DollarSign, Fuel, Gauge, Plus, Trash2, Wrench } from '@lucide/vue';
 import type { AcceptableValue } from 'reka-ui';
 import { computed, ref } from 'vue';
@@ -17,9 +17,19 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { store as storeEvent } from '@/actions/App/Http/Controllers/EventController';
-import { todayIso } from '@/lib/format';
-import type { QuickAddVehicle, ServiceTypeOption } from '@/types/garage';
+import {
+    destroy as destroyEvent,
+    store as storeEvent,
+    update as updateEvent,
+} from '@/actions/App/Http/Controllers/EventController';
+import { formatDate, formatMiles, todayIso } from '@/lib/format';
+import { boundsFor, rangeHint } from '@/lib/readings';
+import type {
+    HistoryEvent,
+    QuickAddVehicle,
+    Reading,
+    ServiceTypeOption,
+} from '@/types/garage';
 
 /*
  * The body of the quick-add flow: the four lanes and their fields.
@@ -40,6 +50,11 @@ import type { QuickAddVehicle, ServiceTypeOption } from '@/types/garage';
  * needs the mileage estimator, which is Phase 2. The interaction is identical;
  * only the number improves.
  *
+ * Given an `event`, the same form edits it instead. Its type and vehicle are
+ * fixed — a different type is a different entry, and entries never move
+ * between cars — so the lane toggle and vehicle picker give way to a label,
+ * and every field starts from what was logged.
+ *
  * Every control here is a shadcn primitive. That matters for more than
  * consistency: reka-ui's Select and Checkbox render hidden native inputs bound
  * to their `name`, so Inertia's <Form> — which serialises the DOM — picks them
@@ -54,9 +69,15 @@ const props = withDefaults(
         expenseCategories: string[];
         /** Which lane to open on — used by reminder deep links. */
         initialLane?: Lane;
+        /** An entry to edit rather than a new one to log. */
+        event?: HistoryEvent | null;
+        /** The entry's vehicle's readings, oldest first; editing only. */
+        readings?: Reading[];
     }>(),
     {
         initialLane: 'fuel',
+        event: null,
+        readings: () => [],
     },
 );
 
@@ -64,12 +85,28 @@ const emit = defineEmits<{
     saved: [];
 }>();
 
-const lane = ref<Lane>(props.initialLane);
-const showDetails = ref(false);
+const editing = props.event;
+
+const lane = ref<Lane>(editing?.type ?? props.initialLane);
+const showDetails = ref(
+    editing !== null &&
+        (editing.notes !== null ||
+            (editing.type === 'odometer' && editing.cost_cents !== null)),
+);
 const selectedId = ref<string>(String(props.vehicles[0]?.id ?? ''));
-const lineItems = ref<{ service_type_id: string; cost: string }[]>([
-    { service_type_id: '', cost: '' },
-]);
+const lineItems = ref<{ service_type_id: string; cost: string }[]>(
+    editing?.line_items.length
+        ? editing.line_items.map((item) => ({
+              service_type_id: String(item.service_type_id),
+              cost: dollars(item.cost_cents),
+          }))
+        : [{ service_type_id: '', cost: '' }],
+);
+
+/** Stored cents back into the dollars the cost fields take. */
+function dollars(cents: number | null | undefined): string {
+    return cents == null ? '' : (cents / 100).toFixed(2);
+}
 
 const lanes = [
     { value: 'fuel', label: 'Fuel', icon: Fuel },
@@ -108,21 +145,122 @@ function addLineItem() {
 function removeLineItem(index: number) {
     lineItems.value.splice(index, 1);
 }
+
+/*
+ * What the edit sheet can say before saving: the range this reading must sit
+ * in, given the date as it stands in the field, and whether it is the car's
+ * first or only reading. Bound to the date so moving it moves the range.
+ */
+const occurredOn = ref(editing?.occurred_on ?? todayIso());
+
+const range = computed(() =>
+    editing
+        ? rangeHint(boundsFor(props.readings, editing.id, occurredOn.value))
+        : null,
+);
+
+const isFirst = computed(
+    () => editing !== null && props.readings[0]?.id === editing.id,
+);
+
+const isOnly = computed(() => editing !== null && props.readings.length <= 1);
+
+const form = computed(() =>
+    editing
+        ? updateEvent.form(editing.id)
+        : storeEvent.form(vehicle.value?.id ?? 0),
+);
+
+const laneItem = computed(
+    () => lanes.find((item) => item.value === lane.value) ?? lanes[0],
+);
+
+/*
+ * Delete is confirmed in place: the footer turns into the question rather
+ * than a second modal opening over this one. The confirmation says what else
+ * changes, because the entry is rarely the only thing a delete touches.
+ */
+const confirmingDelete = ref(false);
+const deleting = ref(false);
+const deleteError = ref<string | null>(null);
+
+const deleteConsequence = computed(() => {
+    if (!editing) {
+        return '';
+    }
+
+    const said: string[] = [];
+    const next = props.readings[1];
+
+    if (isFirst.value && next) {
+        said.push(
+            `Your earliest reading becomes ${formatMiles(next.odometer)} on ${formatDate(next.occurred_on)}.`,
+        );
+    }
+
+    const names = [...new Set(editing.line_items.map((item) => item.name))];
+
+    if (editing.type === 'visit' && names.length) {
+        const one = names.length === 1;
+
+        said.push(
+            `${names.join(', ')} ${one ? 'goes' : 'go'} back to ${one ? 'its' : 'their'} previous service, or to Not set if there is none.`,
+        );
+    } else if (editing.type === 'fuel') {
+        said.push('MPG for the next fill-up is worked out again.');
+    } else if (!said.length) {
+        said.push("The car's mileage estimate is worked out again.");
+    }
+
+    return said.join(' ');
+});
+
+function deleteEntry(): void {
+    if (!editing) {
+        return;
+    }
+
+    router.delete(destroyEvent.url(editing.id), {
+        preserveScroll: true,
+        onStart: () => {
+            deleting.value = true;
+            deleteError.value = null;
+        },
+        onSuccess: () => emit('saved'),
+        onError: (errors) => {
+            deleteError.value =
+                errors.event ?? Object.values(errors)[0] ?? null;
+        },
+        onFinish: () => {
+            deleting.value = false;
+        },
+    });
+}
 </script>
 
 <template>
     <Form
         v-if="vehicle"
-        v-bind="storeEvent.form(vehicle.id)"
+        v-bind="form"
         :options="{ preserveScroll: true }"
-        reset-on-success
+        :reset-on-success="!editing"
         class="flex flex-col gap-5 px-4 pb-6"
         v-slot="{ errors, processing }"
         @success="emit('saved')"
     >
         <input type="hidden" name="type" :value="lane" />
 
+        <!-- An entry's type is fixed once logged, so editing shows it, not a choice. -->
+        <p
+            v-if="editing"
+            class="text-muted-foreground flex items-center gap-2 text-sm font-bold"
+        >
+            <component :is="laneItem.icon" class="size-4" :stroke-width="1.5" />
+            {{ laneItem.label }} entry
+        </p>
+
         <ToggleGroup
+            v-else
             type="single"
             :model-value="lane"
             class="bg-muted w-full p-1"
@@ -141,7 +279,7 @@ function removeLineItem(index: number) {
             </ToggleGroupItem>
         </ToggleGroup>
 
-        <div v-if="vehicles.length > 1" class="grid gap-1.5">
+        <div v-if="!editing && vehicles.length > 1" class="grid gap-1.5">
             <Label for="quick-add-vehicle">Vehicle</Label>
             <Select v-model="selectedId">
                 <SelectTrigger id="quick-add-vehicle" class="w-full">
@@ -169,7 +307,9 @@ function removeLineItem(index: number) {
                     type="number"
                     inputmode="numeric"
                     required
-                    :default-value="vehicle?.last_odometer ?? undefined"
+                    :default-value="
+                        editing?.odometer ?? vehicle?.last_odometer ?? undefined
+                    "
                     :placeholder="odometerPlaceholder"
                 />
             </div>
@@ -178,11 +318,20 @@ function removeLineItem(index: number) {
                 <Input
                     id="occurred_on"
                     name="occurred_on"
+                    v-model="occurredOn"
                     type="date"
                     required
-                    :default-value="todayIso()"
                 />
             </div>
+        </div>
+        <div
+            v-if="isFirst || range"
+            class="text-muted-foreground -mt-3 grid gap-0.5 text-xs"
+        >
+            <p v-if="isFirst">
+                Your earliest reading. Mileage is measured from here.
+            </p>
+            <p v-if="range">{{ range }}</p>
         </div>
         <InputError :message="errors.odometer" />
         <InputError :message="errors.occurred_on" />
@@ -199,6 +348,7 @@ function removeLineItem(index: number) {
                         step="0.001"
                         inputmode="decimal"
                         placeholder="12.4"
+                        :default-value="editing?.gallons ?? undefined"
                     />
                 </div>
                 <div class="grid gap-1.5">
@@ -210,6 +360,7 @@ function removeLineItem(index: number) {
                         step="0.01"
                         inputmode="decimal"
                         placeholder="44.99"
+                        :default-value="dollars(editing?.cost_cents)"
                     />
                 </div>
             </div>
@@ -220,7 +371,7 @@ function removeLineItem(index: number) {
                     id="full_tank"
                     name="full_tank"
                     value="1"
-                    default-value
+                    :default-value="editing ? editing.full_tank === true : true"
                 />
                 <!-- Clicking the text toggles the box, so it says so. -->
                 <Label
@@ -312,6 +463,7 @@ function removeLineItem(index: number) {
                     id="location"
                     name="location"
                     placeholder="Corner Auto"
+                    :default-value="editing?.location ?? undefined"
                 />
             </div>
         </template>
@@ -321,7 +473,10 @@ function removeLineItem(index: number) {
             <div class="grid grid-cols-2 gap-3">
                 <div class="grid gap-1.5">
                     <Label for="category">Category</Label>
-                    <Select name="category" default-value="Insurance">
+                    <Select
+                        name="category"
+                        :default-value="editing?.category ?? 'Insurance'"
+                    >
                         <SelectTrigger id="category" class="w-full">
                             <SelectValue placeholder="Choose…" />
                         </SelectTrigger>
@@ -345,6 +500,7 @@ function removeLineItem(index: number) {
                         step="0.01"
                         inputmode="decimal"
                         placeholder="120.00"
+                        :default-value="dollars(editing?.cost_cents)"
                     />
                 </div>
             </div>
@@ -372,6 +528,7 @@ function removeLineItem(index: number) {
                     type="number"
                     step="0.01"
                     inputmode="decimal"
+                    :default-value="dollars(editing?.cost_cents)"
                 />
             </div>
             <div class="grid gap-1.5">
@@ -381,6 +538,7 @@ function removeLineItem(index: number) {
                     name="notes"
                     rows="3"
                     placeholder="Optional"
+                    :default-value="editing?.notes ?? undefined"
                 />
             </div>
         </template>
@@ -396,8 +554,76 @@ function removeLineItem(index: number) {
             value="1"
         />
 
-        <Button type="submit" size="lg" :disabled="processing">
-            {{ errors.odometer ? 'Save anyway' : 'Save' }}
-        </Button>
+        <InputError :message="errors.type" />
+
+        <template v-if="!confirmingDelete">
+            <Button type="submit" size="lg" :disabled="processing">
+                {{
+                    errors.odometer
+                        ? 'Save anyway'
+                        : editing
+                          ? 'Save changes'
+                          : 'Save'
+                }}
+            </Button>
+
+            <div v-if="editing" class="grid gap-1 self-start">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    class="text-destructive hover:bg-destructive/10 self-start"
+                    :disabled="isOnly"
+                    :aria-describedby="isOnly ? 'only-reading' : undefined"
+                    @click="confirmingDelete = true"
+                >
+                    <Trash2 :stroke-width="1.5" />
+                    Delete entry
+                </Button>
+                <!-- Said up front, not after the click: there is nothing to try. -->
+                <p
+                    v-if="isOnly"
+                    id="only-reading"
+                    class="text-muted-foreground text-xs"
+                >
+                    This is the car's only reading. Correct it rather than
+                    deleting it.
+                </p>
+            </div>
+        </template>
+
+        <div
+            v-else
+            class="flex flex-col gap-3 border-t border-(--color-divider) pt-4"
+        >
+            <div>
+                <p class="text-body font-bold">Delete this entry?</p>
+                <p class="text-muted-foreground text-sm">
+                    {{ deleteConsequence }}
+                </p>
+            </div>
+            <InputError :message="deleteError ?? undefined" />
+            <div class="flex justify-end gap-3">
+                <Button
+                    type="button"
+                    variant="secondary"
+                    :disabled="deleting"
+                    @click="
+                        confirmingDelete = false;
+                        deleteError = null;
+                    "
+                >
+                    Keep
+                </Button>
+                <Button
+                    type="button"
+                    variant="destructive"
+                    :disabled="deleting"
+                    @click="deleteEntry"
+                >
+                    Delete
+                </Button>
+            </div>
+        </div>
     </Form>
 </template>

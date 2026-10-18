@@ -21,11 +21,10 @@ class StoreEventRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** @var Vehicle $vehicle */
-        $vehicle = $this->route('vehicle');
+        $vehicle = $this->vehicle();
 
         return [
-            'type' => ['required', Rule::enum(EventType::class)],
+            'type' => ['required', Rule::enum(EventType::class), ...$this->typeRules()],
 
             'odometer' => [
                 'required', 'integer', 'min:0', 'max:2000000',
@@ -33,6 +32,7 @@ class StoreEventRequest extends FormRequest
                     $vehicle,
                     $this->string('occurred_on')->value() ?: now()->toDateString(),
                     $this->boolean('confirm_odometer'),
+                    $this->ignoredEventId(),
                 ),
             ],
 
@@ -69,6 +69,30 @@ class StoreEventRequest extends FormRequest
             'gallons.required' => 'Enter how many gallons you put in.',
             'occurred_on.before_or_equal' => 'You cannot log something that has not happened yet.',
         ];
+    }
+
+    /**
+     * The vehicle the entry belongs to. An edit reads it off the entry, since
+     * entries never move between vehicles.
+     */
+    protected function vehicle(): Vehicle
+    {
+        /** @var Vehicle */
+        return $this->route('vehicle');
+    }
+
+    /** The entry being edited, left out of its own odometer check. */
+    protected function ignoredEventId(): ?int
+    {
+        return null;
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    protected function typeRules(): array
+    {
+        return [];
     }
 
     public function eventType(): EventType

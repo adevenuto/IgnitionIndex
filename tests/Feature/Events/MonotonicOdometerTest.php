@@ -72,3 +72,24 @@ test('an ordinary jump is not questioned', function () {
 test('the first ever reading is always accepted', function () {
     expect(validateOdometer($this->vehicle, 123_456, '2026-09-01'))->toBeEmpty();
 });
+
+test('a second reading on the same day may be higher', function () {
+    Event::factory()->for($this->vehicle)->on('2026-09-01', 15_380)->create();
+
+    expect(validateOdometer($this->vehicle, 15_420, '2026-09-01'))->toBeEmpty();
+});
+
+test('a second reading on the same day may be lower', function () {
+    Event::factory()->for($this->vehicle)->on('2026-09-01', 15_380)->create();
+
+    expect(validateOdometer($this->vehicle, 15_350, '2026-09-01'))->toBeEmpty();
+});
+
+test('a same day reading is still bounded by the days either side', function () {
+    Event::factory()->for($this->vehicle)->on('2026-08-01', 15_000)->create();
+    Event::factory()->for($this->vehicle)->on('2026-09-01', 15_380)->create();
+    Event::factory()->for($this->vehicle)->on('2026-10-01', 16_000)->create();
+
+    expect(validateOdometer($this->vehicle, 14_900, '2026-09-01'))->not->toBeEmpty()
+        ->and(validateOdometer($this->vehicle, 16_100, '2026-09-01'))->not->toBeEmpty();
+});
