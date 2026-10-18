@@ -37,7 +37,20 @@ class LastDoneOdometer implements ValidationRule
             return;
         }
 
-        $odometer = (int) $value;
+        $problem = $this->problemWith((int) $value);
+
+        if ($problem !== null) {
+            $fail($problem);
+        }
+    }
+
+    /**
+     * Why this odometer does not fit the readings on record, or null if it
+     * does. Public so a later change to the readings can ask the same question
+     * of a value saved earlier (AssertHandSetGaugesFit).
+     */
+    public function problemWith(int $odometer): ?string
+    {
         $date = $this->date();
 
         // Capped by the lowest reading taken on or after the service. With no
@@ -50,17 +63,15 @@ class LastDoneOdometer implements ValidationRule
                 ->first();
 
         if ($after !== null && $odometer > $after->odometer) {
-            $fail(sprintf(
+            return sprintf(
                 'This is higher than the %s mi recorded on %s. Enter the reading from when this service was done, not today\'s.',
                 number_format($after->odometer),
                 $after->occurred_on->format('M j, Y'),
-            ));
-
-            return;
+            );
         }
 
         if ($date === null) {
-            return;
+            return null;
         }
 
         /** @var Event|null $before */
@@ -70,12 +81,14 @@ class LastDoneOdometer implements ValidationRule
             ->first();
 
         if ($before !== null && $odometer < $before->odometer) {
-            $fail(sprintf(
+            return sprintf(
                 'This is lower than the %s mi recorded on %s, before this service. Odometers only go up.',
                 number_format($before->odometer),
                 $before->occurred_on->format('M j, Y'),
-            ));
+            );
         }
+
+        return null;
     }
 
     /**
