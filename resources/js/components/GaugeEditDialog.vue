@@ -176,6 +176,62 @@ const intervalSummary = computed(() => {
     return parts.length ? `Every ${parts.join(' or ')}` : 'No interval set';
 });
 
+/*
+ * Both axes, not just the one the dial shows.
+ *
+ * The dial draws whichever side is further along, so a mileage side that is not
+ * counting — or is counting from a bad reading — hides behind the time side and
+ * the gauge looks as if miles do nothing. Listed in the summary's order, with
+ * the side on display set in bold rather than colour, since colour is reserved
+ * for service state.
+ */
+const axisReadout = computed(() => {
+    const gauge = props.gauge;
+
+    if (!gauge || gauge.status === 'uncalibrated') {
+        return [];
+    }
+
+    const sides: { label: string; value: string; binding: boolean }[] = [];
+
+    if (gauge.interval_miles) {
+        sides.push({
+            label: 'Miles',
+            value: asPercent(gauge.mile_progress),
+            binding: gauge.axis === 'mileage',
+        });
+    }
+
+    if (gauge.interval_months) {
+        sides.push({
+            label: 'Time',
+            value: asPercent(gauge.time_progress),
+            binding: gauge.axis === 'time',
+        });
+    }
+
+    return sides;
+});
+
+/** Whole and uncapped, as the dials print it; a dash where nothing counts. */
+function asPercent(progress: number | null): string {
+    return progress === null ? '—' : `${Math.round(progress * 100)}%`;
+}
+
+/*
+ * A mileage interval with no reading to count from: the miles side is off, and
+ * nothing else on screen would say so.
+ *
+ * String() because a number input hands its v-model back as a number once
+ * typed into, despite the ref starting as a string.
+ */
+const milesOff = computed(
+    () =>
+        canBeNever.value &&
+        !neverDone.value &&
+        String(lastDoneOdometer.value).trim() === '',
+);
+
 /** "5 years", "18 months", "1 year 6 months" — never "60 months". */
 function inYearsAndMonths(months: number): string {
     const years = Math.floor(months / 12);
@@ -212,6 +268,20 @@ function inYearsAndMonths(months: number): string {
                         <DialogDescription>
                             {{ intervalSummary }}
                         </DialogDescription>
+                        <p
+                            v-if="axisReadout.length"
+                            class="text-muted-foreground mt-0.5 text-xs"
+                        >
+                            <template
+                                v-for="(side, index) in axisReadout"
+                                :key="side.label"
+                            >
+                                <span v-if="index > 0"> · </span>
+                                <span :class="{ 'font-bold': side.binding }">
+                                    {{ side.label }} {{ side.value }}
+                                </span>
+                            </template>
+                        </p>
                     </div>
                 </div>
             </DialogHeader>
@@ -284,9 +354,12 @@ function inYearsAndMonths(months: number): string {
                         inputmode="numeric"
                         :placeholder="String(projectedOdometer)"
                     />
-                    <p class="text-muted-foreground text-xs">
-                        Without this, only the time side of the gauge can count
-                        down.
+                    <p v-if="milesOff" class="text-muted-foreground text-xs">
+                        Miles aren't counted without this. Enter the reading
+                        from when this service was done.
+                    </p>
+                    <p v-else class="text-muted-foreground text-xs">
+                        The reading when this service was done, not today's.
                     </p>
                     <InputError :message="errors.last_done_odometer" />
                 </div>

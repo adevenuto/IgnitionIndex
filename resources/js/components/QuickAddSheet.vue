@@ -15,7 +15,12 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
-import type { QuickAddVehicle, ServiceTypeOption } from '@/types/garage';
+import type {
+    HistoryEvent,
+    QuickAddVehicle,
+    Reading,
+    ServiceTypeOption,
+} from '@/types/garage';
 
 /*
  * Chrome for the quick-add flow: a bottom sheet on mobile, a centred dialog on
@@ -37,14 +42,22 @@ const props = defineProps<{
     serviceTypes: ServiceTypeOption[];
     expenseCategories: string[];
     initialLane?: 'fuel' | 'visit' | 'expense' | 'odometer';
+    /** Opens the sheet on an existing entry, to edit or delete it. */
+    event?: HistoryEvent | null;
+    /** The entry's vehicle's readings, so the edit form can show its range. */
+    readings?: Reading[];
 }>();
 
 const open = defineModel<boolean>('open', { required: true });
 
 const isDesktop = useMediaQuery('(min-width: 768px)');
 
+const title = () => (props.event ? 'Edit entry' : 'Log an entry');
+
 const subtitle = () =>
-    props.vehicles.length > 1
+    props.event
+        ? props.event.vehicle_name
+        : props.vehicles.length > 1
         ? 'Choose a vehicle below'
         : (props.vehicles[0]?.name ?? '');
 </script>
@@ -55,7 +68,7 @@ const subtitle = () =>
             class="max-h-[85vh] gap-0 overflow-y-auto p-0 sm:max-w-2xl"
         >
             <DialogHeader class="px-4 pt-5 pb-0 text-left">
-                <DialogTitle class="text-h2">Log an entry</DialogTitle>
+                <DialogTitle class="text-h2">{{ title() }}</DialogTitle>
                 <DialogDescription class="text-body">
                     {{ subtitle() }}
                 </DialogDescription>
@@ -66,6 +79,8 @@ const subtitle = () =>
                 :service-types="serviceTypes"
                 :expense-categories="expenseCategories"
                 :initial-lane="initialLane"
+                :event="event"
+                :readings="readings"
                 @saved="open = false"
             />
         </DialogContent>
@@ -77,7 +92,7 @@ const subtitle = () =>
             class="max-h-[90svh] overflow-y-auto rounded-t-xl"
         >
             <SheetHeader class="pb-0">
-                <SheetTitle class="text-h2">Log an entry</SheetTitle>
+                <SheetTitle class="text-h2">{{ title() }}</SheetTitle>
                 <SheetDescription class="text-body">
                     {{ subtitle() }}
                 </SheetDescription>
@@ -88,6 +103,8 @@ const subtitle = () =>
                 :service-types="serviceTypes"
                 :expense-categories="expenseCategories"
                 :initial-lane="initialLane"
+                :event="event"
+                :readings="readings"
                 @saved="open = false"
             />
         </SheetContent>

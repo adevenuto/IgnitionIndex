@@ -43,6 +43,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('vehicles/{vehicle}/events', [EventController::class, 'store'])
         ->name('vehicles.events.store');
+    Route::patch('events/{event}', [EventController::class, 'update'])
+        ->name('events.update');
     Route::delete('events/{event}', [EventController::class, 'destroy'])
         ->name('events.destroy');
 });

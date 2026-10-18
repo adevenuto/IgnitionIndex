@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property IntervalSource $source
  * @property Carbon|null $last_done_at
  * @property int|null $last_done_odometer
+ * @property int|null $last_done_event_id
  * @property bool $is_active
  * @property int $position
  * @property bool $is_pinned
@@ -35,7 +36,7 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([
     'service_type_id', 'interval_months', 'interval_miles', 'source',
-    'last_done_at', 'last_done_odometer', 'is_active',
+    'last_done_at', 'last_done_odometer', 'last_done_event_id', 'is_active',
     'position', 'is_pinned',
     'last_reminded_status', 'last_reminded_at',
 ])]
