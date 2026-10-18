@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\LineItem;
 use App\Models\ServiceType;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -36,7 +37,7 @@ class HistoryController extends Controller
                 'full_tank' => $event->full_tank,
                 'mpg' => $event->mpg === null ? null : (float) $event->mpg,
                 'category' => $event->category,
-                'line_items' => $event->lineItems->map(fn ($item): array => [
+                'line_items' => $event->lineItems->map(fn (LineItem $item): array => [
                     'id' => $item->id,
                     'service_type_id' => $item->service_type_id,
                     'name' => $item->serviceType->name,

@@ -34,11 +34,10 @@ class AssertHandSetGaugesFit
      */
     public function misfits(Vehicle $vehicle): array
     {
-        return $this->handSet($vehicle)
+        return array_values($this->handSet($vehicle)
             ->reject(fn (VehicleInterval $interval): bool => $this->fits($vehicle, $interval))
             ->map(fn (VehicleInterval $interval): int => $interval->id)
-            ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -74,14 +73,11 @@ class AssertHandSetGaugesFit
 
     private function fits(Vehicle $vehicle, VehicleInterval $interval): bool
     {
-        $fits = true;
+        // The same question the gauge dialog asked when the value was saved,
+        // asked again of the readings as they are now.
+        $rule = new LastDoneOdometer($vehicle, $interval->last_done_at?->toDateString());
 
-        (new LastDoneOdometer($vehicle, $interval->last_done_at?->toDateString()))
-            ->validate('last_done_odometer', $interval->last_done_odometer, function () use (&$fits): void {
-                $fits = false;
-            });
-
-        return $fits;
+        return $rule->problemWith((int) $interval->last_done_odometer) === null;
     }
 
     private function message(VehicleInterval $interval): string

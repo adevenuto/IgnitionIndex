@@ -62,7 +62,9 @@ class SyncServiceIntervals
             ])->save();
         }
 
-        return $intervals->pluck('service_type_id')->map(fn ($id): int => (int) $id)->all();
+        return array_values($intervals->map(
+            fn (VehicleInterval $interval): int => $interval->service_type_id,
+        )->all());
     }
 
     /**
@@ -167,6 +169,6 @@ class SyncServiceIntervals
         /** @var Collection<int, int> $ids */
         $ids = $event->lineItems()->pluck('service_type_id');
 
-        return $ids->map(fn ($id): int => (int) $id)->unique()->values()->all();
+        return array_values($ids->map(fn ($id): int => (int) $id)->unique()->all());
     }
 }
