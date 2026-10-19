@@ -123,7 +123,6 @@ class VehicleController extends Controller
             'type' => EventType::Odometer,
             'odometer' => $data['odometer'],
             'occurred_on' => now()->toDateString(),
-            'notes' => 'Starting reading',
         ]);
 
         // Every car, not just the first. This was once first-only, to keep the

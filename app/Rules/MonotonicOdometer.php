@@ -97,6 +97,12 @@ class MonotonicOdometer implements ValidationRule
     /**
      * The nearest reading on either side of the given date, so a backfilled
      * event is bounded by its actual neighbours rather than by the newest row.
+     *
+     * Strictly before and strictly after. Readings carry a date but no time,
+     * so two on the same day cannot be put in order — a fill-up in the morning
+     * and a shop visit in the afternoon are both right whichever is higher.
+     * Counting same-day readings as neighbours made each one bound the other
+     * from both sides, so a second reading had to match the first exactly.
      */
     private function neighbour(string $date, bool $before): ?Event
     {
@@ -105,7 +111,7 @@ class MonotonicOdometer implements ValidationRule
                 $this->ignoreEventId !== null,
                 fn ($query) => $query->whereKeyNot($this->ignoreEventId),
             )
-            ->where('occurred_on', $before ? '<=' : '>=', $date)
+            ->whereDate('occurred_on', $before ? '<' : '>', $date)
             ->orderBy('occurred_on', $before ? 'desc' : 'asc')
             ->orderBy('odometer', $before ? 'desc' : 'asc')
             ->first();

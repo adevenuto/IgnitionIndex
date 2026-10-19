@@ -132,6 +132,10 @@ readonly class VehicleGauges
             'label' => $gauge->label(),
             'miles_remaining' => $gauge->milesRemaining,
             'days_remaining' => $gauge->daysRemaining,
+            // Both axes, not just the binding one, so the edit dialog can show
+            // the side the dial is hiding. Null where that axis is not running.
+            'time_progress' => $gauge->timeProgress,
+            'mile_progress' => $gauge->mileProgress,
             'interval_months' => $gauge->interval->interval_months,
             'interval_miles' => $gauge->interval->interval_miles,
             'last_done_at' => $gauge->interval->last_done_at?->toDateString(),

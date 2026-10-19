@@ -29,6 +29,7 @@ export type GarageVehicle = {
 
 export type EventLineItem = {
     id: number;
+    service_type_id: number;
     name: string;
     cost_cents: number | null;
 };
@@ -43,10 +44,17 @@ export type VehicleEvent = {
     notes: string | null;
     location: string | null;
     gallons: number | null;
-    full_tank?: boolean | null;
+    full_tank: boolean | null;
     mpg: number | null;
     category: string | null;
     line_items: EventLineItem[];
+};
+
+/** One reading as the edit sheet bounds against: no lane detail, just the spine. */
+export type Reading = {
+    id: number;
+    odometer: number;
+    occurred_on: string;
 };
 
 export type HistoryEvent = VehicleEvent & {
