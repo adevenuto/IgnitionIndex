@@ -30,6 +30,10 @@ declare module '@inertiajs/core' {
                     percent: number;
                 }[];
             };
+            can: {
+                /** Photo and voice capture in the quick-add sheet. */
+                assistedCapture: boolean;
+            };
             unreadNotifications: number;
             [key: string]: unknown;
         };

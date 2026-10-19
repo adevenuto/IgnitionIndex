@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CaptureController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\NotificationController;
@@ -43,6 +44,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('vehicles/{vehicle}/events', [EventController::class, 'store'])
         ->name('vehicles.events.store');
+    // Assisted capture proposes values for the sheet; it never saves. The
+    // daily allowance applies per person, since every read is a paid call.
+    Route::post('vehicles/{vehicle}/captures/{lane}', CaptureController::class)
+        ->middleware(['can:update,vehicle', 'can:use-assisted-capture', 'throttle:captures'])
+        ->name('vehicles.captures.store');
+
     Route::patch('events/{event}', [EventController::class, 'update'])
         ->name('events.update');
     Route::delete('events/{event}', [EventController::class, 'destroy'])

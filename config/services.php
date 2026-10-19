@@ -54,4 +54,16 @@ return [
         'timeout' => (int) env('FUELECONOMY_TIMEOUT', 10),
     ],
 
+    /*
+     * Claude, for assisted capture: reading a pump, an odometer or a spoken
+     * sentence into the fields of an entry. It only ever proposes values; the
+     * person confirms them, so the app stays fully usable without a key.
+     */
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-opus-5-5'),
+        // Someone is standing at a pump waiting on this; past this, typing wins.
+        'timeout' => (float) env('ANTHROPIC_TIMEOUT', 20),
+    ],
+
 ];

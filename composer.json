@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "anthropic-ai/sdk": "^0.59.0",
         "aws/aws-sdk-php": "^3.395",
         "inertiajs/inertia-laravel": "^3.0",
         "intervention/image": "^4.0",

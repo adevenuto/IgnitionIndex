@@ -55,6 +55,7 @@ class VehicleController extends Controller
                     'photo_color' => $vehicle->primaryPhoto?->placeholder_color,
                     'last_odometer' => $vehicle->last_odometer,
                     'last_odometer_at' => $vehicle->last_odometer_at?->toDateString(),
+                    'projected_odometer' => $gauges->mileage->lastOdometer === null ? null : $gauges->mileage->projectedOdometer,
                     'events_count' => $vehicle->events_count,
                     // One ring per card: whatever is closest to due, named. An
                     // averaged score would let nine healthy items hide one overdue
@@ -183,6 +184,7 @@ class VehicleController extends Controller
                 'photo_color' => $vehicle->primaryPhoto?->placeholder_color,
                 'last_odometer' => $vehicle->last_odometer,
                 'last_odometer_at' => $vehicle->last_odometer_at?->toDateString(),
+                'projected_odometer' => $gauges->mileage->lastOdometer === null ? null : $gauges->mileage->projectedOdometer,
                 // Rounded to the month for the header's metric row; null when
                 // there is no rate yet rather than a misleading zero.
                 'avg_miles_per_month' => $gauges->mileage->milesPerDay === null
