@@ -17,6 +17,7 @@ export type GarageVehicle = {
     photo_color: string | null;
     last_odometer: number | null;
     last_odometer_at: string | null;
+    projected_odometer: number | null;
     events_count: number;
     worst: Gauge | null;
     due_count: number;
@@ -77,6 +78,7 @@ export type VehicleDetail = {
     photo_color: string | null;
     last_odometer: number | null;
     last_odometer_at: string | null;
+    projected_odometer: number | null;
     avg_miles_per_month: number | null;
     /** Every gauge still without a starting point; see VehicleGauges::awaitingSetup(). */
     awaiting_setup: boolean;
@@ -106,6 +108,8 @@ export type QuickAddVehicle = {
     id: number;
     name: string;
     last_odometer: number | null;
+    /** The running estimate, offered as a suggestion; null with no reading yet. */
+    projected_odometer?: number | null;
 };
 
 /**

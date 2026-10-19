@@ -49,6 +49,12 @@ class HandleInertiaRequests extends Middleware
                 ? GarageSummary::empty()->toArray()
                 : GarageSummary::for($request->user())->toArray(),
 
+            // What the signed-in person may do that the UI has to know up
+            // front, rather than discover by being refused.
+            'can' => fn (): array => [
+                'assistedCapture' => $request->user()?->can('use-assisted-capture') ?? false,
+            ],
+
             'unreadNotifications' => fn (): int => $request->user()?->unreadNotifications()->count() ?? 0,
         ];
     }

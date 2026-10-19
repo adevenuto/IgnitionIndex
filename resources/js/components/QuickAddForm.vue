@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Form, router } from '@inertiajs/vue3';
+import { Form, router, usePage } from '@inertiajs/vue3';
 import { DollarSign, Fuel, Gauge, Plus, Trash2, Wrench } from '@lucide/vue';
 import type { AcceptableValue } from 'reka-ui';
 import { computed, ref } from 'vue';
+import FuelFlow from '@/components/capture/FuelFlow.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -54,6 +55,12 @@ import type {
  * fixed — a different type is a different entry, and entries never move
  * between cars — so the lane toggle and vehicle picker give way to a label,
  * and every field starts from what was logged.
+ *
+ * With assisted capture on, a new fuel entry is the stepped flow in
+ * FuelFlow instead — photo or voice per step, then a review card — and the
+ * spine, the extras and the Save button give way to it until it reaches
+ * review. It posts the same fields through this same <Form>, so nothing about
+ * saving changes. Editing an entry always uses the plain fields.
  *
  * Every control here is a shadcn primitive. That matters for more than
  * consistency: reka-ui's Select and Checkbox render hidden native inputs bound
@@ -170,6 +177,18 @@ const form = computed(() =>
         ? updateEvent.form(editing.id)
         : storeEvent.form(vehicle.value?.id ?? 0),
 );
+
+const page = usePage();
+
+const assisted = computed(
+    () =>
+        editing === null &&
+        lane.value === 'fuel' &&
+        page.props.can.assistedCapture,
+);
+
+/** The assisted flow's Save lives on its review card, and only there. */
+const atReview = ref(false);
 
 const laneItem = computed(
     () => lanes.find((item) => item.value === lane.value) ?? lanes[0],
@@ -298,46 +317,59 @@ function deleteEntry(): void {
         </div>
 
         <!-- The spine: every lane carries these two. -->
-        <div class="grid grid-cols-2 gap-3">
-            <div class="grid gap-1.5">
-                <Label for="odometer">Odometer</Label>
-                <Input
-                    id="odometer"
-                    name="odometer"
-                    type="number"
-                    inputmode="numeric"
-                    required
-                    :default-value="
-                        editing?.odometer ?? vehicle?.last_odometer ?? undefined
-                    "
-                    :placeholder="odometerPlaceholder"
-                />
+        <template v-if="!assisted">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="grid gap-1.5">
+                    <Label for="odometer">Odometer</Label>
+                    <Input
+                        id="odometer"
+                        name="odometer"
+                        type="number"
+                        inputmode="numeric"
+                        required
+                        :default-value="
+                            editing?.odometer ??
+                            vehicle?.last_odometer ??
+                            undefined
+                        "
+                        :placeholder="odometerPlaceholder"
+                    />
+                </div>
+                <div class="grid gap-1.5">
+                    <Label for="occurred_on">Date</Label>
+                    <Input
+                        id="occurred_on"
+                        name="occurred_on"
+                        v-model="occurredOn"
+                        type="date"
+                        required
+                    />
+                </div>
             </div>
-            <div class="grid gap-1.5">
-                <Label for="occurred_on">Date</Label>
-                <Input
-                    id="occurred_on"
-                    name="occurred_on"
-                    v-model="occurredOn"
-                    type="date"
-                    required
-                />
+            <div
+                v-if="isFirst || range"
+                class="text-muted-foreground -mt-3 grid gap-0.5 text-xs"
+            >
+                <p v-if="isFirst">
+                    Your earliest reading. Mileage is measured from here.
+                </p>
+                <p v-if="range">{{ range }}</p>
             </div>
-        </div>
-        <div
-            v-if="isFirst || range"
-            class="text-muted-foreground -mt-3 grid gap-0.5 text-xs"
-        >
-            <p v-if="isFirst">
-                Your earliest reading. Mileage is measured from here.
-            </p>
-            <p v-if="range">{{ range }}</p>
-        </div>
-        <InputError :message="errors.odometer" />
-        <InputError :message="errors.occurred_on" />
+            <InputError :message="errors.odometer" />
+            <InputError :message="errors.occurred_on" />
+        </template>
+
+        <!-- Fuel, assisted: steps with photo and voice, then review. -->
+        <FuelFlow
+            v-if="assisted"
+            :key="vehicle.id"
+            v-model:at-review="atReview"
+            :vehicle="vehicle"
+            :errors="errors"
+        />
 
         <!-- Fuel: odometer + gallons + total cost is a complete entry. -->
-        <template v-if="lane === 'fuel'">
+        <template v-else-if="lane === 'fuel'">
             <div class="grid grid-cols-2 gap-3">
                 <div class="grid gap-1.5">
                     <Label for="gallons">Gallons</Label>
@@ -509,7 +541,7 @@ function deleteEntry(): void {
 
         <!-- Optional extras stay collapsed: the common case is 2-3 taps. -->
         <Button
-            v-if="!showDetails"
+            v-if="!showDetails && !assisted"
             type="button"
             variant="ghost"
             size="sm"
@@ -519,7 +551,7 @@ function deleteEntry(): void {
             Add notes{{ lane === 'fuel' ? '' : ' or cost' }}
         </Button>
 
-        <template v-if="showDetails">
+        <template v-if="showDetails && !assisted">
             <div v-if="lane === 'odometer'" class="grid gap-1.5">
                 <Label for="misc-cost">Cost</Label>
                 <Input
@@ -557,7 +589,12 @@ function deleteEntry(): void {
         <InputError :message="errors.type" />
 
         <template v-if="!confirmingDelete">
-            <Button type="submit" size="lg" :disabled="processing">
+            <Button
+                v-if="!assisted || atReview"
+                type="submit"
+                size="lg"
+                :disabled="processing"
+            >
                 {{
                     errors.odometer
                         ? 'Save anyway'
