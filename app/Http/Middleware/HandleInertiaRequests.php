@@ -53,6 +53,7 @@ class HandleInertiaRequests extends Middleware
             // front, rather than discover by being refused.
             'can' => fn (): array => [
                 'assistedCapture' => $request->user()?->can('use-assisted-capture') ?? false,
+                'voiceCapture' => $request->user()?->can('use-voice-capture') ?? false,
             ],
 
             'unreadNotifications' => fn (): int => $request->user()?->unreadNotifications()->count() ?? 0,

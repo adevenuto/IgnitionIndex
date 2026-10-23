@@ -2,6 +2,7 @@ import { useHttp } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import CaptureController from '@/actions/App/Http/Controllers/CaptureController';
 import type { CaptureLaneId, CaptureReading } from '@/lib/capture/lanes';
+import { responseMessage } from '@/lib/capture/responseMessage';
 
 /*
  * Asks the server to read a photo or a sentence for one lane.
@@ -41,7 +42,10 @@ export function useCaptureReader(lane: CaptureLaneId, vehicleId: () => number) {
                             'That could not be read. Type it in instead.';
                     },
                     onHttpException: (response) => {
-                        error.value = messageFrom(response.data);
+                        error.value = responseMessage(
+                            response.data,
+                            'Could not read that just now. Type it in instead.',
+                        );
 
                         return false;
                     },
@@ -60,16 +64,4 @@ export function useCaptureReader(lane: CaptureLaneId, vehicleId: () => number) {
     }
 
     return { read, reading, error };
-}
-
-function messageFrom(data: string | Record<string, unknown>): string {
-    const fallback = 'Could not read that just now. Type it in instead.';
-
-    try {
-        const body = typeof data === 'string' ? JSON.parse(data) : data;
-
-        return typeof body?.message === 'string' ? body.message : fallback;
-    } catch {
-        return fallback;
-    }
 }

@@ -7,8 +7,8 @@
  * "forty-eight twelve" — goes to the server instead. This only has to be
  * right about the easy cases, and say so when a case is not easy.
  *
- * Speech engines mostly hand back digits already ("12.5 gallons"), so the word
- * parser is the fallback rather than the main path.
+ * The transcriber mostly hands back digits already ("12.5 gallons", "$48.12."),
+ * so the word parser is the fallback rather than the main path.
  */
 
 export type SpokenUnit = 'mi' | 'gal' | 'usd';
@@ -70,6 +70,8 @@ const UNITS: Record<string, SpokenUnit> = {
 export function spokenQuantities(text: string): SpokenQuantity[] {
     const tokens = text
         .toLowerCase()
+        // A full stop ends a sentence; only a point between digits is decimal.
+        .replace(/\.(?!\d)/g, ' ')
         // "$48.12" → "48.12 dollars", so the unit is found the same way as a spoken one.
         .replace(/\$\s*([\d.,]+)/g, '$1 dollars')
         .replace(/(\d),(?=\d{3}\b)/g, '$1')
@@ -112,7 +114,8 @@ function readNumber(
     const first = tokens[start];
 
     if (/^\d+(\.\d+)?$/.test(first)) {
-        return { value: Number(first), next: start + 1 };
+        // Transcribers write "12 and a half" with digits, so the half applies here too.
+        return withHalf(tokens, Number(first), start + 1);
     }
 
     let total = 0;
@@ -176,16 +179,24 @@ function readNumber(
         }
 
         value = Number(`${value}.${digits || '0'}`);
-    } else if (
-        tokens[index] === 'and' &&
-        tokens[index + 1] === 'a' &&
-        tokens[index + 2] === 'half'
-    ) {
-        value += 0.5;
-        index += 3;
+
+        return { value, next: index };
     }
 
-    return { value, next: index };
+    return withHalf(tokens, value, index);
+}
+
+/** A trailing "and a half", when there is one. */
+function withHalf(
+    tokens: string[],
+    value: number,
+    index: number,
+): { value: number; next: number } {
+    return tokens[index] === 'and' &&
+        tokens[index + 1] === 'a' &&
+        tokens[index + 2] === 'half'
+        ? { value: value + 0.5, next: index + 3 }
+        : { value, next: index };
 }
 
 /**

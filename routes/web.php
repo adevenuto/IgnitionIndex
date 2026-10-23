@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CaptureController;
+use App\Http\Controllers\CaptureTranscriptionController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\NotificationController;
@@ -46,6 +47,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('vehicles.events.store');
     // Assisted capture proposes values for the sheet; it never saves. The
     // daily allowance applies per person, since every read is a paid call.
+    // Transcriptions come first so the word is never taken for a lane.
+    Route::post('vehicles/{vehicle}/captures/transcriptions', CaptureTranscriptionController::class)
+        ->middleware(['can:update,vehicle', 'can:use-voice-capture', 'throttle:transcriptions'])
+        ->name('vehicles.captures.transcriptions.store');
     Route::post('vehicles/{vehicle}/captures/{lane}', CaptureController::class)
         ->middleware(['can:update,vehicle', 'can:use-assisted-capture', 'throttle:captures'])
         ->name('vehicles.captures.store');

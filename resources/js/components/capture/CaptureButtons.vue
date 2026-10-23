@@ -3,7 +3,7 @@ import { Camera, Mic, Square } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { useSpeechInput } from '@/composables/useSpeechInput';
+import { injectVoiceInput } from '@/composables/useVoiceInput';
 
 /*
  * Snap and Say it. These only gather input — a photo file, or the words heard
@@ -11,7 +11,8 @@ import { useSpeechInput } from '@/composables/useSpeechInput';
  *
  * Snap is a plain file input with capture="environment", which opens the rear
  * camera on a phone without any permission prompt of our own and falls back to
- * a file picker on a desktop. Say it only exists where the browser can listen.
+ * a file picker on a desktop. Say it records a clip and has the server hear it
+ * (useVoiceInput); it only exists where the browser can record and voice is on.
  */
 defineProps<{
     /** A read is in flight; both buttons wait for it. */
@@ -23,7 +24,7 @@ const emit = defineEmits<{
     speech: [transcript: string];
 }>();
 
-const speech = useSpeechInput();
+const speech = injectVoiceInput();
 const fileInput = ref<HTMLInputElement | null>(null);
 
 function onFile(event: Event): void {
@@ -59,7 +60,9 @@ async function onSpeak(): Promise<void> {
             <Button
                 type="button"
                 variant="outline"
-                :disabled="busy || speech.listening.value"
+                :disabled="
+                    busy || speech.listening.value || speech.transcribing.value
+                "
                 @click="fileInput?.click()"
             >
                 <Spinner v-if="busy" />
@@ -71,15 +74,23 @@ async function onSpeak(): Promise<void> {
                 v-if="speech.supported"
                 type="button"
                 variant="outline"
-                :disabled="busy"
+                :disabled="busy || speech.transcribing.value"
                 :aria-pressed="speech.listening.value"
                 :class="speech.listening.value && 'border-accent text-accent'"
                 @click="onSpeak"
             >
-                <Square v-if="speech.listening.value" :stroke-width="1.5" />
+                <Spinner v-if="speech.transcribing.value" />
+                <Square
+                    v-else-if="speech.listening.value"
+                    :stroke-width="1.5"
+                />
                 <Mic v-else :stroke-width="1.5" />
                 {{
-                    speech.listening.value ? 'Listening… tap to stop' : 'Say it'
+                    speech.transcribing.value
+                        ? 'Hearing…'
+                        : speech.listening.value
+                          ? 'Listening… tap to stop'
+                          : 'Say it'
                 }}
             </Button>
 
