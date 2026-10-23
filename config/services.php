@@ -66,4 +66,15 @@ return [
         'timeout' => (float) env('ANTHROPIC_TIMEOUT', 20),
     ],
 
+    /*
+     * OpenAI, for assisted capture's voice only: turning a recorded clip into
+     * words. Claude does not take audio, and the phone's own recognition is
+     * too unreliable on iOS to build on. Without a key, Say it simply hides.
+     */
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'transcription_model' => env('OPENAI_TRANSCRIPTION_MODEL', 'gpt-4o-mini-transcribe'),
+        'timeout' => (float) env('OPENAI_TIMEOUT', 15),
+    ],
+
 ];

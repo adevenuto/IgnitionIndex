@@ -33,6 +33,8 @@ declare module '@inertiajs/core' {
             can: {
                 /** Photo and voice capture in the quick-add sheet. */
                 assistedCapture: boolean;
+                /** Say it: needs the transcription key on top of the above. */
+                voiceCapture: boolean;
             };
             unreadNotifications: number;
             [key: string]: unknown;

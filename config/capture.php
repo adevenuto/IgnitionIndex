@@ -28,4 +28,11 @@ return [
         'quality' => 85,
     ],
 
+    'audio' => [
+        // The client stops recording at max_seconds; this is the server's
+        // backstop, generous for an 8-second clip in either container.
+        'max_kilobytes' => 2048,
+        'max_seconds' => 8,
+    ],
+
 ];

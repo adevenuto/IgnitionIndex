@@ -6,6 +6,8 @@ use Anthropic\Client;
 use App\Models\User;
 use App\Support\Capture\CaptureReader;
 use App\Support\Capture\ClaudeCaptureReader;
+use App\Support\Capture\OpenAiTranscriber;
+use App\Support\Capture\Transcriber;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -28,6 +30,12 @@ class AppServiceProvider extends ServiceProvider
             new Client(apiKey: (string) config('services.anthropic.key')),
             Config::string('services.anthropic.model'),
             Config::float('services.anthropic.timeout'),
+        ));
+
+        $this->app->bind(Transcriber::class, fn (): OpenAiTranscriber => new OpenAiTranscriber(
+            (string) config('services.openai.key'),
+            Config::string('services.openai.transcription_model'),
+            Config::float('services.openai.timeout'),
         ));
     }
 
@@ -72,10 +80,21 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('use-assisted-capture', fn (User $user): bool => filled((string) config('services.anthropic.key'))
             && in_array(strtolower($user->email), array_map(strtolower(...), Config::array('capture.allowed_emails')), true));
 
+        // Voice needs a second vendor, so it can be off while photos are on.
+        Gate::define('use-voice-capture', fn (User $user): bool => filled((string) config('services.openai.key'))
+            && Gate::forUser($user)->allows('use-assisted-capture'));
+
         RateLimiter::for('captures', fn (Request $request): Limit => Limit::perDay(Config::integer('capture.daily_limit'))
             ->by((string) $request->user()?->getAuthIdentifier())
             ->response(fn () => response()->json([
                 'message' => "That's today's photo and voice allowance. Type it in instead.",
+            ], 429)));
+
+        // Its own allowance, so saying a mileage never uses up a photo read.
+        RateLimiter::for('transcriptions', fn (Request $request): Limit => Limit::perDay(Config::integer('capture.daily_limit'))
+            ->by('transcriptions:'.$request->user()?->getAuthIdentifier())
+            ->response(fn () => response()->json([
+                'message' => "That's today's voice allowance. Type it in instead.",
             ], 429)));
     }
 }

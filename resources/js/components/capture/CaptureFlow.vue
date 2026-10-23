@@ -9,6 +9,7 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { useCaptureFlow } from '@/composables/useCaptureFlow';
 import { useCaptureReader } from '@/composables/useCaptureReader';
+import { provideVoiceInput } from '@/composables/useVoiceInput';
 import type {
     CaptureField,
     CaptureLane,
@@ -26,8 +27,9 @@ import { formatNumber } from '@/lib/format';
  * inputs, so a captured entry is submitted exactly like a typed one and hits
  * the same validation, guardrails and save path.
  *
- * Speech is settled on the device when it can be — one number for a one-field
- * step — and read by the server only when it cannot.
+ * Speech is heard by the server (useVoiceInput), then settled on the device
+ * when it can be — one number for a one-field step — and read by the server
+ * only when it cannot.
  */
 const props = withDefaults(
     defineProps<{
@@ -51,6 +53,8 @@ const atReview = defineModel<boolean>('atReview', { default: false });
 
 const flow = useCaptureFlow(props.lane);
 const reader = useCaptureReader(props.lane.id, () => props.vehicleId);
+// Held here rather than per step, so the steps share one microphone.
+provideVoiceInput(() => props.vehicleId);
 
 const fieldsByKey = Object.fromEntries(
     props.lane.fields.map((field) => [field.key, field]),
