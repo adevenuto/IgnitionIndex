@@ -97,7 +97,7 @@ const lastReading = computed(() => {
             <Link
                 v-else
                 :href="edit(vehicle.id)"
-                class="ease-standard hover:border-accent hover:text-accent absolute inset-3 flex flex-col items-center justify-center gap-2 border border-dashed border-(--color-neutral-400) text-(--color-neutral-700) transition-colors duration-[var(--dur-fast)]"
+                class="ease-standard hover:border-accent hover:text-accent absolute inset-3 flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-(--color-neutral-400) text-(--color-neutral-700) transition-colors duration-[var(--dur-fast)]"
             >
                 <ImagePlus class="size-6" :stroke-width="1.5" />
                 <span class="text-[13px]">Add a photo</span>

@@ -52,7 +52,7 @@ const nextLabel = computed(() => {
                 <span
                     v-for="segment in titles.length"
                     :key="segment"
-                    class="h-1 flex-1 transition-colors duration-[var(--dur-fast)]"
+                    class="h-1 flex-1 rounded-full transition-colors duration-[var(--dur-fast)]"
                     :class="
                         segment - 1 <= index
                             ? 'bg-accent'

@@ -43,9 +43,10 @@ const search = ref('');
         <ShellBrand class="hidden md:flex" />
         <ShellBrand compact class="md:hidden" />
 
+        <!-- Steel, not the near-black primary: ink would vanish into the navy bar. -->
         <Button
             size="sm"
-            class="font-display h-[38px] flex-none gap-2 px-5 text-[17px] font-semibold tracking-[0.04em] uppercase max-md:px-0 max-md:[&>span]:sr-only"
+            class="border-accent bg-accent text-primary-foreground hover:border-accent-700 hover:bg-accent-700 active:bg-accent-800 h-[38px] flex-none gap-2 rounded-md px-5 text-[15px] font-semibold max-md:px-0 max-md:[&>span]:sr-only"
             @click="$emit('add')"
         >
             <Plus class="size-4" :stroke-width="1.8" />
@@ -58,7 +59,7 @@ const search = ref('');
           work, which is why Enter is swallowed instead of reloading the page.
         -->
         <form
-            class="ease-standard focus-within:border-accent hidden h-[38px] min-w-[250px] items-center gap-[9px] border px-[14px] transition-colors duration-[var(--dur-fast)] lg:flex"
+            class="ease-standard focus-within:border-accent hidden h-[38px] min-w-[250px] items-center gap-[9px] rounded-md border px-[14px] transition-colors duration-[var(--dur-fast)] lg:flex"
             :style="{ borderColor: 'var(--shell-field-border)' }"
             role="search"
             @submit.prevent

@@ -24,16 +24,19 @@
     /* ── Surfaces ── */
     --background: var(--color-bg); /* #f2f2f3 paper, NOT white */
     --foreground: var(--color-text);
-    --card: var(--color-neutral-100);
+    /* Near-white since the 2026-10 softening: frames lift off the paper
+       ground with shadow-card rather than sitting in it as a tint. */
+    --card: var(--surface-card);
     --card-foreground: var(--color-text);
-    --popover: var(--color-neutral-100);
+    --popover: var(--surface-card);
     --popover-foreground: var(--color-text);
 
     /* ── Brand ── */
-    --primary: var(--color-accent);
-    --primary-foreground: var(
-        --color-bg
-    ); /* paper on steel, per .btn-primary */
+    /* Near-black since the 2026-10 softening. Steel stays the brand — the
+       active nav, links, focus, progress and the gauges — but the one button
+       that says "do this" is ink, which reads as the action on any ground. */
+    --primary: var(--color-text);
+    --primary-foreground: var(--surface-card);
 
     /* ── Quiet fills ──
        .btn-secondary in the Industry sheet is outline-only: a hairline border
@@ -63,5 +66,5 @@
     --destructive-foreground: var(--color-bg);
 
     /* Kept alive purely because components/ui/sonner/Sonner.vue reads it. */
-    --radius: 0;
+    --radius: var(--radius-control);
 }

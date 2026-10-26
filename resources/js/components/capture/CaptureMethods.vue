@@ -42,6 +42,8 @@ const fileInput = ref<HTMLInputElement | null>(null);
 type Method = {
     key: 'photo' | 'voice' | 'type';
     icon: Component;
+    /** The tile hue (design doc §2): each way in is told apart at a glance. */
+    tile: string;
     title: string;
     tag?: string;
     line: string;
@@ -52,6 +54,7 @@ const methods = computed((): Method[] =>
         {
             key: 'photo' as const,
             icon: Camera,
+            tile: 'bg-(--tile-steel-bg) text-(--tile-steel-ink)',
             title: 'Snap',
             tag: 'Fastest',
             line: props.step.cards.photo,
@@ -59,6 +62,7 @@ const methods = computed((): Method[] =>
         {
             key: 'voice' as const,
             icon: Mic,
+            tile: 'bg-(--tile-violet-bg) text-(--tile-violet-ink)',
             title: 'Say it',
             tag: 'Hands-free',
             line: props.step.cards.voice,
@@ -66,6 +70,7 @@ const methods = computed((): Method[] =>
         {
             key: 'type' as const,
             icon: Keyboard,
+            tile: 'bg-(--tile-slate-bg) text-(--tile-slate-ink)',
             title: 'Type it',
             line: props.step.cards.type,
         },
@@ -122,11 +127,12 @@ function onFile(event: Event): void {
             type="button"
             interactive
             :disabled="busy && method.key !== 'type'"
-            class="group focus-visible:border-accent focus-visible:ring-ring/50 flex min-h-16 w-full cursor-pointer items-center gap-(--space-4) p-(--space-4) text-left outline-none hover:bg-[color-mix(in_oklab,var(--color-accent)_8%,var(--color-neutral-100))] focus-visible:ring-[3px] active:bg-[color-mix(in_oklab,var(--color-accent)_14%,var(--color-neutral-100))] disabled:cursor-not-allowed disabled:opacity-45"
+            class="group focus-visible:border-accent focus-visible:ring-ring/50 flex min-h-16 w-full cursor-pointer items-center gap-(--space-4) p-(--space-4) text-left outline-none hover:bg-[color-mix(in_oklab,var(--color-accent)_8%,var(--surface-card))] focus-visible:ring-[3px] active:bg-[color-mix(in_oklab,var(--color-accent)_14%,var(--surface-card))] disabled:cursor-not-allowed disabled:opacity-45"
             @click="choose(method.key)"
         >
             <span
-                class="text-accent group-hover:border-accent flex size-12 shrink-0 items-center justify-center border border-(--color-divider) bg-(--color-bg) transition-colors duration-[var(--dur-fast)]"
+                class="flex size-12 shrink-0 items-center justify-center rounded-md"
+                :class="method.tile"
                 aria-hidden="true"
             >
                 <component
@@ -143,7 +149,7 @@ function onFile(event: Event): void {
                     }}</span>
                     <span
                         v-if="method.tag"
-                        class="ii-eyebrow border border-(--color-divider) px-1.5 py-px"
+                        class="ii-eyebrow bg-muted rounded-full px-2 py-0.5"
                         >{{ method.tag }}</span
                     >
                 </span>

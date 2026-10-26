@@ -17,13 +17,18 @@ export { default as Button } from "./Button.vue"
  *   destructive -> outlined rust (see below)
  *   link      -> no Industry equivalent; left as shadcn shipped it
  *
- * Buttons are set in the HEADING face at 14px/600, per Industry's .btn rule —
- * condensed uppercase is for chrome, and a button is chrome.
+ * Buttons are set in the heading role at 14px/600, sentence case. (Before the
+ * 2026-10 softening this was condensed uppercase; Inter carries no condensed
+ * face, and uppercase Inter at button size shouts.)
  *
- * Geometry per design doc section 4: square, hairline, no shadow, and no press
- * scale. The previous system squished on :active; nothing in a blueprint system
- * deforms, so the press feedback is a background step instead, which is what
- * Industry's own .btn:active does.
+ * Geometry per design doc section 4 (softened 2026-10): the control radius,
+ * hairline, no shadow, and no press scale. Nothing in the system deforms, so
+ * the press feedback is a background step instead, which is what Industry's
+ * own .btn:active does.
+ *
+ * The primary fill is near-black ink since 2026-10, not steel: steel remains
+ * the brand on nav, links, focus and gauges, and the one "do this" button
+ * reads as the action on any ground.
  *
  * destructive is an OUTLINE rather than a fill on purpose. Rust is a service
  * status colour (section 2), and filling a button with it puts a status colour
@@ -38,15 +43,14 @@ export { default as Button } from "./Button.vue"
  * A future `npx shadcn-vue add button` will revert this file.
  */
 export const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap border font-display text-[14px]/[1.2] font-semibold transition-colors duration-[var(--dur-fast)] ease-standard disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md border font-display text-[14px]/[1.2] font-semibold transition-colors duration-[var(--dur-fast)] ease-standard disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
-        // Industry's sheet specifies accent-600 on hover, but that is #597ea3
-        // against a #5980a6 base — a three-value difference nobody can see. The
-        // next step down reads as a hover without changing the colour's identity.
+        // Ink lifts toward slate on hover and press: a step you can see on a
+        // near-black fill, where darkening further would not register.
         default:
-          "border-accent bg-primary text-primary-foreground hover:border-accent-700 hover:bg-accent-700 active:border-accent-800 active:bg-accent-800",
+          "border-primary bg-primary text-primary-foreground hover:border-[color-mix(in_oklab,var(--primary)_84%,white)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]",
         destructive:
           "border-destructive bg-transparent text-destructive hover:bg-destructive/10 active:bg-destructive/18 focus-visible:ring-destructive/20",
         outline:

@@ -11,13 +11,22 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],
             refresh: true,
-            fonts: [
-                bunny('Barlow Condensed', {
-                    weights: [600],
-                    fallbacks: ['ui-sans-serif', 'system-ui', 'sans-serif'],
-                }),
-                bunny('Barlow', {
-                    weights: [400, 500, 700],
+            // The default face is preloaded; the trial faces offered by the
+            // picker (resources/js/lib/fonts.ts) load only when chosen.
+            fonts: (
+                [
+                    ['Inter', '--font-inter', true],
+                    ['Plus Jakarta Sans', '--font-plus-jakarta-sans', false],
+                    ['Manrope', '--font-manrope', false],
+                    ['DM Sans', '--font-dm-sans', false],
+                    ['Figtree', '--font-figtree', false],
+                    ['Outfit', '--font-outfit', false],
+                ] as const
+            ).map(([family, variable, preload]) =>
+                bunny(family, {
+                    weights: [400, 500, 600, 700],
+                    variable,
+                    preload,
                     fallbacks: [
                         'ui-sans-serif',
                         'system-ui',
@@ -26,7 +35,7 @@ export default defineConfig({
                         'sans-serif',
                     ],
                 }),
-            ],
+            ),
         }),
         inertia(),
         tailwindcss(),

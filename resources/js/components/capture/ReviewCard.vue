@@ -11,7 +11,7 @@ import { BlueprintFrame } from '@/components/ui/blueprint';
 <template>
     <BlueprintFrame class="p-0">
         <div
-            class="grid gap-px bg-(--color-divider) [&>*]:bg-(--color-neutral-100)"
+            class="grid gap-px overflow-hidden rounded-[inherit] bg-(--hairline-soft) [&>*]:bg-(--surface-card)"
         >
             <slot />
         </div>

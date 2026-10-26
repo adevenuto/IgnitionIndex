@@ -27,7 +27,7 @@ defineProps<{
             v-for="vehicle in vehicles"
             :key="vehicle.id"
             :href="show(vehicle.id)"
-            class="ease-standard flex w-[150px] flex-none flex-col gap-[5px] border px-[13px] py-[11px] transition-colors duration-[var(--dur-fast)]"
+            class="ease-standard flex w-[150px] flex-none flex-col gap-[5px] rounded-md border px-[13px] py-[11px] transition-colors duration-[var(--dur-fast)]"
             :class="
                 vehicle.is_active
                     ? 'border-(--shell-navy) bg-(--shell-navy)'
@@ -69,7 +69,7 @@ defineProps<{
 
         <Link
             :href="create()"
-            class="ease-standard hover:border-accent hover:text-accent flex w-[54px] flex-none items-center justify-center border border-dashed border-(--color-neutral-400) text-(--color-neutral-700) transition-colors duration-[var(--dur-fast)]"
+            class="ease-standard hover:border-accent hover:text-accent flex w-[54px] flex-none items-center justify-center rounded-md border border-dashed border-(--color-neutral-400) text-(--color-neutral-700) transition-colors duration-[var(--dur-fast)]"
         >
             <Plus class="size-[18px]" :stroke-width="1.5" />
             <span class="sr-only">Add a vehicle</span>

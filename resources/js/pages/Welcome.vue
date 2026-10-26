@@ -77,13 +77,6 @@ const steps = [
     },
 ];
 
-const fleetStats = [
-    { value: 'Unlimited', label: 'Vehicles per account' },
-    { value: 'Groups', label: 'By site, crew or class' },
-    { value: 'Roles', label: 'Drivers log, managers configure' },
-    { value: 'CSV', label: 'Export for accounting' },
-];
-
 const tiers = [
     {
         name: 'Solo',
@@ -92,7 +85,6 @@ const tiers = [
         per: 'forever',
         line: 'One or two cars and the full gauge set.',
         cta: 'Start free',
-        dark: false,
         features: [
             '2 vehicles',
             'Unlimited services and intervals',
@@ -107,30 +99,12 @@ const tiers = [
         per: '/ month',
         line: 'For the enthusiast with a project and a daily.',
         cta: 'Start 14-day trial',
-        dark: false,
         features: [
             'Up to 8 vehicles',
             'Receipt and document storage',
             'Parts and cost tracking',
             'Insights: cost per mile',
             'Shared access for a partner',
-        ],
-    },
-    {
-        name: 'Fleet',
-        badge: 'Paid tier',
-        price: '$4',
-        per: '/ vehicle / month',
-        line: 'For companies running vehicles as equipment.',
-        cta: 'Request access',
-        dark: true,
-        features: [
-            'Unlimited vehicles',
-            'Groups by site, crew or class',
-            'Driver and manager roles',
-            'Fleet-wide overdue roll-up',
-            'CSV export and API',
-            'Priority support',
         ],
     },
 ];
@@ -153,7 +127,6 @@ const user = computed(() => page.props.auth?.user ?? null);
 const navLinks = [
     { label: 'Gauges', href: '#gauges' },
     { label: 'How it works', href: '#how' },
-    { label: 'Fleet', href: '#fleet' },
     { label: 'Pricing', href: '#pricing' },
 ];
 </script>
@@ -196,7 +169,7 @@ const navLinks = [
                     <Link
                         v-if="user"
                         :href="garage()"
-                        class="font-display bg-accent hover:bg-accent-700 active:bg-accent-800 hover:border-accent-700 active:border-accent-800 ease-standard flex h-[38px] items-center border border-(--color-accent) px-5 text-[17px] font-semibold tracking-[0.04em] uppercase transition-colors duration-[var(--dur-fast)]"
+                        class="bg-accent hover:bg-accent-700 active:bg-accent-800 hover:border-accent-700 active:border-accent-800 ease-standard flex h-[36px] items-center rounded-md border border-(--color-accent) px-3.5 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)]"
                         :style="{ color: 'var(--color-bg)' }"
                     >
                         Garage
@@ -210,7 +183,7 @@ const navLinks = [
                         </Link>
                         <Link
                             :href="register()"
-                            class="font-display bg-accent hover:bg-accent-700 active:bg-accent-800 hover:border-accent-700 active:border-accent-800 ease-standard flex h-[38px] items-center border border-(--color-accent) px-5 text-[17px] font-semibold tracking-[0.04em] uppercase transition-colors duration-[var(--dur-fast)]"
+                            class="bg-accent hover:bg-accent-700 active:bg-accent-800 hover:border-accent-700 active:border-accent-800 ease-standard flex h-[36px] items-center rounded-md border border-(--color-accent) px-3.5 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)]"
                             :style="{ color: 'var(--color-bg)' }"
                         >
                             Start free
@@ -242,7 +215,7 @@ const navLinks = [
                         </p>
 
                         <h1
-                            class="font-display mt-(--space-4) text-[clamp(46px,6vw,76px)]/[0.98] font-semibold tracking-[-0.02em] uppercase"
+                            class="font-display mt-(--space-4) text-[clamp(44px,5.4vw,68px)]/[1.02] font-bold tracking-[-0.035em]"
                         >
                             Know what<br />your car<br />needs next
                         </h1>
@@ -261,14 +234,14 @@ const navLinks = [
                         >
                             <Link
                                 :href="register()"
-                                class="font-display bg-accent hover:bg-accent-700 active:bg-accent-800 hover:border-accent-700 active:border-accent-800 ease-standard flex h-[46px] items-center border border-(--color-accent) px-[26px] text-[19px] font-semibold tracking-[0.04em] uppercase transition-colors duration-[var(--dur-fast)]"
+                                class="bg-primary text-primary-foreground ease-standard flex h-[46px] items-center rounded-md border border-(--primary) px-6 text-[15px] font-semibold transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]"
                                 :style="{ color: 'var(--color-bg)' }"
                             >
                                 Start free
                             </Link>
                             <a
                                 href="#how"
-                                class="hover:bg-hover-surface ease-standard flex h-[46px] items-center border border-(--color-divider) px-[22px] text-[15px] font-medium transition-colors duration-[var(--dur-fast)]"
+                                class="hover:bg-hover-surface bg-card ease-standard flex h-[46px] items-center rounded-md border border-(--color-divider) px-[22px] text-[15px] font-medium transition-colors duration-[var(--dur-fast)]"
                             >
                                 See how it works
                             </a>
@@ -287,8 +260,7 @@ const navLinks = [
 
                     <!--
                         Fig. 01 — the data model as an exploded isometric. It says what the
-                        headline claims (readings + intervals become gauges) in one object,
-                        and carries the Fleet tier without a second section.
+                        headline claims (readings + intervals become gauges) in one object.
                     -->
                     <figure class="flex flex-col gap-(--space-3)">
                         <figcaption
@@ -334,7 +306,7 @@ const navLinks = [
                             01 — The gauge
                         </h6>
                         <h2
-                            class="font-display mt-(--space-2) text-[clamp(32px,3.4vw,46px)] font-semibold tracking-[-0.01em] uppercase"
+                            class="font-display mt-(--space-2) text-[clamp(30px,3.2vw,42px)]/[1.1] font-bold tracking-[-0.03em]"
                         >
                             One dial per service
                         </h2>
@@ -400,7 +372,7 @@ const navLinks = [
                     02 — How it works
                 </h6>
                 <h2
-                    class="font-display mt-(--space-2) mb-(--space-8) text-[clamp(32px,3.4vw,46px)] font-semibold tracking-[-0.01em] uppercase"
+                    class="font-display mt-(--space-2) mb-(--space-8) text-[clamp(30px,3.2vw,42px)]/[1.1] font-bold tracking-[-0.03em]"
                 >
                     Three inputs, then it runs itself
                 </h2>
@@ -408,12 +380,12 @@ const navLinks = [
                 <BlueprintFrame class="gap-0 p-0">
                     <!-- The 1px gaps are the rules; each cell paints over them. -->
                     <div
-                        class="grid gap-px bg-(--color-divider) md:grid-cols-3"
+                        class="grid gap-px overflow-hidden rounded-[inherit] bg-(--hairline-soft) md:grid-cols-3"
                     >
                         <div
                             v-for="step in steps"
                             :key="step.n"
-                            class="flex flex-col gap-(--space-2) bg-(--color-neutral-100) px-7 py-[30px]"
+                            class="flex flex-col gap-(--space-2) bg-(--surface-card) px-7 py-[30px]"
                         >
                             <p
                                 class="font-display text-accent text-[58px]/[0.9] font-semibold"
@@ -421,7 +393,7 @@ const navLinks = [
                                 {{ step.n }}
                             </p>
                             <p
-                                class="font-display text-[24px]/[1.1] font-semibold uppercase"
+                                class="font-display text-[22px]/[1.2] font-semibold tracking-[-0.015em]"
                             >
                                 {{ step.title }}
                             </p>
@@ -435,123 +407,40 @@ const navLinks = [
                 </BlueprintFrame>
             </section>
 
-            <!-- ── 03 Fleet ───────────────────────────────────────────── -->
-            <section
-                id="fleet"
-                class="mt-24"
-                :style="{
-                    background: 'var(--color-accent-900)',
-                    color: 'var(--color-bg)',
-                }"
-            >
-                <div
-                    class="mx-auto grid w-full max-w-[1200px] items-center gap-[54px] px-7 py-[78px] lg:grid-cols-2"
-                >
-                    <div>
-                        <h6
-                            class="ii-eyebrow"
-                            :style="{ color: 'var(--shell-ink-meta)' }"
-                        >
-                            03 — Fleet
-                        </h6>
-                        <h2
-                            class="font-display mt-(--space-2) text-[clamp(32px,3.4vw,46px)] font-semibold tracking-[-0.01em] uppercase"
-                        >
-                            Same gauges,<br />a hundred vehicles
-                        </h2>
-                        <p
-                            class="mt-(--space-6) max-w-[48ch] text-[17px]/[1.55] text-pretty"
-                            :style="{ color: 'var(--shell-ink-secondary)' }"
-                        >
-                            A fleet is a garage that outgrew one person. Group
-                            vehicles by site or crew, give drivers permission to
-                            log a reading and nothing else, and let the index
-                            roll up: what is overdue today, what lands next
-                            week, what it will cost.
-                        </p>
-                        <!--
-                            Outlined on the reversed field, so the hover is a
-                            paper wash rather than a colour change.
-                        -->
-                        <Link
-                            :href="register()"
-                            class="font-display ease-standard mt-(--space-8) inline-flex h-[46px] items-center border border-[rgb(242_242_243/0.4)] px-[26px] text-[19px] font-semibold tracking-[0.04em] text-(--color-bg) uppercase transition-colors duration-[var(--dur-fast)] hover:border-[rgb(242_242_243/0.7)] hover:bg-[rgb(242_242_243/0.12)] active:bg-[rgb(242_242_243/0.2)]"
-                        >
-                            Talk to us about fleet
-                        </Link>
-                    </div>
-
-                    <div
-                        class="grid grid-cols-2 gap-px"
-                        :style="{ background: 'rgb(242 242 243 / 0.22)' }"
-                    >
-                        <div
-                            v-for="stat in fleetStats"
-                            :key="stat.value"
-                            class="px-5 py-6"
-                            :style="{ background: 'var(--color-accent-900)' }"
-                        >
-                            <p
-                                class="font-display text-[44px]/none font-semibold"
-                            >
-                                {{ stat.value }}
-                            </p>
-                            <p
-                                class="mt-1.5 text-[13px]/[1.4]"
-                                :style="{ color: 'var(--shell-ink-secondary)' }"
-                            >
-                                {{ stat.label }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ── 04 Pricing ─────────────────────────────────────────── -->
+            <!-- ── 03 Pricing ─────────────────────────────────────────── -->
             <section
                 id="pricing"
                 class="mx-auto w-full max-w-[1200px] px-7 pt-24"
             >
                 <h6 class="ii-eyebrow text-(--color-accent-700)">
-                    04 — Pricing
+                    03 — Pricing
                 </h6>
                 <h2
-                    class="font-display mt-(--space-2) mb-(--space-8) text-[clamp(32px,3.4vw,46px)] font-semibold tracking-[-0.01em] uppercase"
+                    class="font-display mt-(--space-2) mb-(--space-8) text-[clamp(30px,3.2vw,42px)]/[1.1] font-bold tracking-[-0.03em]"
                 >
                     Pick a tier
                 </h2>
 
-                <div class="grid gap-5 md:grid-cols-3">
+                <div class="grid max-w-[820px] gap-5 md:grid-cols-2">
                     <BlueprintFrame
                         v-for="tier in tiers"
                         :key="tier.name"
                         class="flex flex-col gap-0 px-6 pt-[26px] pb-6"
-                        :style="
-                            tier.dark
-                                ? {
-                                      background: 'var(--shell-navy)',
-                                      color: 'var(--color-bg)',
-                                  }
-                                : undefined
-                        "
                     >
                         <div
                             class="flex items-center justify-between gap-(--space-3)"
                         >
                             <p
-                                class="font-display text-[26px] font-semibold tracking-[0.02em] uppercase"
+                                class="font-display text-[24px] font-bold tracking-[-0.02em]"
                             >
                                 {{ tier.name }}
                             </p>
                             <span
                                 class="ii-tag ii-tag-outline text-[10px] font-bold tracking-[0.12em] uppercase"
                                 :style="{
-                                    '--ii-tag-border': tier.dark
-                                        ? 'rgb(242 242 243 / 0.6)'
-                                        : 'var(--color-accent-700)',
-                                    '--ii-tag-ink': tier.dark
-                                        ? 'rgb(242 242 243 / 0.6)'
-                                        : 'var(--color-accent-700)',
+                                    '--ii-tag-border':
+                                        'var(--color-accent-700)',
+                                    '--ii-tag-ink': 'var(--color-accent-700)',
                                 }"
                             >
                                 {{ tier.badge }}
@@ -565,35 +454,20 @@ const navLinks = [
                                 {{ tier.price }}
                             </span>
                             <span
-                                class="text-[14px]"
-                                :style="{
-                                    color: tier.dark
-                                        ? 'var(--shell-ink-secondary)'
-                                        : 'var(--color-neutral-700)',
-                                }"
+                                class="text-[14px] text-(--color-neutral-700)"
                             >
                                 {{ tier.per }}
                             </span>
                         </p>
 
                         <p
-                            class="mt-(--space-3) text-[14px]/[1.5] text-pretty"
-                            :style="{
-                                color: tier.dark
-                                    ? 'var(--shell-ink-secondary)'
-                                    : 'var(--color-neutral-700)',
-                            }"
+                            class="mt-(--space-3) text-[14px]/[1.5] text-pretty text-(--color-neutral-700)"
                         >
                             {{ tier.line }}
                         </p>
 
                         <div
-                            class="my-(--space-6) h-px"
-                            :style="{
-                                background: tier.dark
-                                    ? 'rgb(242 242 243 / 0.22)'
-                                    : 'var(--color-divider)',
-                            }"
+                            class="my-(--space-6) h-px bg-(--color-divider)"
                             aria-hidden="true"
                         />
 
@@ -610,20 +484,9 @@ const navLinks = [
                                 {{ feature }}
                             </li>
                         </ul>
-
-                        <!--
-                            Classes, not an inline style: an inline style wins
-                            over any class selector, so a hover: utility could
-                            never override a resting colour set inline.
-                        -->
                         <Link
                             :href="register()"
-                            class="font-display ease-standard mt-(--space-8) flex h-[42px] items-center justify-center border text-[18px] font-semibold tracking-[0.04em] uppercase transition-colors duration-[var(--dur-fast)]"
-                            :class="
-                                tier.dark
-                                    ? 'border-accent bg-accent hover:border-accent-700 hover:bg-accent-700 active:border-accent-800 active:bg-accent-800 text-(--shell-active-ink)'
-                                    : 'hover:bg-hover-surface active:bg-foreground/14 border-(--color-neutral-400) hover:border-(--color-accent)'
-                            "
+                            class="ease-standard hover:bg-hover-surface active:bg-foreground/14 mt-(--space-8) flex h-[42px] items-center justify-center rounded-md border border-(--color-neutral-400) text-[15px] font-semibold transition-colors duration-[var(--dur-fast)] hover:border-(--color-accent)"
                         >
                             {{ tier.cta }}
                         </Link>

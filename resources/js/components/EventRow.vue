@@ -87,7 +87,7 @@ const secondary = computed(() =>
             >
                 <CardContent class="flex items-start gap-3">
                     <span
-                        class="flex size-10 shrink-0 items-center justify-center border border-(--color-divider) bg-(--color-accent-100) text-(--color-accent-700)"
+                        class="flex size-10 shrink-0 items-center justify-center rounded-md bg-(--tile-steel-bg) text-(--tile-steel-ink)"
                     >
                         <component :is="icons[event.type]" class="size-5" />
                     </span>

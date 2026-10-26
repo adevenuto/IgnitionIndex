@@ -16,7 +16,7 @@ defineProps<{ item: NavItem; active: boolean }>();
 <template>
     <Link
         :href="item.href"
-        class="ease-standard flex items-center gap-[11px] p-(--space-3) text-[14px] transition-colors duration-[var(--dur-fast)]"
+        class="ease-standard flex items-center gap-[11px] rounded-md p-(--space-3) text-[14px] transition-colors duration-[var(--dur-fast)]"
         :class="
             active
                 ? 'bg-accent font-semibold text-[var(--shell-active-ink)]'

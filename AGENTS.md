@@ -8,9 +8,14 @@
 > UI, and treat it as authoritative where it conflicts with existing code. Existing components
 > that predate it are legacy, not precedent: do not copy their patterns forward.
 >
-> **Do not** reintroduce, extend, or pattern-match against the old system: the CarTrak name, the
-> red accent, rounded corners, pill shapes, soft drop shadows, white floating cards, or filled
-> icons. Encountering them in the codebase means that file has not been migrated yet.
+> **Do not** reintroduce, extend, or pattern-match against the old CarTrak system: the CarTrak
+> name, the red accent, or filled icons.
+>
+> **2026-10 softening.** The blueprint geometry has been softened: the `+` corner marks are
+> retired, and cards, controls and chips now use a radius scale and one soft elevation. Type is
+> Inter, the primary button is near-black, and icon tiles may take one of the four tile hues.
+> Pill tabs and pill badges are allowed. The doc's §2–§4 describe the current rules; where an
+> older comment in the code cites the square, mark-framed geometry, the doc wins.
 >
 > **Do** take every color, font, space and radius from the CSS variables in `styles.css`
 > (`var(--color-*)`, `var(--font-*)`, `var(--space-*)`). Never hard-code a hex, a font name, or a

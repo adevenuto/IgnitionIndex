@@ -76,7 +76,7 @@ const specs = computed(() =>
                     </div>
 
                     <span
-                        class="flex size-12 shrink-0 items-center justify-center overflow-hidden border border-(--color-divider) bg-(--color-surface) text-(--color-neutral-700)"
+                        class="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-(--tile-slate-bg) text-(--tile-slate-ink)"
                         :style="
                             vehicle.photo_color
                                 ? { backgroundColor: vehicle.photo_color }

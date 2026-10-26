@@ -316,12 +316,14 @@ function cardState(gauge: Gauge): string {
         </div>
 
         <BlueprintFrame v-if="rest.length" class="gap-0 p-0">
-            <div class="grid gap-px bg-(--color-divider) sm:grid-cols-2">
+            <div
+                class="grid gap-px overflow-hidden rounded-[inherit] bg-(--hairline-soft) sm:grid-cols-2"
+            >
                 <div
                     v-for="gauge in rest"
                     :key="gauge.id"
                     :data-gauge-id="gauge.id"
-                    class="ease-standard hover:bg-accent-100 relative flex items-center gap-3 border border-transparent bg-(--color-neutral-100) px-[18px] py-3.5 text-left transition-colors duration-[var(--dur-fast)] focus-within:border-(--color-accent)"
+                    class="ease-standard hover:bg-accent-100 relative flex items-center gap-3 border border-transparent bg-(--surface-card) px-[18px] py-3.5 text-left transition-colors duration-[var(--dur-fast)] focus-within:border-(--color-accent)"
                     :class="cardState(gauge)"
                 >
                     <GaugeDragHandle
@@ -389,7 +391,7 @@ function cardState(gauge: Gauge): string {
                 <!-- Squares off an odd count so the last row stays ruled. -->
                 <div
                     v-if="needsFiller"
-                    class="bg-(--color-neutral-100)"
+                    class="bg-(--surface-card)"
                     aria-hidden="true"
                 />
             </div>

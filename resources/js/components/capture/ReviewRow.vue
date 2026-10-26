@@ -26,7 +26,7 @@ const emit = defineEmits<{ edit: [] }>();
 <template>
     <button
         type="button"
-        class="focus-visible:outline-accent grid w-full cursor-pointer gap-1 px-(--space-6) py-(--space-4) text-left transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_srgb,var(--color-neutral-100)_93%,var(--color-text))] focus-visible:outline-2 focus-visible:outline-offset-2"
+        class="focus-visible:outline-accent grid w-full cursor-pointer gap-1 px-(--space-6) py-(--space-4) text-left transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_srgb,var(--surface-card)_94%,var(--color-text))] focus-visible:outline-2 focus-visible:outline-offset-2"
         @click="emit('edit')"
     >
         <span class="flex items-baseline justify-between gap-3">
