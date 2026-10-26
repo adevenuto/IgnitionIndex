@@ -35,15 +35,14 @@
 @theme inline {
     /* ── Families. Each face's variable (--font-inter, --font-manrope, ...) is
          emitted into <head> by laravel-vite-plugin's font handling; see
-         vite.config.ts. --font-ui, in product.css, picks one of them, which is
-         how the type-face picker swaps the whole app. Since the 2026-10
-         softening both roles share it: headings are told apart by weight and
-         size, not by a condensed face. `font-display` is kept as the heading hook so call
+         vite.config.ts. --font-ui-display and --font-ui, in product.css, pick a
+         heading face and a body face from them, which is how the type picker
+         swaps the whole app. `font-display` is kept as the heading hook so call
          sites keep saying what they are, and it adds tighter tracking.
          Deliberately NOT named --font-heading: layer 1 carries a token of that
          name holding a literal stack, and one name with two values is a trap. ── */
     --font-sans: var(--font-ui);
-    --font-display: var(--font-ui);
+    --font-display: var(--font-ui-display);
     --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 
     /* ── Type scale (design doc §3).

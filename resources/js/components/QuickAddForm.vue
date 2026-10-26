@@ -5,6 +5,7 @@ import type { AcceptableValue } from 'reka-ui';
 import { computed, ref } from 'vue';
 import FuelFlow from '@/components/capture/FuelFlow.vue';
 import InputError from '@/components/InputError.vue';
+import { provideSheetFooter } from '@/composables/useSheetFooter';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -255,6 +256,9 @@ function deleteEntry(): void {
         },
     });
 }
+
+/** The sheet's pinned footer: Save, plus whatever a stepped flow adds to it. */
+const footer = provideSheetFooter();
 </script>
 
 <template>
@@ -263,7 +267,7 @@ function deleteEntry(): void {
         v-bind="form"
         :options="{ preserveScroll: true }"
         :reset-on-success="!editing"
-        class="flex flex-col gap-5 px-4 pb-6"
+        class="flex flex-col gap-5 px-4"
         v-slot="{ errors, processing }"
         @success="emit('saved')"
     >
@@ -590,21 +594,6 @@ function deleteEntry(): void {
         <InputError :message="errors.type" />
 
         <template v-if="!confirmingDelete">
-            <Button
-                v-if="!assisted || atReview"
-                type="submit"
-                size="lg"
-                :disabled="processing"
-            >
-                {{
-                    errors.odometer
-                        ? 'Save anyway'
-                        : editing
-                          ? 'Save changes'
-                          : 'Save'
-                }}
-            </Button>
-
             <div v-if="editing" class="grid gap-1 self-start">
                 <Button
                     type="button"
@@ -662,6 +651,35 @@ function deleteEntry(): void {
                     Delete
                 </Button>
             </div>
+        </div>
+
+        <!--
+          The sheet's one footer, pinned to the bottom of its scroll so the way
+          on is always in reach. A stepped flow teleports Back and Next into the
+          mount point; Save joins them on review, or stands alone on a plain
+          lane. While a delete is being confirmed, that card's own buttons are
+          the only actions, so the footer steps aside.
+        -->
+        <div
+            v-show="!confirmingDelete"
+            class="bg-background sticky bottom-0 z-10 -mx-4 mt-auto flex items-center gap-3 border-t border-(--color-divider) px-4 pt-(--space-4) pb-[max(var(--space-6),env(safe-area-inset-bottom))]"
+        >
+            <div ref="footer" class="contents" />
+            <Button
+                v-if="!assisted || atReview"
+                type="submit"
+                size="lg"
+                class="flex-1 text-[14px]"
+                :disabled="processing"
+            >
+                {{
+                    errors.odometer
+                        ? 'Save anyway'
+                        : editing
+                          ? 'Save changes'
+                          : 'Save'
+                }}
+            </Button>
         </div>
     </Form>
 </template>

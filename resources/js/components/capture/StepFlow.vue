@@ -2,6 +2,7 @@
 import { ArrowLeft, ArrowRight } from '@lucide/vue';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
+import { injectSheetFooter } from '@/composables/useSheetFooter';
 
 /*
  * A stepper and nothing else: where you are, how far there is to go, and the
@@ -15,9 +16,9 @@ import { Button } from '@/components/ui/button';
  * past any step a capture has already filled.
  *
  * The bar has one segment per step, matching "Step 1 of 2"; review fills them
- * all. The way back and forward sticks to the bottom of the sheet, so it stays
- * in reach however tall the step grows — except at review, where Save is the
- * way forward and a lone Back pinned over it would only cover the card.
+ * all. The way back and forward goes into the sheet's pinned footer
+ * (useSheetFooter), beside Save on review, so the whole sheet has one bar at
+ * the bottom. Outside such a sheet it pins itself instead.
  */
 const props = defineProps<{
     titles: string[];
@@ -29,6 +30,11 @@ const emit = defineEmits<{
     back: [];
     next: [];
 }>();
+
+const footer = injectSheetFooter();
+const inSheet = footer !== null;
+/** The footer's mount point, once the sheet has rendered it. */
+const footerEl = computed(() => footer?.value ?? null);
 
 const atReview = computed(() => props.index >= props.titles.length);
 const label = computed(() =>
@@ -64,13 +70,36 @@ const nextLabel = computed(() => {
 
         <slot />
 
+        <!-- Into the sheet's footer once it exists; pinned here without one. -->
+        <Teleport v-if="footerEl" :to="footerEl">
+            <template v-if="index > 0 || !atReview">
+                <Button
+                    v-if="index > 0"
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    class="text-[14px]"
+                    @click="emit('back')"
+                >
+                    <ArrowLeft :stroke-width="1.5" />
+                    Back
+                </Button>
+                <Button
+                    v-if="!atReview"
+                    type="button"
+                    size="lg"
+                    class="group flex-1 text-[14px]"
+                    @click="emit('next')"
+                >
+                    {{ nextLabel }}
+                    <ArrowRight class="ii-arrow-nudge" :stroke-width="1.5" />
+                </Button>
+            </template>
+        </Teleport>
+
         <div
-            v-if="index > 0 || !atReview"
-            class="flex items-center gap-3"
-            :class="
-                !atReview &&
-                'bg-background sticky bottom-0 z-10 -mx-4 border-t border-(--color-divider) px-4 py-(--space-4)'
-            "
+            v-if="!inSheet && (index > 0 || !atReview)"
+            class="bg-background sticky bottom-0 z-10 -mx-4 flex items-center gap-3 border-t border-(--color-divider) px-4 py-(--space-4)"
         >
             <Button
                 v-if="index > 0"
