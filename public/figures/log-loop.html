@@ -1,0 +1,1564 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Ignition Index — logging an entry</title>
+        <style>
+            /* ═══════════════════════════════════════════════════════════════════════
+   PALETTE — one place for every colour the figure uses.
+   ═══════════════════════════════════════════════════════════════════════ */
+            :root {
+                --ink: #1d1f20;
+                --ink-soft: #5d5d60;
+                --brand: #5980a6;
+                --brand-deep: #416180;
+                --amber: #c08a2e;
+                --red: #b4442f;
+                --green: #3f8a5f;
+                --ring: rgba(29, 31, 32, 0.26);
+                --tick: rgba(29, 31, 32, 0.3);
+                --tick-major: rgba(29, 31, 32, 0.55);
+                --track: rgba(29, 31, 32, 0.1);
+                --card: #fdfdfe;
+                --hairline: rgba(29, 31, 32, 0.09);
+                --font:
+                    Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+                    sans-serif;
+            }
+
+            html,
+            body {
+                margin: 0;
+                height: 100%;
+                background: transparent;
+                overflow: hidden;
+            }
+
+            svg.hero {
+                display: block;
+                width: 100%;
+                height: 100%;
+                font-family: var(--font);
+                font-variant-numeric: tabular-nums;
+                color: var(--ink);
+                user-select: none;
+            }
+
+            /* Anything moved by transform pivots on its own box unless told otherwise. */
+            svg.hero .t {
+                transform-box: fill-box;
+                transform-origin: center;
+            }
+
+            .eyebrow {
+                font-size: 10.5px;
+                font-weight: 700;
+                letter-spacing: 0.14em;
+                fill: var(--ink-soft);
+            }
+
+            .value {
+                font-size: 21px;
+                font-weight: 700;
+                fill: var(--ink);
+            }
+
+            .ring-label {
+                font-size: 10.5px;
+                font-weight: 700;
+                letter-spacing: 0.32em;
+                fill: var(--ink-soft);
+            }
+        </style>
+    </head>
+    <body>
+        <svg
+            class="hero"
+            id="hero"
+            viewBox="0 0 800 560"
+            role="img"
+            aria-label="Logging an odometer reading in Ignition Index: the reading rolls from 14,850 to 15,100 miles, flows into the index, and the oil-change gauge rises past its interval to overdue; logging the service brings it back to on track."
+        >
+            <defs>
+                <!-- Layered soft shadow for cards: a tight contact shadow and a wide ambient one. -->
+                <filter
+                    id="card-shadow"
+                    x="-20%"
+                    y="-20%"
+                    width="140%"
+                    height="160%"
+                >
+                    <feDropShadow
+                        dx="0"
+                        dy="1"
+                        stdDeviation="1"
+                        flood-color="#0f172a"
+                        flood-opacity="0.06"
+                    />
+                    <feDropShadow
+                        dx="0"
+                        dy="8"
+                        stdDeviation="10"
+                        flood-color="#0f172a"
+                        flood-opacity="0.09"
+                    />
+                </filter>
+
+                <radialGradient id="hub-top" cx="42%" cy="35%" r="70%">
+                    <stop offset="0%" stop-color="#9db8d3" />
+                    <stop offset="55%" stop-color="#6b90b5" />
+                    <stop offset="100%" stop-color="#4c7096" />
+                </radialGradient>
+                <linearGradient id="hub-side" x1="0" x2="1">
+                    <stop offset="0%" stop-color="#36536f" />
+                    <stop offset="50%" stop-color="#4a6d91" />
+                    <stop offset="100%" stop-color="#2f4963" />
+                </linearGradient>
+                <radialGradient id="hub-shadow">
+                    <stop
+                        offset="0%"
+                        stop-color="#0f172a"
+                        stop-opacity="0.22"
+                    />
+                    <stop offset="100%" stop-color="#0f172a" stop-opacity="0" />
+                </radialGradient>
+                <radialGradient id="hub-glow">
+                    <stop
+                        offset="0%"
+                        stop-color="#5980a6"
+                        stop-opacity="0.28"
+                    />
+                    <stop offset="100%" stop-color="#5980a6" stop-opacity="0" />
+                </radialGradient>
+                <radialGradient id="pulse-glow">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+                    <stop
+                        offset="35%"
+                        stop-color="#8fb0d0"
+                        stop-opacity="0.9"
+                    />
+                    <stop offset="100%" stop-color="#5980a6" stop-opacity="0" />
+                </radialGradient>
+                <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="#5980a6" stop-opacity="0.9" />
+                    <stop
+                        offset="100%"
+                        stop-color="#5980a6"
+                        stop-opacity="0.25"
+                    />
+                </linearGradient>
+
+                <clipPath id="odo-window">
+                    <rect
+                        id="odo-window-rect"
+                        x="0"
+                        y="0"
+                        width="0"
+                        height="0"
+                    />
+                </clipPath>
+            </defs>
+
+            <!-- ── The disc: ticks, rings, labels, hub ────────────────────────── -->
+            <g class="disc">
+                <g id="ticks"></g>
+                <g id="rings"></g>
+
+                <!-- ── The hub ────────────────────────────────────────────────────── -->
+                <g id="hub">
+                    <ellipse
+                        class="t"
+                        id="hub-glow-el"
+                        cx="400"
+                        cy="380"
+                        rx="96"
+                        ry="38"
+                        fill="url(#hub-glow)"
+                    />
+                    <ellipse
+                        id="hub-shadow-el"
+                        cx="400"
+                        cy="398"
+                        rx="58"
+                        ry="17"
+                        fill="url(#hub-shadow)"
+                    />
+                    <ellipse
+                        class="t"
+                        id="hub-ripple"
+                        cx="400"
+                        cy="378"
+                        rx="42"
+                        ry="16"
+                        fill="none"
+                        stroke="#5980a6"
+                        stroke-width="1.5"
+                        opacity="0"
+                    />
+                    <path
+                        d="M358 378 v12 a42 15 0 0 0 84 0 v-12 z"
+                        fill="url(#hub-side)"
+                    />
+                    <ellipse
+                        cx="400"
+                        cy="378"
+                        rx="42"
+                        ry="15"
+                        fill="url(#hub-top)"
+                    />
+                    <ellipse
+                        cx="400"
+                        cy="376"
+                        rx="26"
+                        ry="8"
+                        fill="#ffffff"
+                        opacity="0.18"
+                    />
+                </g>
+            </g>
+
+            <!-- ── Connector: hub up to the gauge card ────────────────────────── -->
+            <g id="connector">
+                <line
+                    id="connector-line"
+                    x1="400"
+                    y1="364"
+                    x2="400"
+                    y2="240"
+                    stroke="var(--ring)"
+                    stroke-width="1.5"
+                />
+                <line
+                    id="beam-el"
+                    x1="400"
+                    y1="364"
+                    x2="400"
+                    y2="240"
+                    stroke="url(#beam)"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    opacity="0"
+                />
+                <circle
+                    class="t"
+                    id="beam-dot"
+                    cx="400"
+                    cy="364"
+                    r="4"
+                    fill="#ffffff"
+                    stroke="#5980a6"
+                    stroke-width="2"
+                    opacity="0"
+                />
+            </g>
+
+            <!-- ── Markers and the pulse ride the disc, above the connector ───── -->
+            <g class="disc">
+                <g id="markers"></g>
+
+                <!-- ── The data pulse ─────────────────────────────────────────────── -->
+                <g id="pulse" opacity="0">
+                    <circle r="12" fill="url(#pulse-glow)" />
+                    <circle r="3.5" fill="#ffffff" />
+                </g>
+            </g>
+
+            <!-- ── Interval card (left) ───────────────────────────────────────── -->
+            <g id="card-interval">
+                <rect
+                    x="40"
+                    y="64"
+                    width="200"
+                    height="92"
+                    rx="14"
+                    fill="var(--card)"
+                    stroke="var(--hairline)"
+                    filter="url(#card-shadow)"
+                />
+                <text class="eyebrow" x="60" y="92">INTERVAL</text>
+                <text class="value" id="interval-value" x="60" y="132"></text>
+            </g>
+
+            <!-- ── Gauge card (centre) ────────────────────────────────────────── -->
+            <g id="card-gauge">
+                <rect
+                    x="290"
+                    y="28"
+                    width="220"
+                    height="208"
+                    rx="16"
+                    fill="var(--card)"
+                    stroke="var(--hairline)"
+                    filter="url(#card-shadow)"
+                />
+                <text
+                    class="eyebrow"
+                    id="service-name"
+                    x="400"
+                    y="54"
+                    text-anchor="middle"
+                ></text>
+                <g id="gauge-ticks"></g>
+                <path
+                    id="gauge-track"
+                    fill="none"
+                    stroke="var(--track)"
+                    stroke-width="9"
+                    stroke-linecap="round"
+                />
+                <path
+                    class="gauge-arc"
+                    id="arc-green"
+                    fill="none"
+                    stroke="var(--green)"
+                    stroke-width="9"
+                    stroke-linecap="round"
+                />
+                <path
+                    class="gauge-arc"
+                    id="arc-amber"
+                    fill="none"
+                    stroke="var(--amber)"
+                    stroke-width="9"
+                    stroke-linecap="round"
+                />
+                <path
+                    class="gauge-arc"
+                    id="arc-red"
+                    fill="none"
+                    stroke="var(--red)"
+                    stroke-width="9"
+                    stroke-linecap="round"
+                />
+                <g id="needle">
+                    <line
+                        x1="400"
+                        y1="156"
+                        x2="356"
+                        y2="156"
+                        stroke="var(--ink)"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                    />
+                </g>
+                <circle
+                    cx="400"
+                    cy="156"
+                    r="6.5"
+                    fill="var(--card)"
+                    stroke="var(--ink)"
+                    stroke-width="2"
+                />
+                <text
+                    id="gauge-percent"
+                    x="400"
+                    y="198"
+                    text-anchor="middle"
+                    font-size="28"
+                    font-weight="800"
+                    fill="var(--ink)"
+                ></text>
+                <text
+                    class="status"
+                    id="status-ok"
+                    x="400"
+                    y="222"
+                    text-anchor="middle"
+                    font-size="12"
+                    font-weight="700"
+                    fill="var(--green)"
+                ></text>
+                <text
+                    class="status"
+                    id="status-due"
+                    x="400"
+                    y="222"
+                    text-anchor="middle"
+                    font-size="12"
+                    font-weight="700"
+                    fill="var(--amber)"
+                ></text>
+                <text
+                    class="status"
+                    id="status-overdue"
+                    x="400"
+                    y="222"
+                    text-anchor="middle"
+                    font-size="12"
+                    font-weight="700"
+                    fill="var(--red)"
+                ></text>
+            </g>
+
+            <!-- ── Odometer card (right) ──────────────────────────────────────── -->
+            <g id="card-odometer">
+                <rect
+                    x="560"
+                    y="64"
+                    width="200"
+                    height="92"
+                    rx="14"
+                    fill="var(--card)"
+                    stroke="var(--hairline)"
+                    filter="url(#card-shadow)"
+                />
+                <text class="eyebrow" x="580" y="92">ODOMETER</text>
+                <g id="date-chip">
+                    <rect
+                        x="684"
+                        y="77"
+                        width="58"
+                        height="22"
+                        rx="11"
+                        fill="rgba(89,128,166,0.12)"
+                    />
+                    <text
+                        id="date-from"
+                        x="713"
+                        y="92"
+                        text-anchor="middle"
+                        font-size="11"
+                        font-weight="700"
+                        fill="var(--brand-deep)"
+                    ></text>
+                    <text
+                        id="date-to"
+                        x="713"
+                        y="92"
+                        text-anchor="middle"
+                        font-size="11"
+                        font-weight="700"
+                        fill="var(--brand-deep)"
+                        opacity="0"
+                    ></text>
+                </g>
+                <g id="odo-digits" clip-path="url(#odo-window)"></g>
+                <text
+                    id="odo-unit"
+                    class="value"
+                    y="132"
+                    font-size="15"
+                    font-weight="600"
+                    fill="var(--ink-soft)"
+                >
+                    mi
+                </text>
+            </g>
+
+            <!-- ── "Log reading" pill under the odometer card ─────────────────── -->
+            <g id="pill-log" opacity="0">
+                <g class="t" id="pill-log-body">
+                    <rect
+                        x="560"
+                        y="170"
+                        width="200"
+                        height="38"
+                        rx="19"
+                        fill="var(--card)"
+                        stroke="var(--hairline)"
+                        filter="url(#card-shadow)"
+                    />
+                    <g id="pill-log-idle">
+                        <text
+                            x="578"
+                            y="194"
+                            font-size="12.5"
+                            font-weight="700"
+                            fill="var(--ink)"
+                        >
+                            Log reading
+                        </text>
+                        <text
+                            id="pill-log-value"
+                            x="716"
+                            y="194"
+                            text-anchor="end"
+                            font-size="12"
+                            font-weight="600"
+                            fill="var(--ink-soft)"
+                        ></text>
+                        <circle cx="739" cy="189" r="13" fill="var(--ink)" />
+                        <path
+                            d="M733 189 h11 m-4 -4 l4 4 l-4 4"
+                            fill="none"
+                            stroke="#fff"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </g>
+                    <g id="pill-log-done" opacity="0">
+                        <circle cx="584" cy="189" r="9" fill="var(--green)" />
+                        <path
+                            d="M579.5 189.2 l3 3 l6 -6"
+                            fill="none"
+                            stroke="#fff"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <text
+                            x="600"
+                            y="194"
+                            font-size="13"
+                            font-weight="600"
+                            fill="var(--ink)"
+                        >
+                            Reading logged
+                        </text>
+                    </g>
+                </g>
+            </g>
+
+            <!-- ── "Service logged" pill under the interval card ──────────────── -->
+            <g id="pill-service" opacity="0">
+                <rect
+                    x="40"
+                    y="170"
+                    width="200"
+                    height="38"
+                    rx="19"
+                    fill="var(--card)"
+                    stroke="var(--hairline)"
+                    filter="url(#card-shadow)"
+                />
+                <circle cx="64" cy="189" r="9" fill="var(--green)" />
+                <path
+                    d="M59.5 189.2 l3 3 l6 -6"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+                <text
+                    x="80"
+                    y="194"
+                    font-size="13"
+                    font-weight="600"
+                    fill="var(--ink)"
+                >
+                    Service logged
+                </text>
+            </g>
+        </svg>
+
+        <script>
+            (function () {
+                'use strict';
+
+                /* ═══════════════════════════════════════════════════════════════════
+       CONFIG — every value, label, threshold and timing the figure uses.
+       Override any of it by defining window.HERO_LOOP_CONFIG before this
+       script runs (see the note at the end of the file).
+       ═══════════════════════════════════════════════════════════════════ */
+                const DEFAULTS = {
+                    locale: 'en-US',
+                    intervalMiles: 5000,
+                    odometer: { from: 14850, to: 15100, unit: 'mi' },
+                    date: { from: 'Aug 21', to: 'Sep 8' },
+                    service: 'OIL & FILTER',
+                    gauge: {
+                        max: 125, // the dial's end stop, in percent
+                        idle: 95, // where the loop starts and ends
+                        peak: 112, // after the reading is logged
+                        reset: 0, // after the service is logged
+                        due: 75, // amber from here
+                        overdue: 100, // red from here
+                    },
+                    labels: {
+                        ok: 'On track',
+                        due: 'Due soon',
+                        overdue: 'Overdue',
+                    },
+                    rings: [
+                        {
+                            key: 'vehicles',
+                            label: 'VEHICLES',
+                            r: 300,
+                            dashed: false,
+                            speed: 9,
+                        },
+                        {
+                            key: 'readings',
+                            label: 'READINGS',
+                            r: 215,
+                            dashed: false,
+                            speed: 14,
+                        },
+                        {
+                            key: 'intervals',
+                            label: 'INTERVALS',
+                            r: 130,
+                            dashed: true,
+                            speed: 20,
+                        },
+                    ],
+                    // Seconds. intro plays once; the story loops after it.
+                    timing: {
+                        intro: 1.6,
+                        loop: 13,
+                        logPillIn: 1.2,
+                        odometerRoll: 1.9,
+                        datesSwap: 3.3,
+                        press: 3.75,
+                        confirm: 3.95,
+                        pulse: 4.5, // leaves the reading marker
+                        pulseHub: 5.5, // arrives at the hub
+                        beam: 5.55,
+                        needleUp: 6.0,
+                        logPillOut: 7.6,
+                        servicePillIn: 8.1,
+                        needleDown: 8.7,
+                        servicePillOut: 10.6,
+                        resetValues: 10.9,
+                        needleIdle: 11.2,
+                    },
+                };
+
+                const CONFIG = deepMerge(
+                    DEFAULTS,
+                    window.HERO_LOOP_CONFIG || {},
+                );
+
+                /* ═══════════════════════════════════════════════════════════════════
+       GEOMETRY
+       ═══════════════════════════════════════════════════════════════════ */
+                const SVGNS = 'http://www.w3.org/2000/svg';
+                const CX = 400;
+                const CY = 380;
+                const TILT = 0.4; // vertical squash of the disc: the "seen at an angle" part
+                const GAUGE = { cx: 400, cy: 156, r: 56 };
+
+                /** A point on a ring of radius r at angle θ (degrees, 0 = right, 90 = front). */
+                function onDisc(r, deg) {
+                    const a = (deg * Math.PI) / 180;
+                    return [CX + r * Math.cos(a), CY + r * Math.sin(a) * TILT];
+                }
+
+                /** A full ellipse as a path, starting at the back so the reveal draws round from there. */
+                function ringPath(r) {
+                    const ry = r * TILT;
+                    return `M ${CX} ${CY - ry} A ${r} ${ry} 0 1 1 ${CX} ${CY + ry} A ${r} ${ry} 0 1 1 ${CX} ${CY - ry}`;
+                }
+
+                /** The front half of an ellipse, left to right, for a label to sit on upright. */
+                function frontArc(r) {
+                    const ry = r * TILT;
+                    return `M ${CX - r} ${CY} A ${r} ${ry} 0 0 0 ${CX + r} ${CY}`;
+                }
+
+                function gaugePoint(pct, r) {
+                    const a = Math.PI + (pct / CONFIG.gauge.max) * Math.PI;
+                    return [
+                        GAUGE.cx + r * Math.cos(a),
+                        GAUGE.cy + r * Math.sin(a),
+                    ];
+                }
+
+                function gaugeArcPath() {
+                    const [x0, y0] = gaugePoint(0, GAUGE.r);
+                    const [x1, y1] = gaugePoint(CONFIG.gauge.max, GAUGE.r);
+                    return `M ${x0} ${y0} A ${GAUGE.r} ${GAUGE.r} 0 0 1 ${x1} ${y1}`;
+                }
+
+                /* ═══════════════════════════════════════════════════════════════════
+       LAYOUTS — wide for desktop, compact (stacked) for a phone. The figure
+       picks one from its own proportions, so its frame decides.
+       ═══════════════════════════════════════════════════════════════════ */
+                const LAYOUTS = {
+                    wide: {
+                        viewBox: '0 0 800 560',
+                        disc: '',
+                        offset: {},
+                        connector: { x: 400, top: 240, bottom: 364 },
+                    },
+                    compact: {
+                        // Gauge on top, the two cards side by side, the disc beneath,
+                        // and the connector running up between the cards.
+                        viewBox: '0 0 460 640',
+                        disc: 'translate(230 548) scale(0.62) translate(-400 -380)',
+                        offset: {
+                            'card-gauge': 'translate(-170px, 0px)',
+                            'card-interval': 'translate(-24px, 188px)',
+                            'pill-service': 'translate(-24px, 188px)',
+                            'card-odometer': 'translate(-316px, 188px)',
+                            'pill-log': 'translate(-316px, 188px)',
+                        },
+                        connector: { x: 230, top: 240, bottom: 538 },
+                    },
+                };
+                let LAYOUT = LAYOUTS.wide;
+
+                function applyLayout() {
+                    const next =
+                        window.innerWidth / Math.max(1, window.innerHeight) <
+                        1.1
+                            ? LAYOUTS.compact
+                            : LAYOUTS.wide;
+                    if (
+                        next === LAYOUT &&
+                        svg.getAttribute('viewBox') === next.viewBox
+                    )
+                        return;
+                    LAYOUT = next;
+                    svg.setAttribute('viewBox', LAYOUT.viewBox);
+                    svg.querySelectorAll('.disc').forEach((g) =>
+                        g.setAttribute('transform', LAYOUT.disc),
+                    );
+                    const c = LAYOUT.connector;
+                    ['connector-line', 'beam-el'].forEach((id) => {
+                        const line = $(id);
+                        line.setAttribute('x1', c.x);
+                        line.setAttribute('x2', c.x);
+                        line.setAttribute('y1', c.bottom);
+                        line.setAttribute('y2', c.top);
+                    });
+                    $('beam-dot').setAttribute('cx', c.x);
+                    $('beam-dot').setAttribute('cy', c.bottom);
+                }
+
+                /** A card's place in the current layout, ahead of any motion. */
+                const placed = (id) => LAYOUT.offset[id] || '';
+
+                /* ═══════════════════════════════════════════════════════════════════
+       EASING
+       ═══════════════════════════════════════════════════════════════════ */
+                function cubicBezier(x1, y1, x2, y2) {
+                    const cx = 3 * x1,
+                        bx = 3 * (x2 - x1) - cx,
+                        ax = 1 - cx - bx;
+                    const cy = 3 * y1,
+                        by = 3 * (y2 - y1) - cy,
+                        ay = 1 - cy - by;
+                    const sx = (t) => ((ax * t + bx) * t + cx) * t;
+                    const sy = (t) => ((ay * t + by) * t + cy) * t;
+                    const dx = (t) => (3 * ax * t + 2 * bx) * t + cx;
+                    return (x) => {
+                        if (x <= 0) return 0;
+                        if (x >= 1) return 1;
+                        let t = x;
+                        for (let i = 0; i < 6; i++) {
+                            const d = dx(t);
+                            if (Math.abs(d) < 1e-6) break;
+                            t -= (sx(t) - x) / d;
+                        }
+                        return sy(Math.min(1, Math.max(0, t)));
+                    };
+                }
+
+                const easeOut = cubicBezier(0.22, 1, 0.36, 1); // entering
+                const easeInOut = cubicBezier(0.65, 0, 0.35, 1); // moving through
+
+                /** A gentle spring, settled by t = 1 (no residual wobble at the seam). */
+                function spring(t) {
+                    if (t <= 0) return 0;
+                    if (t >= 1) return 1;
+                    const w = 11,
+                        z = 0.62,
+                        wd = w * Math.sqrt(1 - z * z);
+                    const s = t * 1.25;
+                    const v =
+                        1 -
+                        Math.exp(-z * w * s) *
+                            (Math.cos(wd * s) +
+                                ((z * w) / wd) * Math.sin(wd * s));
+                    // Blend into exactly 1 over the last tenth so the end is exact.
+                    const tail = Math.max(0, (t - 0.9) / 0.1);
+                    return v + (1 - v) * tail * tail;
+                }
+
+                const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+                const lerp = (a, b, t) => a + (b - a) * t;
+                /** 0→1 progress of t through [start, start + dur]. */
+                const span = (t, start, dur) => clamp((t - start) / dur);
+                /** Opacity that rises over [inAt, inAt+fade] and falls over [outAt, outAt+fade]. */
+                function window01(t, inAt, outAt, fade = 0.35) {
+                    return (
+                        easeOut(span(t, inAt, fade)) *
+                        (1 - easeInOut(span(t, outAt, fade)))
+                    );
+                }
+
+                /* ═══════════════════════════════════════════════════════════════════
+       BUILD THE STATIC PARTS
+       ═══════════════════════════════════════════════════════════════════ */
+                const $ = (id) => document.getElementById(id);
+                const svg = $('hero');
+                const nf = new Intl.NumberFormat(CONFIG.locale);
+
+                function el(name, attrs, parent) {
+                    const node = document.createElementNS(SVGNS, name);
+                    for (const key in attrs) node.setAttribute(key, attrs[key]);
+                    if (parent) parent.appendChild(node);
+                    return node;
+                }
+
+                // Instrument ticks round the outer ring: every 6°, a major every 30°.
+                const OUTER = CONFIG.rings[0].r;
+                const ticks = [];
+                for (let i = 0; i < 60; i++) {
+                    const deg = i * 6;
+                    const major = i % 5 === 0;
+                    const [x1, y1] = onDisc(OUTER + 12, deg);
+                    const [x2, y2] = onDisc(OUTER + (major ? 26 : 19), deg);
+                    ticks.push(
+                        el(
+                            'line',
+                            {
+                                x1,
+                                y1,
+                                x2,
+                                y2,
+                                stroke: major
+                                    ? 'var(--tick-major)'
+                                    : 'var(--tick)',
+                                'stroke-width': major ? 1.6 : 1,
+                                'stroke-linecap': 'round',
+                                opacity: 0,
+                            },
+                            $('ticks'),
+                        ),
+                    );
+                }
+
+                // Rings, innermost first so the reveal staggers outward.
+                const ringEls = [];
+                const labelEls = [];
+                const defs = svg.querySelector('defs');
+                [...CONFIG.rings].reverse().forEach((ring) => {
+                    const path = el(
+                        'path',
+                        {
+                            d: ringPath(ring.r),
+                            fill: 'none',
+                            stroke: 'var(--ring)',
+                            'stroke-width': ring.dashed ? 1.3 : 1.5,
+                        },
+                        $('rings'),
+                    );
+                    let reveal = path;
+                    if (ring.dashed) {
+                        // A dashed ring keeps its own dashes; the draw-on runs on a mask
+                        // over it, so it never snaps from solid to dashed.
+                        path.setAttribute('stroke-dasharray', '6 7');
+                        const mask = el(
+                            'mask',
+                            {
+                                id: `reveal-${ring.key}`,
+                                maskUnits: 'userSpaceOnUse',
+                                x: 0,
+                                y: 0,
+                                width: 800,
+                                height: 560,
+                            },
+                            defs,
+                        );
+                        reveal = el(
+                            'path',
+                            {
+                                d: ringPath(ring.r),
+                                fill: 'none',
+                                stroke: '#fff',
+                                'stroke-width': 6,
+                            },
+                            mask,
+                        );
+                        path.setAttribute('mask', `url(#reveal-${ring.key})`);
+                    }
+                    const length = reveal.getTotalLength();
+                    reveal.style.strokeDasharray = `${length}`;
+                    reveal.style.strokeDashoffset = `${length}`;
+                    ringEls.push({ path: reveal, length });
+
+                    const arcId = `label-arc-${ring.key}`;
+                    el(
+                        'path',
+                        { id: arcId, d: frontArc(ring.r - 20), fill: 'none' },
+                        $('rings'),
+                    );
+                    const text = el(
+                        'text',
+                        { class: 'ring-label', opacity: 0 },
+                        $('rings'),
+                    );
+                    const tp = el(
+                        'textPath',
+                        {
+                            href: `#${arcId}`,
+                            startOffset: '50%',
+                            'text-anchor': 'middle',
+                        },
+                        text,
+                    );
+                    tp.textContent = ring.label;
+                    labelEls.push(text);
+                });
+
+                // Markers: one per ring, each a different shape for what it stands for.
+                const markerEls = CONFIG.rings.map((ring) => {
+                    const g = el('g', { opacity: 0 }, $('markers'));
+                    const inner = el('g', { class: 't' }, g);
+                    el(
+                        'circle',
+                        { r: 11, fill: 'rgba(89,128,166,0.16)' },
+                        inner,
+                    );
+                    if (ring.key === 'vehicles') {
+                        el(
+                            'rect',
+                            {
+                                x: -5.5,
+                                y: -5.5,
+                                width: 11,
+                                height: 11,
+                                rx: 3,
+                                fill: 'var(--brand)',
+                                stroke: '#fff',
+                                'stroke-width': 1.6,
+                            },
+                            inner,
+                        );
+                    } else if (ring.key === 'readings') {
+                        el(
+                            'circle',
+                            {
+                                r: 5.5,
+                                fill: 'var(--brand)',
+                                stroke: '#fff',
+                                'stroke-width': 1.6,
+                            },
+                            inner,
+                        );
+                    } else {
+                        el(
+                            'rect',
+                            {
+                                x: -4.5,
+                                y: -4.5,
+                                width: 9,
+                                height: 9,
+                                rx: 1.5,
+                                fill: 'var(--brand)',
+                                stroke: '#fff',
+                                'stroke-width': 1.6,
+                                transform: 'rotate(45)',
+                            },
+                            inner,
+                        );
+                    }
+                    return { ring, g, inner };
+                });
+
+                // Gauge face: ticks every 5%, majors every 25%, and the 100% threshold called out.
+                for (let p = 0; p <= CONFIG.gauge.max; p += 5) {
+                    const major = p % 25 === 0;
+                    const threshold = p === CONFIG.gauge.overdue;
+                    const [x1, y1] = gaugePoint(p, GAUGE.r + 9);
+                    const [x2, y2] = gaugePoint(p, GAUGE.r + (major ? 17 : 13));
+                    el(
+                        'line',
+                        {
+                            x1,
+                            y1,
+                            x2,
+                            y2,
+                            stroke: threshold
+                                ? 'var(--red)'
+                                : major
+                                  ? 'var(--tick-major)'
+                                  : 'var(--tick)',
+                            'stroke-width': threshold ? 2 : major ? 1.5 : 1,
+                            'stroke-linecap': 'round',
+                        },
+                        $('gauge-ticks'),
+                    );
+                }
+                const ARC = gaugeArcPath();
+                $('gauge-track').setAttribute('d', ARC);
+                const arcs = ['arc-green', 'arc-amber', 'arc-red'].map((id) => {
+                    const node = $(id);
+                    node.setAttribute('d', ARC);
+                    const length = node.getTotalLength();
+                    node.style.strokeDasharray = `${length}`;
+                    return { node, length };
+                });
+
+                // Static text.
+                $('service-name').textContent = CONFIG.service;
+                $('interval-value').textContent =
+                    `every ${nf.format(CONFIG.intervalMiles)} ${CONFIG.odometer.unit}`;
+                $('date-from').textContent = CONFIG.date.from;
+                $('date-to').textContent = CONFIG.date.to;
+                $('status-ok').textContent = CONFIG.labels.ok;
+                $('status-due').textContent = CONFIG.labels.due;
+                $('status-overdue').textContent = CONFIG.labels.overdue;
+                $('pill-log-value').textContent =
+                    `${nf.format(CONFIG.odometer.to)} ${CONFIG.odometer.unit}`;
+
+                /* ── The odometer: a column per digit, rolled odometer-style ─────── */
+                const ODO = { x: 580, baseline: 132, size: 21 };
+                let odoColumns = [];
+
+                function buildOdometer() {
+                    const host = $('odo-digits');
+                    host.textContent = '';
+                    const fromText = nf.format(CONFIG.odometer.from);
+                    const toText = nf.format(CONFIG.odometer.to);
+                    // Measure one tabular digit and the group separator in the face actually in use.
+                    const probe = el(
+                        'text',
+                        { class: 'value', x: 0, y: -100 },
+                        svg,
+                    );
+                    probe.textContent = '0';
+                    const digitW = probe.getComputedTextLength();
+                    probe.textContent = ',';
+                    const sepW = probe.getComputedTextLength();
+                    probe.remove();
+
+                    const lineH = ODO.size * 1.25;
+                    const top = ODO.baseline - ODO.size * 0.95;
+                    let x = ODO.x;
+                    odoColumns = [];
+                    const chars = [...toText];
+                    const fromDigits = fromText
+                        .replace(/\D/g, '')
+                        .padStart(toText.replace(/\D/g, '').length, '0');
+                    let d = 0;
+
+                    chars.forEach((ch) => {
+                        if (/\d/.test(ch)) {
+                            const strip = el('g', {}, host);
+                            for (let k = 0; k <= 10; k++) {
+                                const t = el(
+                                    'text',
+                                    {
+                                        class: 'value',
+                                        x,
+                                        y: ODO.baseline + k * lineH,
+                                    },
+                                    strip,
+                                );
+                                t.textContent = String(k % 10);
+                            }
+                            const from = Number(fromDigits[d]);
+                            const to = Number(ch);
+                            odoColumns.push({
+                                strip,
+                                from,
+                                steps: (to - from + 10) % 10,
+                                lineH,
+                            });
+                            d++;
+                            x += digitW;
+                        } else {
+                            const t = el(
+                                'text',
+                                { class: 'value', x, y: ODO.baseline },
+                                host,
+                            );
+                            t.textContent = ch;
+                            x += sepW;
+                        }
+                    });
+
+                    const rect = $('odo-window-rect');
+                    rect.setAttribute('x', ODO.x - 2);
+                    rect.setAttribute('y', top);
+                    rect.setAttribute('width', x - ODO.x + 4);
+                    rect.setAttribute('height', lineH);
+                    $('odo-unit').setAttribute('x', x + 5);
+                    // Rightmost columns roll first, like a real odometer's carry.
+                    odoColumns
+                        .reverse()
+                        .forEach((col, i) => (col.delay = i * 0.07));
+                }
+
+                /* ═══════════════════════════════════════════════════════════════════
+       THE MASTER TIMELINE — every frame is a pure function of time.
+       ═══════════════════════════════════════════════════════════════════ */
+                const T = CONFIG.timing;
+                const G = CONFIG.gauge;
+
+                /** The gauge reading at loop time t. */
+                function gaugeAt(t) {
+                    if (t < T.needleUp) return G.idle;
+                    if (t < T.needleDown)
+                        return lerp(
+                            G.idle,
+                            G.peak,
+                            spring(span(t, T.needleUp, 1.3)),
+                        );
+                    if (t < T.needleIdle)
+                        return lerp(
+                            G.peak,
+                            G.reset,
+                            easeInOut(span(t, T.needleDown, 1.4)),
+                        );
+                    return lerp(
+                        G.reset,
+                        G.idle,
+                        easeInOut(span(t, T.needleIdle, 1.6)),
+                    );
+                }
+
+                /** How strongly each status colour shows at a reading — a crossfade, never a swap. */
+                function statusWeights(p) {
+                    const band = 4;
+                    const red = clamp((p - (G.overdue - band)) / (band * 2));
+                    const amberIn = clamp((p - (G.due - band)) / (band * 2));
+                    return {
+                        ok: 1 - amberIn,
+                        due: amberIn * (1 - red),
+                        overdue: red,
+                    };
+                }
+
+                function setTransform(node, value) {
+                    node.style.transform = value;
+                }
+
+                function render(time, reduced) {
+                    const intro = reduced ? 1 : clamp(time / T.intro);
+                    const t = reduced
+                        ? T.servicePillOut - 0.01
+                        : Math.max(0, time - T.intro) % T.loop;
+
+                    /* Intro: rings draw inner → outer, labels and ticks fade, cards rise. */
+                    ringEls.forEach((ring, i) => {
+                        const p = reduced
+                            ? 1
+                            : easeOut(span(time, i * 0.14, 0.9));
+                        ring.path.style.strokeDashoffset = `${ring.length * (1 - p)}`;
+                    });
+                    labelEls.forEach((label, i) =>
+                        label.setAttribute(
+                            'opacity',
+                            reduced
+                                ? 1
+                                : easeOut(span(time, 0.45 + i * 0.07, 0.6)),
+                        ),
+                    );
+                    ticks.forEach((tick, i) =>
+                        tick.setAttribute(
+                            'opacity',
+                            reduced
+                                ? 1
+                                : easeOut(span(time, 0.35 + i * 0.012, 0.4)),
+                        ),
+                    );
+
+                    [
+                        ['card-interval', 0.55],
+                        ['card-gauge', 0.62],
+                        ['card-odometer', 0.69],
+                    ].forEach(([id, at]) => {
+                        const p = reduced ? 1 : easeOut(span(time, at, 0.75));
+                        const node = $(id);
+                        node.setAttribute('opacity', p);
+                        setTransform(
+                            node,
+                            `${placed(id)} translateY(${(1 - p) * 10}px)`,
+                        );
+                    });
+                    $('hub').setAttribute(
+                        'opacity',
+                        reduced ? 1 : easeOut(span(time, 0.3, 0.8)),
+                    );
+                    $('connector').setAttribute(
+                        'opacity',
+                        reduced ? 1 : easeOut(span(time, 0.8, 0.6)),
+                    );
+
+                    /* Idle orbit: each marker on its own ring, calm and continuous. */
+                    const orbitTime = reduced ? 0 : time;
+                    markerEls.forEach((m, i) => {
+                        const deg =
+                            (i * 117 + 200 + orbitTime * m.ring.speed) % 360;
+                        m.deg = deg;
+                        const [x, y] = onDisc(m.ring.r, deg);
+                        // Nearer the front, slightly larger and fuller: depth without 3D.
+                        const front = (Math.sin((deg * Math.PI) / 180) + 1) / 2;
+                        m.g.setAttribute('transform', `translate(${x} ${y})`);
+                        m.g.setAttribute(
+                            'opacity',
+                            (reduced
+                                ? 1
+                                : easeOut(span(time, 1.0 + i * 0.07, 0.5))) *
+                                (0.65 + 0.35 * front),
+                        );
+                        setTransform(m.inner, `scale(${0.82 + 0.18 * front})`);
+                    });
+
+                    /* Log an entry: the pill, the roll, the date, the press, the tick. */
+                    const logPill = window01(
+                        t,
+                        T.logPillIn,
+                        T.logPillOut,
+                        0.45,
+                    );
+                    $('pill-log').setAttribute(
+                        'opacity',
+                        reduced ? 0 : logPill,
+                    );
+                    setTransform(
+                        $('pill-log'),
+                        `${placed('pill-log')} translateY(${(1 - easeOut(span(t, T.logPillIn, 0.5))) * 10}px)`,
+                    );
+
+                    odoColumns.forEach((col) => {
+                        const rolled = easeInOut(
+                            span(t, T.odometerRoll + col.delay, 1.0),
+                        );
+                        const reset = easeInOut(span(t, T.resetValues, 0.4));
+                        // Rolls forward when logging; on reset the old value crossfades back in instead of rolling backwards.
+                        let pos = (col.from + col.steps * rolled) % 10;
+                        if (reduced) pos = (col.from + col.steps) % 10;
+                        setTransform(
+                            col.strip,
+                            `translateY(${-pos * col.lineH}px)`,
+                        );
+                        col.strip.setAttribute(
+                            'opacity',
+                            reduced
+                                ? 1
+                                : 1 -
+                                      reset *
+                                          (1 -
+                                              easeOut(
+                                                  span(
+                                                      t,
+                                                      T.resetValues + 0.45,
+                                                      0.4,
+                                                  ),
+                                              )),
+                        );
+                    });
+                    if (!reduced && t >= T.resetValues + 0.45) {
+                        // Back at the start value, faded in rather than rolled.
+                        odoColumns.forEach((col) =>
+                            setTransform(
+                                col.strip,
+                                `translateY(${-col.from * col.lineH}px)`,
+                            ),
+                        );
+                    }
+
+                    const dateIn = reduced
+                        ? 1
+                        : easeInOut(span(t, T.datesSwap, 0.35)) *
+                          (1 - easeInOut(span(t, T.resetValues, 0.4)));
+                    $('date-to').setAttribute('opacity', dateIn);
+                    $('date-from').setAttribute('opacity', 1 - dateIn);
+
+                    const press = span(t, T.press, 0.32);
+                    const scale =
+                        press < 0.35
+                            ? lerp(1, 0.97, easeOut(press / 0.35))
+                            : lerp(0.97, 1, easeOut((press - 0.35) / 0.65));
+                    setTransform(
+                        $('pill-log-body'),
+                        `scale(${press > 0 && press < 1 ? scale : 1})`,
+                    );
+                    // One state out, then the other in — two layouts never overlap.
+                    const leaving = easeInOut(span(t, T.confirm, 0.16));
+                    const arriving = easeOut(span(t, T.confirm + 0.16, 0.28));
+                    $('pill-log-idle').setAttribute('opacity', 1 - leaving);
+                    $('pill-log-done').setAttribute('opacity', arriving);
+                    setTransform(
+                        $('pill-log-done'),
+                        `translateX(${(1 - arriving) * -6}px)`,
+                    );
+
+                    /* The data flows: reading marker → along READINGS → into the hub. */
+                    const reading = markerEls[1];
+                    const pulse = $('pulse');
+                    if (!reduced && t >= T.pulse && t < T.pulseHub + 0.15) {
+                        const startTime = time - (t - T.pulse);
+                        const startDeg =
+                            (1 * 117 + 200 + startTime * reading.ring.speed) %
+                            360;
+                        const along = span(
+                            t,
+                            T.pulse,
+                            (T.pulseHub - T.pulse) * 0.7,
+                        );
+                        const dive = span(
+                            t,
+                            T.pulse + (T.pulseHub - T.pulse) * 0.7,
+                            (T.pulseHub - T.pulse) * 0.3,
+                        );
+                        // Round the ring to the back-left, then drop into the hub — going
+                        // whichever way keeps it off the ring labels at the front (60°–120°).
+                        const target = 235;
+                        const forward =
+                            (((target - startDeg) % 360) + 360) % 360;
+                        const crosses = (from, sweep, dir) => {
+                            for (let a = 0; a <= sweep; a += 5) {
+                                const d =
+                                    (((from + dir * a) % 360) + 360) % 360;
+                                if (d > 60 && d < 120) return true;
+                            }
+                            return false;
+                        };
+                        const sweep = crosses(startDeg, forward, 1)
+                            ? -(360 - forward)
+                            : forward;
+                        const deg = startDeg + sweep * easeInOut(along);
+                        const [rx, ry] = onDisc(reading.ring.r, deg);
+                        const [hx, hy] = [CX, CY - 4];
+                        const k = easeInOut(dive);
+                        const x = lerp(rx, hx, k);
+                        const y = lerp(ry, hy, k);
+                        pulse.setAttribute('transform', `translate(${x} ${y})`);
+                        pulse.setAttribute(
+                            'opacity',
+                            easeOut(span(t, T.pulse, 0.2)) *
+                                (1 - easeInOut(span(t, T.pulseHub, 0.15))),
+                        );
+                    } else {
+                        pulse.setAttribute('opacity', 0);
+                    }
+
+                    // The hub's ripple, and its glow breathing a little brighter as data lands.
+                    const ripple = span(t, T.pulseHub, 0.9);
+                    const rippleOn = !reduced && t >= T.pulseHub && ripple < 1;
+                    $('hub-ripple').setAttribute(
+                        'opacity',
+                        rippleOn ? 0.7 * (1 - easeOut(ripple)) : 0,
+                    );
+                    setTransform(
+                        $('hub-ripple'),
+                        `scale(${1 + 1.6 * easeOut(ripple)})`,
+                    );
+                    const breathe = reduced
+                        ? 0.8
+                        : 0.75 + 0.25 * Math.sin(time * 1.2);
+                    const landed = reduced
+                        ? 0
+                        : window01(t, T.pulseHub, T.pulseHub + 0.6, 0.3);
+                    $('hub-glow-el').setAttribute(
+                        'opacity',
+                        clamp(breathe + landed * 0.6, 0, 1),
+                    );
+
+                    // Up the connector to the gauge.
+                    const beam = reduced
+                        ? 0
+                        : window01(t, T.beam, T.beam + 0.75, 0.25);
+                    $('beam-el').setAttribute('opacity', beam);
+                    const rise = easeInOut(span(t, T.beam, 0.55));
+                    $('beam-dot').setAttribute(
+                        'opacity',
+                        reduced ? 0 : window01(t, T.beam, T.beam + 0.45, 0.12),
+                    );
+                    const c = LAYOUT.connector;
+                    setTransform(
+                        $('beam-dot'),
+                        `translateY(${-rise * (c.bottom - c.top)}px)`,
+                    );
+
+                    /* The gauge reacts, then resolves, then returns to idle. */
+                    const p = reduced ? G.reset : gaugeAt(t);
+                    const angle = (clamp(p, 0, G.max) / G.max) * 180;
+                    $('needle').setAttribute(
+                        'transform',
+                        `rotate(${angle} ${GAUGE.cx} ${GAUGE.cy})`,
+                    );
+                    arcs.forEach((arc) => {
+                        arc.node.style.strokeDashoffset = `${arc.length * (1 - clamp(p, 0, G.max) / G.max)}`;
+                    });
+                    const w = statusWeights(p);
+                    $('arc-green').setAttribute('opacity', w.ok);
+                    $('arc-amber').setAttribute('opacity', w.due);
+                    $('arc-red').setAttribute('opacity', w.overdue);
+                    $('status-ok').setAttribute('opacity', w.ok);
+                    $('status-due').setAttribute('opacity', w.due);
+                    $('status-overdue').setAttribute('opacity', w.overdue);
+                    $('gauge-percent').textContent =
+                        `${nf.format(Math.round(p))}%`;
+
+                    /* Resolve: the service is logged. */
+                    const service = reduced
+                        ? 1
+                        : window01(t, T.servicePillIn, T.servicePillOut, 0.45);
+                    $('pill-service').setAttribute('opacity', service);
+                    setTransform(
+                        $('pill-service'),
+                        `${placed('pill-service')} translateY(${reduced ? 0 : (1 - easeOut(span(t, T.servicePillIn, 0.5))) * 10}px)`,
+                    );
+                }
+
+                /* ═══════════════════════════════════════════════════════════════════
+       CLOCK — one rAF loop; paused offscreen, still under reduced motion.
+       ═══════════════════════════════════════════════════════════════════ */
+                const reducedQuery = window.matchMedia(
+                    '(prefers-reduced-motion: reduce)',
+                );
+                let elapsed = 0;
+                let last = null;
+                let frame = 0;
+                let visible = true;
+
+                function tick(now) {
+                    if (last !== null)
+                        elapsed += Math.min(0.1, (now - last) / 1000);
+                    last = now;
+                    render(elapsed, false);
+
+                    frame = requestAnimationFrame(tick);
+                }
+
+                function start() {
+                    if (frame || reducedQuery.matches || !visible) return;
+                    last = null;
+                    frame = requestAnimationFrame(tick);
+                }
+
+                function stop() {
+                    cancelAnimationFrame(frame);
+                    frame = 0;
+                }
+
+                function showResolved() {
+                    stop();
+                    // Simple crossfade into the resolved state.
+                    svg.style.transition = 'opacity 0.6s ease';
+                    svg.style.opacity = '0';
+                    render(0, true);
+                    requestAnimationFrame(() => (svg.style.opacity = '1'));
+                }
+
+                new IntersectionObserver(([entry]) => {
+                    visible = entry.isIntersecting;
+                    visible ? start() : stop();
+                }).observe(svg);
+
+                reducedQuery.addEventListener('change', () =>
+                    reducedQuery.matches ? showResolved() : start(),
+                );
+
+                /* ═══════════════════════════════════════════════════════════════════
+       FONT — inside an iframe, borrow the host page's face so the figure
+       matches the page; standalone, use --font above.
+       ═══════════════════════════════════════════════════════════════════ */
+                function adoptHostFont() {
+                    try {
+                        const host =
+                            window.parent && window.parent !== window
+                                ? window.parent.document
+                                : null;
+                        if (!host) return;
+                        let css = '';
+                        for (const sheet of host.styleSheets) {
+                            let rules;
+                            try {
+                                rules = sheet.cssRules;
+                            } catch {
+                                continue;
+                            }
+                            for (const rule of rules)
+                                if (rule.type === CSSRule.FONT_FACE_RULE)
+                                    css += rule.cssText + '\n';
+                        }
+                        let style = document.getElementById('host-fonts');
+                        if (!style) {
+                            style = document.createElement('style');
+                            style.id = 'host-fonts';
+                            document.head.appendChild(style);
+                        }
+                        style.textContent = css;
+                        const family = getComputedStyle(host.body).fontFamily;
+                        if (family)
+                            document.documentElement.style.setProperty(
+                                '--font',
+                                family,
+                            );
+                        return host;
+                    } catch {
+                        return null;
+                    }
+                }
+
+                async function remeasure() {
+                    await document.fonts.ready;
+                    buildOdometer();
+                    if (reducedQuery.matches) render(0, true);
+                }
+
+                const host = adoptHostFont();
+                if (host) {
+                    new MutationObserver(() => {
+                        adoptHostFont();
+                        remeasure();
+                    }).observe(host.documentElement, {
+                        attributes: true,
+                        attributeFilter: ['data-font'],
+                    });
+                }
+
+                // For inspecting the loop frame by frame: stops the clock and draws time t.
+                window.heroLoopSeek = (t) => {
+                    stop();
+                    elapsed = t;
+                    render(t, false);
+                };
+
+                applyLayout();
+                window.addEventListener('resize', () => {
+                    applyLayout();
+                    if (reducedQuery.matches) render(0, true);
+                    else if (!frame) render(elapsed, false);
+                });
+
+                buildOdometer();
+                remeasure();
+                if (reducedQuery.matches) showResolved();
+                else start();
+
+                /* ── util ─────────────────────────────────────────────────────────── */
+                function deepMerge(base, extra) {
+                    const out = Array.isArray(base) ? [...base] : { ...base };
+                    for (const key in extra) {
+                        const value = extra[key];
+                        out[key] =
+                            value &&
+                            typeof value === 'object' &&
+                            !Array.isArray(value) &&
+                            base[key]
+                                ? deepMerge(base[key], value)
+                                : value;
+                    }
+                    return out;
+                }
+            })();
+        </script>
+
+        <!--
+    ═══════════════════════════════════════════════════════════════════════
+    USING THIS FROM BLADE
+    ═══════════════════════════════════════════════════════════════════════
+    Move the <style>, the <svg> and the <script> into a partial, e.g.
+    resources/views/partials/hero-loop.blade.php, and set the config before
+    the script runs. Anything you leave out falls back to DEFAULTS:
+
+        <script>
+            window.HERO_LOOP_CONFIG = @json($heroConfig);
+        </script>
+
+    where $heroConfig is a PHP array shaped like DEFAULTS, for example:
+
+        $heroConfig = [
+            'odometer' => ['from' => 14850, 'to' => 15100, 'unit' => 'mi'],
+            'date' => ['from' => 'Aug 21', 'to' => 'Sep 8'],
+            'gauge' => ['idle' => 95, 'peak' => 112],
+        ];
+
+    @json escapes for a <script> context, so values are safe to pass as-is.
+    Inside this app the homepage loads this file in an iframe instead
+    (TheLoopFigure.vue), so it stays self-contained.
+-->
+    </body>
+</html>

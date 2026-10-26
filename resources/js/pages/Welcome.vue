@@ -5,8 +5,11 @@ import FontPicker from '@/components/FontPicker.vue';
 import GaugeDial from '@/components/GaugeDial.vue';
 import GaugeLegend from '@/components/GaugeLegend.vue';
 import TheIndexFigure from '@/components/marketing/TheIndexFigure.vue';
+import TheLoopFigure from '@/components/marketing/TheLoopFigure.vue';
+import TheOrbitFigure from '@/components/marketing/TheOrbitFigure.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
-import { fontPickerEnabled } from '@/lib/fonts';
+import type { FigureChoice } from '@/lib/fonts';
+import { currentFigure, fontPickerEnabled } from '@/lib/fonts';
 import { gaugeColor, gaugeInk, gaugeStatusLabel } from '@/lib/gauge';
 import { computed, onMounted, ref } from 'vue';
 import { garage, login, register } from '@/routes';
@@ -138,8 +141,12 @@ const navLinks = [
  */
 const showFontPicker = ref(false);
 
+/** Which hero figure is on trial in this browser; the isometric by default. */
+const figure = ref<FigureChoice>('index');
+
 onMounted(() => {
     showFontPicker.value = fontPickerEnabled();
+    figure.value = currentFigure();
 });
 </script>
 
@@ -279,7 +286,9 @@ onMounted(() => {
                         </figcaption>
 
                         <BlueprintFrame class="gap-0 p-(--space-6)">
-                            <TheIndexFigure />
+                            <TheOrbitFigure v-if="figure === 'orbit'" />
+                            <TheLoopFigure v-else-if="figure === 'loop'" />
+                            <TheIndexFigure v-else />
                         </BlueprintFrame>
 
                         <!--
@@ -293,8 +302,11 @@ onMounted(() => {
                             otherwise monochrome blueprint. These are §2 status
                             colours doing a caption's job, which is a different
                             thing from colouring the figure itself.
+
+                            Not under the story figure: it names its own
+                            states on the gauge as they change.
                         -->
-                        <GaugeLegend />
+                        <GaugeLegend v-if="figure !== 'loop'" />
                     </figure>
                 </div>
             </section>
@@ -524,6 +536,6 @@ onMounted(() => {
             </div>
         </footer>
 
-        <FontPicker v-if="showFontPicker" />
+        <FontPicker v-if="showFontPicker" v-model:figure="figure" />
     </div>
 </template>
