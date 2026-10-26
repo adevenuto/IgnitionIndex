@@ -14,6 +14,7 @@ export type GarageVehicle = {
     trim: string | null;
     color: string | null;
     photo_thumb_url: string | null;
+    photo_url: string | null;
     photo_color: string | null;
     last_odometer: number | null;
     last_odometer_at: string | null;

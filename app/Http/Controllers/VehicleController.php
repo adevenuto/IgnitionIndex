@@ -52,6 +52,11 @@ class VehicleController extends Controller
                     'photo_thumb_url' => $vehicle->primaryPhoto
                         ? route('vehicle-photos.thumbnail', $vehicle->primaryPhoto)
                         : null,
+                    // The full photo too: the card shows it edge to edge, and
+                    // the 400px thumbnail is soft at that width on a phone.
+                    'photo_url' => $vehicle->primaryPhoto
+                        ? route('vehicle-photos.show', $vehicle->primaryPhoto)
+                        : null,
                     'photo_color' => $vehicle->primaryPhoto?->placeholder_color,
                     'last_odometer' => $vehicle->last_odometer,
                     'last_odometer_at' => $vehicle->last_odometer_at?->toDateString(),
