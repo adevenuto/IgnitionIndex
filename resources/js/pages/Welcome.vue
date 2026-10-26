@@ -5,6 +5,7 @@ import FontPicker from '@/components/FontPicker.vue';
 import GaugeDial from '@/components/GaugeDial.vue';
 import GaugeLegend from '@/components/GaugeLegend.vue';
 import TheIndexFigure from '@/components/marketing/TheIndexFigure.vue';
+import TheLoopFigure from '@/components/marketing/TheLoopFigure.vue';
 import TheOrbitFigure from '@/components/marketing/TheOrbitFigure.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
 import type { FigureChoice } from '@/lib/fonts';
@@ -286,6 +287,7 @@ onMounted(() => {
 
                         <BlueprintFrame class="gap-0 p-(--space-6)">
                             <TheOrbitFigure v-if="figure === 'orbit'" />
+                            <TheLoopFigure v-else-if="figure === 'loop'" />
                             <TheIndexFigure v-else />
                         </BlueprintFrame>
 
@@ -300,8 +302,11 @@ onMounted(() => {
                             otherwise monochrome blueprint. These are §2 status
                             colours doing a caption's job, which is a different
                             thing from colouring the figure itself.
+
+                            Not under the story figure: it names its own
+                            states on the gauge as they change.
                         -->
-                        <GaugeLegend />
+                        <GaugeLegend v-if="figure !== 'loop'" />
                     </figure>
                 </div>
             </section>

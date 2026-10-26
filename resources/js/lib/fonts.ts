@@ -209,18 +209,19 @@ export function fontPickerEnabled(): boolean {
 
 /*
  * The homepage figure on trial, alongside the type: the isometric stack
- * (TheIndexFigure) or the orbit (TheOrbitFigure). Chosen in the same
+ * (TheIndexFigure), the orbit (TheOrbitFigure) or the logging story
+ * (TheLoopFigure). Chosen in the same
  * homepage-only panel and kept per browser. TEMPORARY, like the rest of it.
  */
-export type FigureChoice = 'index' | 'orbit';
+export type FigureChoice = 'index' | 'orbit' | 'loop';
 
 export const FIGURE_STORAGE_KEY = 'ii-figure';
 
 export function currentFigure(): FigureChoice {
     try {
-        return localStorage.getItem(FIGURE_STORAGE_KEY) === 'orbit'
-            ? 'orbit'
-            : 'index';
+        const stored = localStorage.getItem(FIGURE_STORAGE_KEY);
+
+        return stored === 'orbit' || stored === 'loop' ? stored : 'index';
     } catch {
         return 'index';
     }

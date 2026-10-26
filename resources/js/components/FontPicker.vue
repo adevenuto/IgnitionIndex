@@ -21,7 +21,8 @@ const figure = defineModel<FigureChoice>('figure', { required: true });
 
 const FIGURES: { id: FigureChoice; label: string }[] = [
     { id: 'index', label: 'Isometric' },
-    { id: 'orbit', label: 'Orbit (3D)' },
+    { id: 'orbit', label: 'Orbit' },
+    { id: 'loop', label: 'Story' },
 ];
 
 function chooseFigure(id: FigureChoice): void {
@@ -76,7 +77,7 @@ function dismiss(): void {
             <div class="grid gap-1.5 px-2 pt-1 pb-2">
                 <span class="ii-eyebrow">Homepage figure</span>
                 <div
-                    class="bg-muted grid grid-cols-2 gap-1 rounded-md p-1"
+                    class="bg-muted grid grid-cols-3 gap-1 rounded-md p-1"
                     role="radiogroup"
                     aria-label="Homepage figure"
                 >
