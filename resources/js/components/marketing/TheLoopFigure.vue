@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue';
 import { cn } from '@/lib/utils';
+import { logLoop } from '@/routes/figures';
 
 /*
  * Fig. 01 as a story: logging a reading, the data flowing into the index,
  * the gauge reacting, and the service resolving it — a 13-second loop.
  *
- * The figure itself is one self-contained file, public/figures/log-loop.html
+ * The figure itself is one self-contained file, resources/figures/log-loop.html,
+ * served by FigureController (a route, so it can carry the frame policy the
+ * hosting edge would otherwise deny)
  * (vanilla JS, inline SVG, one config object), written so it can move into a
  * Blade partial unchanged. Here it is framed in an iframe so its styles and
  * script stay its own; it borrows this page's type face and follows its
@@ -25,7 +28,7 @@ const props = withDefaults(
 
 <template>
     <iframe
-        src="/figures/log-loop.html"
+        :src="logLoop.url()"
         title="Logging a reading: the odometer updates, the data flows into the index, and the oil-change gauge goes overdue until the service is logged."
         loading="lazy"
         :class="
