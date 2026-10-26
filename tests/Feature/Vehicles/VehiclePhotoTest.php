@@ -415,3 +415,16 @@ test('deleting a user removes every photo file they owned', function () {
     expect(VehiclePhoto::count())->toBe(0)
         ->and(Vehicle::count())->toBe(0);
 });
+
+test('the garage card gets the full photo as well as the thumbnail', function () {
+    $vehicle = Vehicle::factory()->for($this->user)->create();
+    $photo = VehiclePhoto::factory()->for($vehicle)->create(['position' => 0]);
+    Vehicle::factory()->for($this->user)->create();
+
+    $this->actingAs($this->user)
+        ->get(route('garage'))
+        ->assertInertia(fn ($page) => $page
+            ->where('vehicles.0.photo_thumb_url', route('vehicle-photos.thumbnail', $photo))
+            ->where('vehicles.0.photo_url', route('vehicle-photos.show', $photo))
+            ->where('vehicles.1.photo_url', null));
+});

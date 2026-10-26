@@ -54,62 +54,73 @@ const specs = computed(() =>
             down as --vehicle so classes, not an inline colour, use it.
         -->
         <Card
+            class="overflow-hidden pt-0"
             :class="vehicle.awaiting_setup && 'ii-awaiting-setup'"
             :style="vehicle.color ? { '--vehicle': vehicle.color } : undefined"
         >
+            <!--
+                The photo leads, full width and flush to the card's edges, the
+                way the vehicle's own page opens: it is how you recognise your
+                car at a glance. The thumbnail serves narrow cards; srcset lets
+                a dense screen or a wide card take the full photo instead.
+                Without a photo, a well tinted with the paint colour holds the
+                same shape so the grid stays even.
+            -->
+            <div
+                class="relative aspect-[16/9] overflow-hidden"
+                :class="
+                    vehicle.color
+                        ? 'bg-[color-mix(in_oklab,var(--vehicle)_18%,var(--surface-card))] text-[color-mix(in_oklab,var(--vehicle)_55%,var(--color-text))]'
+                        : 'bg-(--tile-slate-bg) text-(--tile-slate-ink)'
+                "
+                :style="
+                    vehicle.photo_color
+                        ? { backgroundColor: vehicle.photo_color }
+                        : undefined
+                "
+            >
+                <img
+                    v-if="vehicle.photo_thumb_url && !failed"
+                    :src="vehicle.photo_thumb_url"
+                    :srcset="
+                        vehicle.photo_url
+                            ? `${vehicle.photo_thumb_url} 400w, ${vehicle.photo_url} 1600w`
+                            : undefined
+                    "
+                    sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+                    :alt="`Photo of ${vehicle.name}`"
+                    loading="lazy"
+                    decoding="async"
+                    class="size-full object-cover"
+                    @error="failed = true"
+                />
+
+                <Car
+                    v-else
+                    class="absolute inset-0 m-auto size-12"
+                    :stroke-width="1.25"
+                />
+            </div>
+
             <CardContent>
-                <div class="flex items-start gap-3">
-                    <div class="min-w-0 flex-1">
-                        <h3
-                            class="font-display text-title flex items-center gap-2"
-                        >
-                            <ShieldAlert
-                                v-if="vehicle.open_recall_count"
-                                class="text-accent-700 size-4 shrink-0"
-                                :aria-label="`${vehicle.open_recall_count} open safety recall`"
-                            />
-                            <VehicleColorDot
-                                :color="vehicle.color"
-                                :label="`Paint colour ${vehicle.color}`"
-                            />
-                            <span class="truncate">{{ vehicle.name }}</span>
-                        </h3>
-                        <p
-                            v-if="specs"
-                            class="mt-0.5 truncate text-[13px] text-(--color-neutral-700)"
-                        >
-                            {{ specs }}
-                        </p>
-                    </div>
-
-                    <span
-                        class="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md"
-                        :class="
-                            vehicle.color
-                                ? 'bg-[color-mix(in_oklab,var(--vehicle)_18%,var(--surface-card))] text-[color-mix(in_oklab,var(--vehicle)_55%,var(--color-text))] ring-1 ring-(--hairline-soft)'
-                                : 'bg-(--tile-slate-bg) text-(--tile-slate-ink)'
-                        "
-                        :style="
-                            vehicle.photo_color
-                                ? { backgroundColor: vehicle.photo_color }
-                                : undefined
-                        "
-                    >
-                        <img
-                            v-if="vehicle.photo_thumb_url && !failed"
-                            :src="vehicle.photo_thumb_url"
-                            :alt="`Photo of ${vehicle.name}`"
-                            width="48"
-                            height="48"
-                            loading="lazy"
-                            decoding="async"
-                            class="size-full object-cover"
-                            @error="failed = true"
-                        />
-
-                        <Car v-else class="size-6" />
-                    </span>
-                </div>
+                <h3 class="font-display text-title flex items-center gap-2">
+                    <ShieldAlert
+                        v-if="vehicle.open_recall_count"
+                        class="text-accent-700 size-4 shrink-0"
+                        :aria-label="`${vehicle.open_recall_count} open safety recall`"
+                    />
+                    <VehicleColorDot
+                        :color="vehicle.color"
+                        :label="`Paint colour ${vehicle.color}`"
+                    />
+                    <span class="truncate">{{ vehicle.name }}</span>
+                </h3>
+                <p
+                    v-if="specs && specs !== vehicle.name"
+                    class="mt-0.5 truncate text-[13px] text-(--color-neutral-700)"
+                >
+                    {{ specs }}
+                </p>
 
                 <div
                     class="mt-(--space-4) flex items-center gap-3 border-t border-(--color-divider) pt-(--space-3)"
