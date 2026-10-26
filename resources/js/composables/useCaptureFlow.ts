@@ -1,6 +1,8 @@
 import { computed, reactive, ref } from 'vue';
 import type {
+    CaptureContext,
     CaptureLane,
+    CaptureOutcome,
     CaptureReading,
     Provenance,
 } from '@/lib/capture/lanes';
@@ -12,11 +14,19 @@ import { formatFieldValue } from '@/lib/capture/lanes';
  * about any particular lane — the lane's config says what the fields and steps
  * are — so every lane's flow behaves the same way.
  *
- * The step after the last is review. A capture that fills more than the step
- * it was taken on skips ahead past every step it completed, which is how one
- * pump photo, or one sentence, can take someone straight to review.
+ * The step after the last is review. A capture stays on its step long enough
+ * to be seen — the outcome says what was filled and what was refused — and
+ * Next then skips every step the capture already completed, which is how one
+ * pump photo, or one sentence, still takes someone straight to review.
+ *
+ * The lane's checks run on every change. A captured value a check rejects is
+ * never filled in; a typed one is only flagged, since typing a lower odometer
+ * is how a past mistake gets corrected.
  */
-export function useCaptureFlow(lane: CaptureLane) {
+export function useCaptureFlow(
+    lane: CaptureLane,
+    context: () => CaptureContext,
+) {
     const keys = lane.fields.map((field) => field.key);
     const empty = <T>(value: T) =>
         Object.fromEntries(keys.map((key) => [key, value])) as Record<
@@ -28,7 +38,10 @@ export function useCaptureFlow(lane: CaptureLane) {
     const provenance = reactive(empty<Provenance | null>(null));
     const flags = reactive(empty<string | null>(null));
     const note = ref<string | null>(null);
+    const outcome = ref<CaptureOutcome | null>(null);
     const stepIndex = ref(0);
+    /** The reader's own flags, kept until their field changes. */
+    const serverFlags = empty<string | null>(null);
 
     const atReview = computed(() => stepIndex.value >= lane.steps.length);
     const step = computed(() => lane.steps[stepIndex.value] ?? null);
@@ -48,47 +61,120 @@ export function useCaptureFlow(lane: CaptureLane) {
         return lane.steps.length;
     }
 
-    /** A change by hand, or by any one source: the flag no longer applies. */
+    /** Every check's verdict on a set of values, by field; the first one wins. */
+    function verdicts(candidate: Record<string, string>) {
+        const found: Record<string, { message: string; reject: boolean }> = {};
+
+        for (const check of lane.checks) {
+            const result = check(candidate, context());
+
+            if (result && !(result.field in found)) {
+                found[result.field] = {
+                    message: result.message,
+                    reject: result.reject ?? false,
+                };
+            }
+        }
+
+        return found;
+    }
+
+    /** Flags from the checks first, then whatever the reader noticed. */
+    function refreshFlags(): void {
+        const found = verdicts(values);
+
+        for (const key of keys) {
+            flags[key] =
+                values[key] === ''
+                    ? null
+                    : (found[key]?.message ?? serverFlags[key]);
+        }
+    }
+
+    /** A change by hand, or by any one source: the reader's flag no longer applies. */
     function set(key: string, value: string, source: Provenance): void {
         values[key] = value;
         provenance[key] = value === '' ? null : source;
-        flags[key] = null;
+        serverFlags[key] = null;
+        refreshFlags();
     }
 
     /**
-     * Take what a read proposed. Only the values it actually found are taken;
-     * a null never clears something already entered.
+     * Take what a read proposed. Only the values it actually found are taken —
+     * a null never clears something already entered — and only those no check
+     * rejects. What happened is kept in `outcome` for the confirmation.
      */
     function apply(reading: CaptureReading, source: Provenance): void {
+        const proposed: Record<string, number> = {};
+
         for (const field of lane.fields) {
             const value = reading.fields[field.key];
 
             if (typeof value === 'number') {
-                set(field.key, formatFieldValue(field, value), source);
+                proposed[field.key] = value;
             }
+        }
+
+        const candidate = { ...values };
+
+        for (const field of lane.fields) {
+            if (field.key in proposed) {
+                candidate[field.key] = formatFieldValue(
+                    field,
+                    proposed[field.key],
+                );
+            }
+        }
+
+        const found = verdicts(candidate);
+        const applied: string[] = [];
+        const rejected: CaptureOutcome['rejected'] = [];
+
+        for (const field of lane.fields) {
+            if (!(field.key in proposed)) {
+                continue;
+            }
+
+            if (found[field.key]?.reject) {
+                rejected.push({
+                    field: field.key,
+                    value: proposed[field.key],
+                    message: found[field.key].message,
+                });
+
+                continue;
+            }
+
+            values[field.key] = candidate[field.key];
+            provenance[field.key] = source;
+            serverFlags[field.key] = null;
+            applied.push(field.key);
         }
 
         for (const flag of reading.flags) {
-            if (flag.field in flags) {
-                flags[flag.field] = flag.message;
+            if (applied.includes(flag.field)) {
+                serverFlags[flag.field] = flag.message;
             }
         }
 
+        refreshFlags();
         note.value = reading.note;
-
-        if (!atReview.value && isComplete(stepIndex.value)) {
-            stepIndex.value = nextUnfinished(stepIndex.value);
-        }
+        outcome.value = { at: performance.now(), source, applied, rejected };
     }
 
+    /** On to the first step not already filled, or review. */
     function next(): void {
-        stepIndex.value = Math.min(stepIndex.value + 1, lane.steps.length);
+        stepIndex.value = atReview.value
+            ? stepIndex.value
+            : nextUnfinished(stepIndex.value);
         note.value = null;
+        outcome.value = null;
     }
 
     function back(): void {
         stepIndex.value = Math.max(stepIndex.value - 1, 0);
         note.value = null;
+        outcome.value = null;
     }
 
     /** Back to the step that owns a field — what tapping a review row does. */
@@ -100,6 +186,7 @@ export function useCaptureFlow(lane: CaptureLane) {
         if (index !== -1) {
             stepIndex.value = index;
             note.value = null;
+            outcome.value = null;
         }
     }
 
@@ -108,6 +195,7 @@ export function useCaptureFlow(lane: CaptureLane) {
         provenance,
         flags,
         note,
+        outcome,
         stepIndex,
         step,
         atReview,

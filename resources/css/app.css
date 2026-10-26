@@ -139,6 +139,23 @@
         }
     }
 
+    /* ── A photo being read: a scan line passing down it and back. Position
+         only, on the `translate` property so it replaces the resting
+         translate-y-1/2 rather than adding to it. Always paired with
+         motion-safe:, and only ever shown while a read is in flight, so it
+         never runs on a screen at rest. ── */
+    --animate-capture-scan: capture-scan 1.6s var(--ease-standard) infinite
+        alternate;
+
+    @keyframes capture-scan {
+        from {
+            translate: 0 0;
+        }
+        to {
+            translate: 0 calc(100% - 2px);
+        }
+    }
+
     /* ── Product palette. These map product.css's names into Tailwind's colour
          namespace; the Industry palette needs no entry here because tokens.css
          already registers it via @theme. ── */

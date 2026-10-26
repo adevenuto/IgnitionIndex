@@ -16,6 +16,10 @@ import { responseMessage } from '@/lib/capture/responseMessage';
  * The microphone is opened on the first tap and held until the sheet closes,
  * so a visit asks for it once, not once per step. Closing the sheet releases
  * it, which also turns off the phone's recording indicator.
+ *
+ * While recording it also reports how loud the microphone is (`level`, 0–1)
+ * and how long is left (`remaining`), so the sheet can show that it is
+ * actually hearing something rather than merely waiting.
  */
 
 // Mirrors capture.audio.max_seconds: long enough for a sentence, short enough
@@ -59,6 +63,8 @@ export function useVoiceInput(vehicleId: () => number) {
     const listening = ref(false);
     const transcribing = ref(false);
     const error = ref<string | null>(null);
+    const level = ref(0);
+    const remaining = ref(MAX_SECONDS);
 
     const http = useHttp<{ audio: File | null }, { transcript: string }>({
         audio: null,
@@ -67,6 +73,72 @@ export function useVoiceInput(vehicleId: () => number) {
     let stream: MediaStream | null = null;
     let recorder: MediaRecorder | null = null;
     let closed = false;
+    let audio: AudioContext | null = null;
+    let tap: MediaStreamAudioSourceNode | null = null;
+    let frame = 0;
+
+    /**
+     * Opened inside the tap itself: iOS only lets audio start from a gesture,
+     * and by the time the microphone has been granted, the gesture is gone.
+     */
+    function wakeAudio(): void {
+        try {
+            audio ??= new AudioContext();
+            void audio.resume();
+        } catch {
+            audio = null;
+        }
+    }
+
+    /**
+     * Follows the microphone's loudness until recording stops. The level is
+     * the RMS of the waveform, lifted so ordinary speech fills most of the
+     * scale; a meter that barely moves for a normal voice reads as deaf.
+     */
+    function meter(source: MediaStream, startedAt: number): void {
+        if (audio === null) {
+            return;
+        }
+
+        try {
+            const analyser = audio.createAnalyser();
+            analyser.fftSize = 512;
+            tap = audio.createMediaStreamSource(source);
+            tap.connect(analyser);
+
+            const samples = new Uint8Array(analyser.fftSize);
+
+            const tick = () => {
+                if (recorder === null) {
+                    level.value = 0;
+
+                    return;
+                }
+
+                analyser.getByteTimeDomainData(samples);
+
+                let sum = 0;
+
+                for (const sample of samples) {
+                    const centred = (sample - 128) / 128;
+                    sum += centred * centred;
+                }
+
+                level.value = Math.min(1, Math.sqrt(sum / samples.length) * 4);
+                remaining.value = Math.max(
+                    0,
+                    Math.ceil(
+                        MAX_SECONDS - (performance.now() - startedAt) / 1000,
+                    ),
+                );
+                frame = requestAnimationFrame(tick);
+            };
+
+            frame = requestAnimationFrame(tick);
+        } catch {
+            // No Web Audio: recording still works, the meter just stays flat.
+        }
+    }
 
     async function microphone(): Promise<MediaStream> {
         const live = stream
@@ -99,6 +171,10 @@ export function useVoiceInput(vehicleId: () => number) {
 
             active.onstop = () => {
                 window.clearTimeout(cap);
+                cancelAnimationFrame(frame);
+                tap?.disconnect();
+                tap = null;
+                level.value = 0;
                 recorder = null;
                 listening.value = false;
 
@@ -115,7 +191,9 @@ export function useVoiceInput(vehicleId: () => number) {
 
             recorder = active;
             listening.value = true;
+            remaining.value = MAX_SECONDS;
             active.start();
+            meter(source, startedAt);
         });
     }
 
@@ -165,6 +243,7 @@ export function useVoiceInput(vehicleId: () => number) {
         }
 
         error.value = null;
+        wakeAudio();
 
         let source: MediaStream;
 
@@ -200,11 +279,23 @@ export function useVoiceInput(vehicleId: () => number) {
     onBeforeUnmount(() => {
         closed = true;
         stop();
+        cancelAnimationFrame(frame);
         stream?.getTracks().forEach((track) => track.stop());
         stream = null;
+        void audio?.close();
+        audio = null;
     });
 
-    return { supported, listening, transcribing, error, listen, stop };
+    return {
+        supported,
+        listening,
+        transcribing,
+        error,
+        level,
+        remaining,
+        listen,
+        stop,
+    };
 }
 
 export type VoiceInput = ReturnType<typeof useVoiceInput>;

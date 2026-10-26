@@ -18,6 +18,9 @@ class FuelLane implements LaneDefinition
     /** Pump prices outside this band are almost certainly a misread. */
     private const PLAUSIBLE_PRICE = [1.5, 10.0];
 
+    /** A fill-up outside this many gallons is a misread, not a tank. */
+    private const PLAUSIBLE_GALLONS = [0.5, 50.0];
+
     /** How far a read may sit from the projection before it is questioned. */
     private const ESTIMATE_TOLERANCE_MILES = 3_000;
 
@@ -99,6 +102,14 @@ class FuelLane implements LaneDefinition
                 'field' => 'odometer',
                 'message' => 'Far from the estimate of ≈'.number_format($mileage->projectedOdometer)
                     .' mi. Check it is the odometer and not a trip meter.',
+            ];
+        }
+
+        if (is_float($gallons) && ($gallons < self::PLAUSIBLE_GALLONS[0] || $gallons > self::PLAUSIBLE_GALLONS[1])) {
+            $flags[] = [
+                'field' => 'gallons',
+                'message' => rtrim(rtrim(number_format($gallons, 3), '0'), '.').' gallons is '
+                    .($gallons < self::PLAUSIBLE_GALLONS[0] ? 'too little for a fill-up.' : 'more than a tank holds.'),
             ];
         }
 
