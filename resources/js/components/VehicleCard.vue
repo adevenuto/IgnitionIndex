@@ -50,14 +50,11 @@ const specs = computed(() =>
             its gauges reads identically in the grid and on its own page.
         -->
         <!--
-            The car's own paint colour runs along the top (§2, vehicle colour),
-            handed down as --vehicle so classes, not an inline colour, use it.
+            The car's paint colour tints its tile (§2, vehicle colour), handed
+            down as --vehicle so classes, not an inline colour, use it.
         -->
         <Card
-            :class="[
-                vehicle.color && 'border-t-4 border-t-(--vehicle)',
-                vehicle.awaiting_setup && 'ii-awaiting-setup',
-            ]"
+            :class="vehicle.awaiting_setup && 'ii-awaiting-setup'"
             :style="vehicle.color ? { '--vehicle': vehicle.color } : undefined"
         >
             <CardContent>

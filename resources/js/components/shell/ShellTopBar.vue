@@ -42,8 +42,13 @@ const search = ref('');
         <ShellBrand class="hidden md:flex" />
         <ShellBrand compact class="md:hidden" />
 
-        <!-- The app's one primary action, in the chrome (§5): the near-black primary. -->
+        <!--
+          The app's foundational action, in the chrome (§5). Ink rather than
+          the blue every other main button uses, so it is the one that stands
+          out on every screen.
+        -->
         <Button
+            variant="ink"
             class="h-10 flex-none gap-2 px-5 max-md:w-10 max-md:px-0 max-md:[&>span]:sr-only"
             @click="$emit('add')"
         >

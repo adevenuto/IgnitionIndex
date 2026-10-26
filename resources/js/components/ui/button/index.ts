@@ -49,6 +49,10 @@ export const buttonVariants = cva(
         // The brand blue deepens a step on hover and two on press.
         default:
           "border-primary bg-primary text-primary-foreground hover:border-accent-700 hover:bg-accent-700 active:border-accent-800 active:bg-accent-800",
+        // Ink: for the app's one foundational action (Log entry) and nothing
+        // else, so it stands apart from the blue every other main button uses.
+        ink:
+          "border-foreground bg-foreground text-white hover:border-neutral-800 hover:bg-neutral-800 active:bg-neutral-900",
         destructive:
           "border-destructive bg-transparent text-destructive hover:bg-destructive/10 active:bg-destructive/18 focus-visible:ring-destructive/20",
         outline:

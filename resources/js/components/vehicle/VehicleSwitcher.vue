@@ -30,8 +30,8 @@ defineProps<{
             class="ease-standard flex w-[150px] flex-none flex-col gap-[5px] rounded-md border px-[13px] py-[11px] transition-colors duration-[var(--dur-fast)]"
             :class="
                 vehicle.is_active
-                    ? 'border-primary bg-primary'
-                    : 'hover:border-accent bg-card border-l-[3px] border-(--hairline-soft) border-l-(--vehicle)'
+                    ? 'border-accent bg-accent-100'
+                    : 'hover:border-accent bg-card border-(--hairline-soft)'
             "
             :style="{
                 '--vehicle': vehicle.color ?? 'var(--color-neutral-400)',
@@ -41,33 +41,16 @@ defineProps<{
             <span class="flex items-center gap-(--space-2)">
                 <!-- §2 vehicle colour: a round swatch, ringed so white and silver still show. -->
                 <span
-                    class="size-2.5 flex-none rounded-full bg-(--vehicle) ring-1"
-                    :class="
-                        vehicle.is_active
-                            ? 'ring-primary-foreground/60'
-                            : 'ring-(--color-divider)'
-                    "
+                    class="size-2.5 flex-none rounded-full bg-(--vehicle) ring-1 ring-(--color-divider)"
                     aria-hidden="true"
                 />
                 <span
-                    class="font-display truncate text-[17px]/none font-semibold"
-                    :class="
-                        vehicle.is_active
-                            ? 'text-primary-foreground'
-                            : 'text-(--color-text)'
-                    "
+                    class="font-display truncate text-[17px]/none font-semibold text-(--color-text)"
                 >
                     {{ vehicle.name }}
                 </span>
             </span>
-            <span
-                class="truncate text-[11px]"
-                :class="
-                    vehicle.is_active
-                        ? 'text-primary-foreground/70'
-                        : 'text-(--color-neutral-700)'
-                "
-            >
+            <span class="truncate text-[11px] text-(--color-neutral-700)">
                 {{ vehicle.spec }}
             </span>
         </Link>

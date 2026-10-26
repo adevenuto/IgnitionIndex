@@ -87,8 +87,12 @@ below has one job; none of them stands in for status.
   and nothing else. Fuel's orange is deliberately redder and brighter than the due amber. The
   lookup lives in `resources/js/lib/lanes.ts`.
 - **Vehicle colour: the owner's paint colour, as identity.** A round swatch beside the name
-  (ringed, so white and silver still show), a band along the top of the vehicle's cards, a tint
-  on its tiles and empty photo well, and an edge on its switcher chip. Passed as `--vehicle`.
+  (ringed, so white and silver still show) and a tint on its tiles and empty photo well. No
+  coloured bands or edges on cards and chips. Passed as `--vehicle`.
+- **Selected states are tints, actions are solid.** The active nav item, settings item and
+  vehicle chip are a light brand tint (`accent-100`, brand ink or a brand outline); solid blue is
+  for buttons. **Log entry** alone is ink (`variant="ink"`): the foundational action, set apart
+  from the blue so it stands out on every screen.
 - **Tile hues:** `--tile-brand` for the product's own actions, `--tile-slate` for neutral ones.
   (Violet and teal tiles are retired: violet now means Service.)
 - **Tints and glows:** the content ground is a breath cooler (`#f3f5f9`). Large, low-alpha

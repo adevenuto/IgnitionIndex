@@ -48,9 +48,9 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                                 as-child
                                 :class="[
                                     'h-11 w-full justify-start rounded-md px-3 text-[14px]',
-                                    // The same near-black pill as the rail's active item.
+                                    // The same tint as the rail's active item.
                                     isCurrentOrParentUrl(item.href)
-                                        ? 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground'
+                                        ? 'bg-accent-100 text-accent-700 hover:bg-accent-100 hover:text-accent-700'
                                         : 'text-muted-foreground hover:bg-hover-surface hover:text-foreground',
                                 ]"
                             >

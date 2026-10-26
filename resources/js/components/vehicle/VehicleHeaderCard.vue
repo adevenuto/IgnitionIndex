@@ -64,13 +64,12 @@ const lastReading = computed(() => {
 
 <template>
     <!--
-      The car's paint colour runs along the top and tints the empty photo well
-      (§2, vehicle colour), handed down as --vehicle. overflow-hidden keeps a
-      photo inside the frame's rounded corners.
+      The car's paint colour tints the empty photo well (§2, vehicle colour),
+      handed down as --vehicle. overflow-hidden keeps a photo inside the
+      frame's rounded corners.
     -->
     <BlueprintFrame
         class="grid grid-cols-1 gap-0 overflow-hidden p-0 xl:grid-cols-[420px_1fr]"
-        :class="vehicle.color && 'border-t-4 border-t-(--vehicle)'"
         :style="vehicle.color ? { '--vehicle': vehicle.color } : undefined"
     >
         <!--
