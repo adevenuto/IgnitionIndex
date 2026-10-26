@@ -62,10 +62,16 @@ const subtitle = () =>
           : (props.vehicles[0]?.name ?? '');
 </script>
 
+<!--
+  Scrolls up and down only. overflow-x-hidden stops a sideways pan when any
+  row runs a pixel wide; overscroll-contain keeps the end of the scroll from
+  dragging the page (or the sheet itself) behind it; touch-pan-y tells a
+  phone that a vertical swipe is the only gesture here.
+-->
 <template>
     <Dialog v-if="isDesktop" v-model:open="open">
         <DialogContent
-            class="max-h-[85vh] gap-0 overflow-y-auto p-0 sm:max-w-2xl"
+            class="max-h-[85vh] gap-0 overflow-x-hidden overflow-y-auto overscroll-contain p-0 sm:max-w-2xl"
         >
             <DialogHeader class="px-4 pt-5 pb-0 text-left">
                 <DialogTitle class="text-h2">{{ title() }}</DialogTitle>
@@ -89,7 +95,7 @@ const subtitle = () =>
     <Sheet v-else v-model:open="open">
         <SheetContent
             side="bottom"
-            class="max-h-[90svh] overflow-y-auto rounded-t-xl"
+            class="max-h-[90svh] touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain rounded-t-xl"
         >
             <SheetHeader class="pb-0">
                 <SheetTitle class="text-h2">{{ title() }}</SheetTitle>

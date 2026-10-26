@@ -1,11 +1,8 @@
 import { createInertiaApp } from '@inertiajs/vue3';
-import { createApp } from 'vue';
-import FontPicker from '@/components/FontPicker.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
-import { fontPickerEnabled } from '@/lib/fonts';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -30,10 +27,3 @@ void createInertiaApp({
 
 // This will listen for flash toast data from the server...
 initializeFlashToast();
-
-// The type-face trial panel, for whoever opened the site with ?fonts.
-if (fontPickerEnabled()) {
-    const host = document.createElement('div');
-    document.body.append(host);
-    createApp(FontPicker).mount(host);
-}

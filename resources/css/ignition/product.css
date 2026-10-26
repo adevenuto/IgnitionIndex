@@ -47,9 +47,10 @@
          as a heavy outline once a shadow carries the edge. Named --surface-*
          rather than --color-card, which app.css already maps to shadcn's
          --card: one name with two meanings would loop. ── */
-    /* The type face (§3). One face for headings and body, chosen here; the
-       trial picker (resources/js/lib/fonts.ts) swaps it per browser through
-       <html data-font>. */
+    /* The type pairing (§3): a heading face and a body face, chosen here; the
+       trial picker (resources/js/lib/fonts.ts) swaps the pair per browser
+       through <html data-font>. */
+    --font-ui-display: var(--font-inter);
     --font-ui: var(--font-inter);
 
     --surface-card: #fdfdfe;
@@ -98,23 +99,88 @@
     --dur-slow: 320ms;
 }
 
-/* The trial faces, one per <html data-font>. */
-:root[data-font='plus-jakarta-sans'] {
-    --font-ui: var(--font-plus-jakarta-sans);
-}
-
-:root[data-font='manrope'] {
-    --font-ui: var(--font-manrope);
-}
-
-:root[data-font='dm-sans'] {
-    --font-ui: var(--font-dm-sans);
-}
-
-:root[data-font='figtree'] {
-    --font-ui: var(--font-figtree);
-}
-
+/* The trial pairings, one per <html data-font>. Keep in step with fonts.ts. */
 :root[data-font='outfit'] {
+    --font-ui-display: var(--font-outfit);
+    --font-ui: var(--font-outfit);
+}
+
+:root[data-font='sora'] {
+    --font-ui-display: var(--font-sora);
+    --font-ui: var(--font-sora);
+}
+
+:root[data-font='urbanist'] {
+    --font-ui-display: var(--font-urbanist);
+    --font-ui: var(--font-urbanist);
+}
+
+:root[data-font='lexend'] {
+    --font-ui-display: var(--font-lexend);
+    --font-ui: var(--font-lexend);
+}
+
+:root[data-font='poppins'] {
+    --font-ui-display: var(--font-poppins);
+    --font-ui: var(--font-poppins);
+}
+
+:root[data-font='jost'] {
+    --font-ui-display: var(--font-jost);
+    --font-ui: var(--font-jost);
+}
+
+:root[data-font='league-spartan'] {
+    --font-ui-display: var(--font-league-spartan);
+    --font-ui: var(--font-outfit);
+}
+
+:root[data-font='montserrat'] {
+    --font-ui-display: var(--font-montserrat);
+    --font-ui: var(--font-montserrat);
+}
+
+:root[data-font='red-hat'] {
+    --font-ui-display: var(--font-red-hat-display);
+    --font-ui: var(--font-red-hat-text);
+}
+
+:root[data-font='albert-sans'] {
+    --font-ui-display: var(--font-albert-sans);
+    --font-ui: var(--font-albert-sans);
+}
+
+:root[data-font='kumbh-sans'] {
+    --font-ui-display: var(--font-kumbh-sans);
+    --font-ui: var(--font-kumbh-sans);
+}
+
+:root[data-font='onest'] {
+    --font-ui-display: var(--font-onest);
+    --font-ui: var(--font-onest);
+}
+
+:root[data-font='rubik'] {
+    --font-ui-display: var(--font-rubik);
+    --font-ui: var(--font-rubik);
+}
+
+:root[data-font='nunito'] {
+    --font-ui-display: var(--font-nunito);
+    --font-ui: var(--font-nunito);
+}
+
+:root[data-font='bricolage'] {
+    --font-ui-display: var(--font-bricolage-grotesque);
+    --font-ui: var(--font-outfit);
+}
+
+:root[data-font='unbounded'] {
+    --font-ui-display: var(--font-unbounded);
+    --font-ui: var(--font-outfit);
+}
+
+:root[data-font='syne'] {
+    --font-ui-display: var(--font-syne);
     --font-ui: var(--font-outfit);
 }

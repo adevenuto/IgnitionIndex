@@ -379,7 +379,7 @@ const connectors = computed(() =>
                     x="0"
                     y="9"
                     text-anchor="middle"
-                    style="font-family: var(--font-ui)"
+                    style="font-family: var(--font-ui-display)"
                     font-size="28"
                     font-weight="600"
                     letter-spacing="1"

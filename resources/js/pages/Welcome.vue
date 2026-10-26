@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Check } from '@lucide/vue';
+import FontPicker from '@/components/FontPicker.vue';
 import GaugeDial from '@/components/GaugeDial.vue';
 import GaugeLegend from '@/components/GaugeLegend.vue';
 import TheIndexFigure from '@/components/marketing/TheIndexFigure.vue';
 import ShellCheckerStrip from '@/components/shell/ShellCheckerStrip.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
+import { fontPickerEnabled } from '@/lib/fonts';
 import { gaugeColor, gaugeInk, gaugeStatusLabel } from '@/lib/gauge';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { garage, login, register } from '@/routes';
 import type { GaugeDisplayStatus } from '@/types/gauges';
 
@@ -129,6 +131,17 @@ const navLinks = [
     { label: 'How it works', href: '#how' },
     { label: 'Pricing', href: '#pricing' },
 ];
+
+/*
+ * The temporary type-pairing picker, shown on the homepage only. The pairing
+ * chosen still applies across the app, since it lives on <html data-font>.
+ * Read after mount: it needs the URL and localStorage.
+ */
+const showFontPicker = ref(false);
+
+onMounted(() => {
+    showFontPicker.value = fontPickerEnabled();
+});
 </script>
 
 <template>
@@ -523,5 +536,7 @@ const navLinks = [
                 </span>
             </div>
         </footer>
+
+        <FontPicker v-if="showFontPicker" />
     </div>
 </template>
