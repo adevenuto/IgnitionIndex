@@ -3,6 +3,7 @@
 use App\Http\Controllers\CaptureController;
 use App\Http\Controllers\CaptureTranscriptionController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\FigureController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\VehicleController;
@@ -10,6 +11,10 @@ use App\Http\Controllers\VehicleGaugeOrderController;
 use App\Http\Controllers\VehicleIntervalController;
 use App\Http\Controllers\VehiclePhotoController;
 use Illuminate\Support\Facades\Route;
+
+// The homepage's story figure, framed by the homepage. See FigureController
+// for why it is a route and not a file in public/.
+Route::get('figures/log-loop', FigureController::class)->name('figures.log-loop');
 
 Route::inertia('/', 'Welcome')->name('home');
 
