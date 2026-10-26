@@ -97,7 +97,8 @@ const subtitle = () =>
             side="bottom"
             class="max-h-[90svh] touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain rounded-t-xl"
         >
-            <SheetHeader class="pb-0">
+            <!-- pr clears the 44px close button in the corner. -->
+            <SheetHeader class="pr-16 pb-0">
                 <SheetTitle class="text-h2">{{ title() }}</SheetTitle>
                 <SheetDescription class="text-body">
                     {{ subtitle() }}
