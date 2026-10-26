@@ -25,7 +25,6 @@ import {
     update as updateEvent,
 } from '@/actions/App/Http/Controllers/EventController';
 import { formatDate, formatMiles, todayIso } from '@/lib/format';
-import { laneTone } from '@/lib/lanes';
 import { boundsFor, rangeHint } from '@/lib/readings';
 import type {
     HistoryEvent,
@@ -297,13 +296,14 @@ const footer = provideSheetFooter();
                 :key="item.value"
                 :value="item.value"
                 :aria-label="item.label"
-                :class="[
-                    'ease-standard text-muted-foreground hover:bg-card hover:text-foreground h-11 flex-1 rounded-md border border-transparent text-sm font-semibold transition-colors duration-[var(--dur-fast)] data-[state=on]:shadow-sm',
-                    // Each type in its own colour (§2 lane hues).
-                    laneTone(item.value).selected,
-                ]"
+                class="ease-standard text-muted-foreground hover:bg-card hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground h-11 flex-1 rounded-md border border-transparent text-sm font-semibold transition-colors duration-[var(--dur-fast)] data-[state=on]:border-(--color-divider) data-[state=on]:shadow-sm"
             >
-                <component :is="item.icon" :class="laneTone(item.value).icon" />
+                <!--
+                    One quiet segmented control: the chosen type is lifted onto
+                    the card surface, never colour-coded per type — four hues in
+                    one row read as noise rather than as a choice.
+                -->
+                <component :is="item.icon" />
                 {{ item.label }}
             </ToggleGroupItem>
         </ToggleGroup>

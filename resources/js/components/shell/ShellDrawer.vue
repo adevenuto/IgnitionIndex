@@ -37,9 +37,10 @@ onBeforeUnmount(stopListening);
     <Sheet v-model:open="open">
         <SheetContent
             side="left"
-            class="w-[264px] border-0 bg-(--chrome-rail) p-0"
+            class="w-[264px] border-0 bg-(--chrome-rail) p-0 pt-14"
             @click="onClick"
         >
+            <!-- pt-14 above: the rail starts below the 44px close button. -->
             <SheetTitle class="sr-only">Navigation</SheetTitle>
             <ShellRail />
         </SheetContent>
