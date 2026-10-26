@@ -13,7 +13,7 @@
 >
 > **2026-10 softening.** The blueprint geometry has been softened: the `+` corner marks are
 > retired, and cards, controls and chips now use a radius scale and one soft elevation. Type is
-> Inter, the primary button is near-black, and icon tiles may take one of the four tile hues.
+> Outfit, the primary button is near-black, and icon tiles may take one of the four tile hues.
 > Pill tabs and pill badges are allowed. The chrome is light — the navy top bar, rail and
 > checker strip are retired — and default buttons and inputs are 48px. A colour pass followed:
 > the brand is vivid blue (also the primary button), each entry type has a lane hue, vehicles

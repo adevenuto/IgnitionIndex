@@ -9,8 +9,8 @@ import { cn } from '@/lib/utils';
  * The figure itself is one self-contained file, public/figures/log-loop.html
  * (vanilla JS, inline SVG, one config object), written so it can move into a
  * Blade partial unchanged. Here it is framed in an iframe so its styles and
- * script stay its own; it borrows this page's type face so it matches the
- * pairing chosen in the design trial.
+ * script stay its own; it borrows this page's type face and follows its
+ * colour theme (<html data-theme>).
  *
  * Below sm the frame turns portrait, and the figure — which picks its layout
  * from its own proportions — stacks its cards above the disc to stay legible.

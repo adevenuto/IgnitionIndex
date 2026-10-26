@@ -11,7 +11,7 @@ conflict with this document, this document wins.
 > type and chrome have changed:
 > - the `+` corner marks are retired
 > - cards, controls and chips are rounded, with one soft elevation
-> - type is Inter
+> - type is Outfit
 > - the primary button is near-black
 > - icon tiles may carry one of four tile hues
 > - the chrome is light: the navy top bar, rail and checker strip are retired (§1, §5)
@@ -113,8 +113,8 @@ In the chrome, text is `--chrome-ink` (ink) for primary and `--chrome-ink-second
 
 ## 3. Type
 
-`var(--font-heading)` and `var(--font-body)` are both **Inter** *(2026-10; was Barlow Condensed
-and Barlow)*. Headings are told apart by weight and size, not by a condensed face, so most of
+`var(--font-heading)` and `var(--font-body)` are both **Outfit** *(2026-10, chosen in a type trial;
+was Barlow Condensed and Barlow)*. Headings are told apart by weight and size, not by a condensed face, so most of
 the uppercase below is now reserved for eyebrows. Headings are sentence case with a slight
 negative tracking.
 

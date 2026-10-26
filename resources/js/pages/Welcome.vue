@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Check } from '@lucide/vue';
-import FontPicker from '@/components/FontPicker.vue';
 import GaugeDial from '@/components/GaugeDial.vue';
-import GaugeLegend from '@/components/GaugeLegend.vue';
-import TheIndexFigure from '@/components/marketing/TheIndexFigure.vue';
 import TheLoopFigure from '@/components/marketing/TheLoopFigure.vue';
-import TheOrbitFigure from '@/components/marketing/TheOrbitFigure.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
-import type { FigureChoice } from '@/lib/fonts';
-import { currentFigure, fontPickerEnabled } from '@/lib/fonts';
 import { gaugeColor, gaugeInk, gaugeStatusLabel } from '@/lib/gauge';
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import { garage, login, register } from '@/routes';
 import type { GaugeDisplayStatus } from '@/types/gauges';
 
@@ -133,21 +127,6 @@ const navLinks = [
     { label: 'How it works', href: '#how' },
     { label: 'Pricing', href: '#pricing' },
 ];
-
-/*
- * The temporary type-pairing picker, shown on the homepage only. The pairing
- * chosen still applies across the app, since it lives on <html data-font>.
- * Read after mount: it needs the URL and localStorage.
- */
-const showFontPicker = ref(false);
-
-/** Which hero figure is on trial in this browser; the isometric by default. */
-const figure = ref<FigureChoice>('index');
-
-onMounted(() => {
-    showFontPicker.value = fontPickerEnabled();
-    figure.value = currentFigure();
-});
 </script>
 
 <template>
@@ -282,8 +261,10 @@ onMounted(() => {
                     </div>
 
                     <!--
-                        Fig. 01 — the data model as an exploded isometric. It says what the
-                        headline claims (readings + intervals become gauges) in one object.
+                        Fig. 01 — the product's loop as a story: a reading is logged, it
+                        flows into the index, the gauge goes overdue, and the service
+                        brings it back. It names its own states as they change, so it
+                        needs no legend.
                     -->
                     <figure class="flex flex-col gap-(--space-3)">
                         <figcaption
@@ -296,27 +277,8 @@ onMounted(() => {
                         </figcaption>
 
                         <BlueprintFrame class="gap-0 p-(--space-6)">
-                            <TheOrbitFigure v-if="figure === 'orbit'" />
-                            <TheLoopFigure v-else-if="figure === 'loop'" />
-                            <TheIndexFigure v-else />
+                            <TheLoopFigure />
                         </BlueprintFrame>
-
-                        <!--
-                            The same three states the gauge wall names, in the
-                            same component, so the homepage cannot promise a
-                            palette the product has stopped using.
-
-                            Below the frame rather than inside the drawing:
-                            407abf6 took colour off the plane deliberately,
-                            because identity chips read as noise against an
-                            otherwise monochrome blueprint. These are §2 status
-                            colours doing a caption's job, which is a different
-                            thing from colouring the figure itself.
-
-                            Not under the story figure: it names its own
-                            states on the gauge as they change.
-                        -->
-                        <GaugeLegend v-if="figure !== 'loop'" />
                     </figure>
                 </div>
             </section>
@@ -556,7 +518,5 @@ onMounted(() => {
                 </span>
             </div>
         </footer>
-
-        <FontPicker v-if="showFontPicker" v-model:figure="figure" />
     </div>
 </template>

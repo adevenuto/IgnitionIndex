@@ -35,14 +35,11 @@
  * counterpart.
  */
 @theme inline {
-    /* ── Families. Each face's variable (--font-inter, --font-manrope, ...) is
-         emitted into <head> by laravel-vite-plugin's font handling; see
-         vite.config.ts. --font-ui-display and --font-ui, in product.css, pick a
-         heading face and a body face from them, which is how the type picker
-         swaps the whole app. `font-display` is kept as the heading hook so call
-         sites keep saying what they are, and it adds tighter tracking.
-         Deliberately NOT named --font-heading: layer 1 carries a token of that
-         name holding a literal stack, and one name with two values is a trap. ── */
+    /* ── Families. --font-outfit is emitted into <head> by laravel-vite-plugin's
+         font handling (vite.config.ts); --font-ui-display and --font-ui, in
+         product.css, point at it. Deliberately NOT named --font-heading:
+         layer 1 carries a token of that name holding a literal stack, and one
+         name with two values is a trap. ── */
     --font-sans: var(--font-ui);
     --font-display: var(--font-ui-display);
     --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
