@@ -22,6 +22,8 @@ declare module '@inertiajs/core' {
                 due_count: number;
                 needs_reading_count: number;
                 vehicle_count: number;
+                /** Set only when there is exactly one vehicle. */
+                only_vehicle_id: number | null;
                 due_next: {
                     vehicle_id: number;
                     vehicle_name: string;

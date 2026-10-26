@@ -11,7 +11,7 @@ conflict with this document, this document wins.
 > type and chrome have changed:
 > - the `+` corner marks are retired
 > - cards, controls and chips are rounded, with one soft elevation
-> - type is Inter
+> - type is Outfit
 > - the primary button is near-black
 > - icon tiles may carry one of four tile hues
 > - the chrome is light: the navy top bar, rail and checker strip are retired (§1, §5)
@@ -113,8 +113,8 @@ In the chrome, text is `--chrome-ink` (ink) for primary and `--chrome-ink-second
 
 ## 3. Type
 
-`var(--font-heading)` and `var(--font-body)` are both **Inter** *(2026-10; was Barlow Condensed
-and Barlow)*. Headings are told apart by weight and size, not by a condensed face, so most of
+`var(--font-heading)` and `var(--font-body)` are both **Outfit** *(2026-10, chosen in a type trial;
+was Barlow Condensed and Barlow)*. Headings are told apart by weight and size, not by a condensed face, so most of
 the uppercase below is now reserved for eyebrows. Headings are sentence case with a slight
 negative tracking.
 
@@ -180,6 +180,12 @@ Icons: **Lucide, stroke-width 1.5**, sized 14–19px in chrome. No filled icons,
   pinned to the bottom is removed, along with every Fleet mention in the product and on the
   landing page, until Fleet is a real initiative.)* Hover on an inactive item is a faint ink
   wash (`--chrome-hover`). The mobile drawer is the same rail on the same light ground.
+- **Phones** *(2026-10)*: the rail and the top bar's Log entry give way to a **bottom tab bar**
+  (`ShellTabBar`) — Garage · History · **Log** · Insights · More. Log is the app's core action, so
+  it is a large raised button in the accent at the centre of the bar; More opens the drawer.
+  Wherever it is pressed without a vehicle in view, Log fetches one (`useLogEntry`): no cars → add
+  one; one car → that car's page with the sheet open; several → the garage in pick mode, where a
+  tap on a card opens the sheet for it.
 - **Content**: breadcrumb → vehicle switcher row → vehicle header card → gauges.
 
 ## 6. The gauge

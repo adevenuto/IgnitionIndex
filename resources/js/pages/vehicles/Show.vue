@@ -38,7 +38,8 @@ const props = defineProps<{
 /*
  * Reminder emails deep-link here as ?log=visit, so the loop is
  * "Oil due -> tap -> Save" rather than landing someone on a page where they
- * still have to find the right button.
+ * still have to find the right button. The shell's Log button arrives with
+ * ?log=open: the sheet opens on its usual first lane.
  */
 const deepLinkLane = new URLSearchParams(window.location.search).get('log');
 const validLanes = ['fuel', 'visit', 'expense', 'odometer'] as const;
@@ -48,7 +49,14 @@ const initialLane = validLanes.includes(deepLinkLane as Lane)
     ? (deepLinkLane as Lane)
     : undefined;
 
-const quickAddOpen = ref(initialLane !== undefined);
+const quickAddOpen = ref(deepLinkLane !== null);
+
+// Opened once: drop ?log so a reload or a back-navigation does not reopen it.
+if (deepLinkLane !== null) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('log');
+    window.history.replaceState(window.history.state, '', url);
+}
 const gaugeOpen = ref(false);
 const selectedGauge = ref<Gauge | null>(null);
 

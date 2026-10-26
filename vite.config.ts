@@ -11,41 +11,11 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],
             refresh: true,
-            // The default face is preloaded; the trial faces offered by the
-            // picker (resources/js/lib/fonts.ts) load only when chosen. The
-            // picker offers PAIRINGS — a heading face and a body face — listed
-            // there; every face named by a pairing is built here.
-            fonts: (
-                [
-                    ['Inter', '--font-inter', true],
-                    ['Outfit', '--font-outfit', false],
-                    ['Sora', '--font-sora', false],
-                    ['Urbanist', '--font-urbanist', false],
-                    ['Lexend', '--font-lexend', false],
-                    ['Poppins', '--font-poppins', false],
-                    ['Jost', '--font-jost', false],
-                    ['League Spartan', '--font-league-spartan', false],
-                    ['Montserrat', '--font-montserrat', false],
-                    ['Red Hat Display', '--font-red-hat-display', false],
-                    ['Red Hat Text', '--font-red-hat-text', false],
-                    ['Albert Sans', '--font-albert-sans', false],
-                    ['Kumbh Sans', '--font-kumbh-sans', false],
-                    ['Onest', '--font-onest', false],
-                    ['Rubik', '--font-rubik', false],
-                    ['Nunito', '--font-nunito', false],
-                    [
-                        'Bricolage Grotesque',
-                        '--font-bricolage-grotesque',
-                        false,
-                    ],
-                    ['Unbounded', '--font-unbounded', false],
-                    ['Syne', '--font-syne', false],
-                ] as const
-            ).map(([family, variable, preload]) =>
-                bunny(family, {
+            // Outfit, for headings and body alike (design doc §3).
+            fonts: [
+                bunny('Outfit', {
                     weights: [400, 500, 600, 700],
-                    variable,
-                    preload,
+                    variable: '--font-outfit',
                     fallbacks: [
                         'ui-sans-serif',
                         'system-ui',
@@ -54,7 +24,7 @@ export default defineConfig({
                         'sans-serif',
                     ],
                 }),
-            ),
+            ],
         }),
         inertia(),
         tailwindcss(),

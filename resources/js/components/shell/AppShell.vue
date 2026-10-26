@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { toast } from 'vue-sonner';
 import ShellDrawer from '@/components/shell/ShellDrawer.vue';
 import ShellRail from '@/components/shell/ShellRail.vue';
+import ShellTabBar from '@/components/shell/ShellTabBar.vue';
 import ShellTopBar from '@/components/shell/ShellTopBar.vue';
 import { Toaster } from '@/components/ui/sonner';
-import { useQuickAdd } from '@/composables/useQuickAdd';
+import { useLogEntry } from '@/composables/useLogEntry';
 
 /*
  * The Ignition Index shell: a light top bar and rail around the stage, each
@@ -17,15 +17,9 @@ import { useQuickAdd } from '@/composables/useQuickAdd';
  */
 const navOpen = ref(false);
 
-const { triggerQuickAdd } = useQuickAdd();
-
-// What "add" means depends on the screen, so the page claims the button. Any
-// screen that has not claimed it says so rather than failing silently.
-function onAdd(): void {
-    if (!triggerQuickAdd()) {
-        toast.info('Open a vehicle to log an entry.');
-    }
-}
+// The Log button, wherever it is pressed: in place on a vehicle, or off to
+// get a vehicle first (see useLogEntry).
+const { startLogEntry: onAdd } = useLogEntry();
 </script>
 
 <template>
@@ -34,7 +28,7 @@ function onAdd(): void {
       ever gets, so a fixed bar would sit under the collapsing toolbar.
     -->
     <div class="bg-background flex h-dvh flex-col overflow-hidden">
-        <ShellTopBar @add="onAdd" @open-nav="navOpen = true" />
+        <ShellTopBar @add="onAdd" />
 
         <!--
           min-h-0 is load-bearing: a flex child defaults to min-height:auto, so
@@ -61,13 +55,14 @@ function onAdd(): void {
                 is what keeps the last field clear of the bottom nav and FAB.
             -->
             <main
-                class="flex min-w-0 flex-1 flex-col gap-[26px] overflow-y-auto px-[30px] pt-[26px] pb-10 max-md:px-5 md:has-[[data-flush-bottom]]:pb-0"
+                class="flex min-w-0 flex-1 flex-col gap-[26px] overflow-y-auto px-[30px] pt-[26px] pb-10 max-md:px-5 max-md:pb-[calc(6rem+env(safe-area-inset-bottom))] md:has-[[data-flush-bottom]]:pb-0"
             >
                 <slot />
             </main>
         </div>
 
         <ShellDrawer v-model:open="navOpen" />
+        <ShellTabBar @add="onAdd" @more="navOpen = true" />
         <Toaster />
     </div>
 </template>
