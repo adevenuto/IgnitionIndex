@@ -4,16 +4,15 @@
  * Kept separate from tokens.css so a future Industry re-export can overwrite
  * that file wholesale without taking these with it.
  *
- * Design doc §2 names two roles the token sheet is missing (the shell navy and
- * the service-status amber/rust) and states the opacities the navy chrome uses.
+ * Design doc §2 names the roles the token sheet is missing — the service-status
+ * amber/rust, and since 2026-10 the light chrome, surfaces and tile hues.
  * AGENTS.md says never to hard-code a hex, so every literal the artboard repeats
  * is named here once rather than re-typed at each call site.
  */
 
 :root {
-    /* ── §2 additions: the two roles with no Industry counterpart ── */
-    --shell-navy: #16233a;
-    --shell-navy-deep: #101a2b;
+    /* ── §2 addition: the service-status pair, the one role with no Industry
+         counterpart ── */
     --status-due: #c08a2e;
     --status-overdue: #b4442f;
 
@@ -24,18 +23,20 @@
     --status-due-ink: #8a6a2e;
     --status-overdue-ink: var(--status-overdue);
 
-    /* ── Ink on the navy shell ──
-       Transcribed from the artboard's literal rgba() values, which are all the
-       paper colour at a stated opacity. */
-    --shell-ink: var(--color-bg);
-    --shell-ink-secondary: rgb(242 242 243 / 0.72);
-    --shell-ink-meta: rgb(242 242 243 / 0.55);
-    --shell-ink-eyebrow: rgb(242 242 243 / 0.38);
-    --shell-hairline: rgb(242 242 243 / 0.2);
-    --shell-field-border: rgb(242 242 243 / 0.26);
-    --shell-hover: rgb(89 128 166 / 0.22);
-    --shell-checker-ink: rgb(242 242 243 / 0.16);
-    --shell-active-ink: #0d1626;
+    /* ── The chrome (§5, light since 2026-10): the top bar, the rail and the
+         drawer. Once navy with paper ink, now the same near-white as the cards
+         with a hairline edge, so the app reads as one light surface and the
+         near-black primary carries the emphasis. ── */
+    --chrome-bar: var(--surface-card);
+    --chrome-rail: var(--surface-card);
+    --chrome-ink: var(--color-text);
+    --chrome-ink-secondary: var(--color-neutral-700);
+    --chrome-ink-meta: var(--color-neutral-700);
+    /* 10px eyebrows: neutral-700 is the floor for text this small (§10). */
+    --chrome-ink-eyebrow: var(--color-neutral-700);
+    --chrome-hairline: var(--hairline-soft);
+    --chrome-field-border: var(--color-divider);
+    --chrome-hover: rgb(29 31 32 / 0.06);
 
     /* ── Gauge chrome (§6) ── */
     --gauge-track: rgb(29 31 32 / 0.14);
@@ -80,10 +81,6 @@
     --tile-teal-ink: #2f7a6d;
     --tile-slate-bg: #eceef2;
     --tile-slate-ink: #3f4652;
-
-    /* The app window's own elevation, from before frames had one. Kept for
-       the shell. */
-    --shell-elevation: 0 14px 40px rgb(22 35 58 / 0.22);
 
     /* ── Layout constants carried over from the previous system ── */
     --card-pad: var(--space-6);

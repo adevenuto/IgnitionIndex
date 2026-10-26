@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { notifications } from '@/routes';
 
 /*
- * The navy top bar, 66px.
+ * The top bar, 66px: near-white with a hairline under it (light since 2026-10).
  *
  * Design doc §5: the app's one primary action lives here, in the chrome, "not
  * floating in the content" — which is why the previous centre FAB is gone
@@ -27,13 +27,12 @@ const search = ref('');
 
 <template>
     <header
-        class="flex h-[66px] flex-none items-center gap-[18px] px-[22px]"
-        :style="{ background: 'var(--shell-navy)' }"
+        class="flex h-[66px] flex-none items-center gap-[18px] border-b border-(--chrome-hairline) bg-(--chrome-bar) px-[22px]"
     >
         <button
             type="button"
             class="-ml-1 flex size-9 flex-none items-center justify-center md:hidden"
-            :style="{ color: 'var(--shell-ink)' }"
+            :style="{ color: 'var(--chrome-ink)' }"
             @click="$emit('openNav')"
         >
             <Menu class="size-5" :stroke-width="1.6" />
@@ -43,10 +42,9 @@ const search = ref('');
         <ShellBrand class="hidden md:flex" />
         <ShellBrand compact class="md:hidden" />
 
-        <!-- Steel, not the near-black primary: ink would vanish into the navy bar. -->
+        <!-- The app's one primary action, in the chrome (§5): the near-black primary. -->
         <Button
-            size="sm"
-            class="border-accent bg-accent text-primary-foreground hover:border-accent-700 hover:bg-accent-700 active:bg-accent-800 h-[38px] flex-none gap-2 rounded-md px-5 text-[15px] font-semibold max-md:px-0 max-md:[&>span]:sr-only"
+            class="h-10 flex-none gap-2 px-5 max-md:w-10 max-md:px-0 max-md:[&>span]:sr-only"
             @click="$emit('add')"
         >
             <Plus class="size-4" :stroke-width="1.8" />
@@ -59,23 +57,22 @@ const search = ref('');
           work, which is why Enter is swallowed instead of reloading the page.
         -->
         <form
-            class="ease-standard focus-within:border-accent hidden h-[38px] min-w-[250px] items-center gap-[9px] rounded-md border px-[14px] transition-colors duration-[var(--dur-fast)] lg:flex"
-            :style="{ borderColor: 'var(--shell-field-border)' }"
+            class="ease-standard focus-within:border-accent bg-background hidden h-10 min-w-[250px] items-center gap-[9px] rounded-md border border-(--chrome-field-border) px-[14px] transition-colors duration-[var(--dur-fast)] lg:flex"
             role="search"
             @submit.prevent
         >
             <Search
                 class="size-[15px] flex-none"
                 :stroke-width="1.5"
-                :style="{ color: 'var(--shell-ink-meta)' }"
+                :style="{ color: 'var(--chrome-ink-meta)' }"
             />
             <input
                 v-model="search"
                 type="search"
                 placeholder="Search services, parts, records"
                 aria-label="Search services, parts, records"
-                class="w-full bg-transparent text-[13px] outline-none placeholder:text-(--shell-ink-meta)"
-                :style="{ color: 'var(--shell-ink)' }"
+                class="w-full bg-transparent text-[13px] outline-none placeholder:text-(--chrome-ink-meta)"
+                :style="{ color: 'var(--chrome-ink)' }"
             />
         </form>
 
@@ -86,11 +83,11 @@ const search = ref('');
                 <Bell
                     class="size-[19px]"
                     :stroke-width="1.5"
-                    :style="{ color: 'var(--shell-ink)' }"
+                    :style="{ color: 'var(--chrome-ink)' }"
                 />
                 <span
                     v-if="unread"
-                    class="absolute -top-[5px] -right-[7px] h-4 min-w-4 px-1 text-center text-[10px]/[16px] font-bold text-white"
+                    class="absolute -top-[5px] -right-[7px] h-4 min-w-4 rounded-full px-1 text-center text-[10px]/[16px] font-bold text-white"
                     :style="{ background: 'var(--status-overdue)' }"
                 >
                     {{ unread > 9 ? '9+' : unread }}
@@ -102,7 +99,7 @@ const search = ref('');
 
             <div
                 class="hidden h-[26px] w-px md:block"
-                :style="{ background: 'var(--shell-hairline)' }"
+                :style="{ background: 'var(--chrome-hairline)' }"
                 aria-hidden="true"
             />
 

@@ -30,8 +30,8 @@ defineProps<{
             class="ease-standard flex w-[150px] flex-none flex-col gap-[5px] rounded-md border px-[13px] py-[11px] transition-colors duration-[var(--dur-fast)]"
             :class="
                 vehicle.is_active
-                    ? 'border-(--shell-navy) bg-(--shell-navy)'
-                    : 'hover:border-accent border-(--color-divider)'
+                    ? 'border-primary bg-primary'
+                    : 'hover:border-accent bg-card border-(--hairline-soft)'
             "
             :aria-current="vehicle.is_active ? 'page' : undefined"
         >
@@ -48,7 +48,7 @@ defineProps<{
                     class="font-display truncate text-[17px]/none font-semibold"
                     :class="
                         vehicle.is_active
-                            ? 'text-(--color-bg)'
+                            ? 'text-primary-foreground'
                             : 'text-(--color-text)'
                     "
                 >
@@ -59,7 +59,7 @@ defineProps<{
                 class="truncate text-[11px]"
                 :class="
                     vehicle.is_active
-                        ? 'text-(--shell-ink-meta)'
+                        ? 'text-primary-foreground/70'
                         : 'text-(--color-neutral-700)'
                 "
             >

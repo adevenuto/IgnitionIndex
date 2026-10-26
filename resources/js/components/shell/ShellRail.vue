@@ -24,7 +24,7 @@ const hasDueNext = computed(
          the aside scroll rather than clipping its own overflow. -->
     <div class="flex min-h-full flex-col px-[14px] py-[22px]">
         <p
-            class="ii-eyebrow px-2 pb-3 tracking-[0.16em] text-[var(--shell-ink-eyebrow)]"
+            class="ii-eyebrow px-2 pb-3 tracking-[0.16em] text-[var(--chrome-ink-eyebrow)]"
         >
             Workspace
         </p>
@@ -41,7 +41,7 @@ const hasDueNext = computed(
         <template v-if="hasDueNext">
             <div class="h-[30px]" aria-hidden="true" />
             <p
-                class="ii-eyebrow px-2 pb-3 tracking-[0.16em] text-[var(--shell-ink-eyebrow)]"
+                class="ii-eyebrow px-2 pb-3 tracking-[0.16em] text-[var(--chrome-ink-eyebrow)]"
             >
                 Due next
             </p>

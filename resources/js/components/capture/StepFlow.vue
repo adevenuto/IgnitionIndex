@@ -78,7 +78,6 @@ const nextLabel = computed(() => {
                     type="button"
                     variant="outline"
                     size="lg"
-                    class="text-[14px]"
                     @click="emit('back')"
                 >
                     <ArrowLeft :stroke-width="1.5" />
@@ -88,7 +87,7 @@ const nextLabel = computed(() => {
                     v-if="!atReview"
                     type="button"
                     size="lg"
-                    class="group flex-1 text-[14px]"
+                    class="group flex-1"
                     @click="emit('next')"
                 >
                     {{ nextLabel }}
@@ -106,7 +105,6 @@ const nextLabel = computed(() => {
                 type="button"
                 variant="outline"
                 size="lg"
-                class="text-[14px]"
                 @click="emit('back')"
             >
                 <ArrowLeft :stroke-width="1.5" />
@@ -116,7 +114,7 @@ const nextLabel = computed(() => {
                 v-if="!atReview"
                 type="button"
                 size="lg"
-                class="group flex-1 text-[14px]"
+                class="group flex-1"
                 @click="emit('next')"
             >
                 {{ nextLabel }}

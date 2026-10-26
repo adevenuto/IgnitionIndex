@@ -669,7 +669,7 @@ const footer = provideSheetFooter();
                 v-if="!assisted || atReview"
                 type="submit"
                 size="lg"
-                class="flex-1 text-[14px]"
+                class="flex-1"
                 :disabled="processing"
             >
                 {{

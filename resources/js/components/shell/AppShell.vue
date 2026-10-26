@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
-import ShellCheckerStrip from '@/components/shell/ShellCheckerStrip.vue';
 import ShellDrawer from '@/components/shell/ShellDrawer.vue';
 import ShellRail from '@/components/shell/ShellRail.vue';
 import ShellTopBar from '@/components/shell/ShellTopBar.vue';
@@ -9,15 +8,12 @@ import { Toaster } from '@/components/ui/sonner';
 import { useQuickAdd } from '@/composables/useQuickAdd';
 
 /*
- * The Ignition Index shell: navy bar, checker strip, navy rail, light stage.
+ * The Ignition Index shell: a light top bar and rail around the stage, each
+ * edged with a hairline (design doc §5, light since 2026-10).
  *
  * The breakpoint switch is CSS-only (Tailwind md:), deliberately — a JS
  * useMediaQuery returns false on the first tick, so a phone would flash the
  * desktop rail before correcting itself.
- *
- * The checker strip is rendered here rather than by any screen, so design doc
- * §1's "exactly once per page" is structural rather than a convention someone
- * has to remember.
  */
 const navOpen = ref(false);
 
@@ -39,7 +35,6 @@ function onAdd(): void {
     -->
     <div class="bg-background flex h-dvh flex-col overflow-hidden">
         <ShellTopBar @add="onAdd" @open-nav="navOpen = true" />
-        <ShellCheckerStrip />
 
         <!--
           min-h-0 is load-bearing: a flex child defaults to min-height:auto, so
@@ -48,8 +43,7 @@ function onAdd(): void {
         -->
         <div class="flex min-h-0 flex-1 items-stretch">
             <aside
-                class="hidden w-[216px] flex-none overflow-y-auto md:block"
-                :style="{ background: 'var(--shell-navy-deep)' }"
+                class="hidden w-[216px] flex-none overflow-y-auto border-r border-(--chrome-hairline) bg-(--chrome-rail) md:block"
             >
                 <ShellRail />
             </aside>
