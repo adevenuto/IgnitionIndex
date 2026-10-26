@@ -1,24 +1,23 @@
 /*
- * Layer 1c — themes on trial (2026-10), chosen in the homepage design-trial
- * panel and applied through <html data-theme>. Daylight, the light look, is
- * no attribute at all: it is product.css as written.
+ * Layer 1c — the colour themes (Settings → Appearance; App\Enums\Theme),
+ * applied through <html data-theme> and <html data-scheme>, both rendered by
+ * app.blade.php from the person's choice. Volt is the default. Daylight is
+ * product.css as written, with no overrides.
  *
- * Each theme is one accent with everything else tuned to it, following
- * Anthony's references: Volt is charcoal with an electric lime (the EV
- * dashboard), Indigo Night is deep navy with indigo (Laravael UI's dark
- * mode). A theme re-points tokens and nothing else — grounds, the neutral and
- * accent ramps (both inverted, so 100 is a deep tint to sit on and 700 a
- * light ink to read), primary, status, lanes, tiles, gauges and elevation —
- * because every component already reads those tokens.
+ * Each theme is one accent with everything else tuned to it. A theme
+ * re-points tokens and nothing else — grounds, the neutral and accent ramps,
+ * primary, status, lanes, tiles, gauges and elevation — because every
+ * component already reads those tokens. Dark themes invert both ramps, so 100
+ * is a deep tint to sit on and 700 a light ink to read; what every dark
+ * theme shares hangs off data-scheme='dark'.
  *
- * Unlayered :root[data-theme] selectors, so they beat both Industry's @theme
- * layer and product.css's :root. TEMPORARY with the rest of the trial: once a
- * theme is chosen it becomes the tokens and this file goes.
+ * Unlayered :root[...] selectors, so they beat both Industry's @theme layer
+ * and product.css's :root. A new theme is a block here, a case in the enum,
+ * and palettes in the two homepage figures.
  */
 
-/* ── Shared by both dark themes ─────────────────────────────────────────── */
-:root[data-theme='volt'],
-:root[data-theme='indigo-night'] {
+/* ── Shared by every dark theme ─────────────────────────────────────────── */
+:root[data-scheme='dark'] {
     color-scheme: dark;
 
     --color-divider: color-mix(in srgb, var(--color-text) 14%, transparent);
@@ -39,7 +38,17 @@
     --tile-slate-bg: var(--color-surface);
     --tile-slate-ink: var(--color-neutral-800);
 
-    /* Lanes sit on a deep tint of themselves and are read in a light step. */
+    /* Lane hues lifted for dark grounds; each sits on a deep tint of itself
+       and is read in a light step. A theme may retune them. */
+    --lane-fuel: #ff8a3d;
+    --lane-fuel-ink: #ffb07a;
+    --lane-visit: #a78bfa;
+    --lane-visit-ink: #c9b8fd;
+    --lane-expense: #34d399;
+    --lane-expense-ink: #7be6bd;
+    --lane-odometer: #38bdf8;
+    --lane-odometer-ink: #84d6fb;
+
     --lane-fuel-bg: color-mix(
         in oklab,
         var(--lane-fuel) 20%,
@@ -99,16 +108,6 @@
     --status-due-ink: #f2bf66;
     --status-overdue-ink: #ff8a73;
 
-    /* Lane hues lifted to sit at the lime's brightness. */
-    --lane-fuel: #ff8a3d;
-    --lane-fuel-ink: #ffb07a;
-    --lane-visit: #a78bfa;
-    --lane-visit-ink: #c9b8fd;
-    --lane-expense: #34d399;
-    --lane-expense-ink: #7be6bd;
-    --lane-odometer: #38bdf8;
-    --lane-odometer-ink: #84d6fb;
-
     --duotone-ink: #6f8f1e;
 }
 
@@ -152,16 +151,132 @@
     --status-due-ink: #f4c46c;
     --status-overdue-ink: #ff917b;
 
-    --lane-fuel: #fb8c4a;
-    --lane-fuel-ink: #ffb486;
-    --lane-visit: #a78bfa;
-    --lane-visit-ink: #c9b8fd;
-    --lane-expense: #34d399;
-    --lane-expense-ink: #7be6bd;
-    --lane-odometer: #38bdf8;
-    --lane-odometer-ink: #84d6fb;
-
     --duotone-ink: #4a50c8;
+}
+
+/* ── Lagoon: dark teal-slate and aqua ──────────────────────────────────── */
+:root[data-theme='lagoon'] {
+    --color-bg: #091416;
+    --color-surface: #16292b;
+    --surface-card: #0f1f21;
+    --color-text: #e4f2f0;
+
+    --color-neutral-100: #12222a;
+    --color-neutral-200: #182c2f;
+    --color-neutral-300: #223a3d;
+    --color-neutral-400: #355155;
+    --color-neutral-500: #527074;
+    --color-neutral-600: #7a9894;
+    --color-neutral-700: #9fb9b6;
+    --color-neutral-800: #c3d6d3;
+    --color-neutral-900: #dfece9;
+
+    --color-accent: #2dd4bf;
+    --color-accent-100: #0f2e2c;
+    --color-accent-200: #12403c;
+    --color-accent-300: #155e57;
+    --color-accent-400: #1a8a7e;
+    --color-accent-500: #22b3a3;
+    --color-accent-600: #2dd4bf;
+    --color-accent-700: #6ee7d6;
+    --color-accent-800: #a3f1e5;
+    --color-accent-900: #d2f8f2;
+
+    --primary-foreground: #062420;
+    --primary-hover: #5eead4;
+    --primary-active: #14b8a6;
+
+    --status-due: #e8ad44;
+    --status-overdue: #f2735c;
+    --status-due-ink: #f2c06a;
+    --status-overdue-ink: #ff917b;
+
+    /* Expense's emerald sits too near the aqua: a warmer green here. */
+    --lane-expense: #86d36a;
+    --lane-expense-ink: #b2e59f;
+
+    --duotone-ink: #1a8a7e;
+}
+
+/* ── Neon: plum-black and hot pink ──────────────────────────────────────── */
+:root[data-theme='neon'] {
+    --color-bg: #110c15;
+    --color-surface: #241a2b;
+    --surface-card: #1a1320;
+    --color-text: #f4eaf6;
+
+    --color-neutral-100: #1d1523;
+    --color-neutral-200: #261c2d;
+    --color-neutral-300: #34283c;
+    --color-neutral-400: #4c3d56;
+    --color-neutral-500: #6c5b76;
+    --color-neutral-600: #93819c;
+    --color-neutral-700: #b9a8bf;
+    --color-neutral-800: #d6c9da;
+    --color-neutral-900: #ebe2ee;
+
+    --color-accent: #f472b6;
+    --color-accent-100: #331627;
+    --color-accent-200: #4a1c37;
+    --color-accent-300: #6e2453;
+    --color-accent-400: #a33478;
+    --color-accent-500: #db4f9c;
+    --color-accent-600: #f472b6;
+    --color-accent-700: #f9a8d4;
+    --color-accent-800: #fbcfe8;
+    --color-accent-900: #fde7f3;
+
+    --primary-foreground: #1a0b14;
+    --primary-hover: #f9a8d4;
+    --primary-active: #ec4899;
+
+    --status-due: #eab04a;
+    --status-overdue: #f2735c;
+    --status-due-ink: #f4c46c;
+    --status-overdue-ink: #ff917b;
+
+    /* Service's violet sits too near the pink: a cooler blue-violet here. */
+    --lane-visit: #8b9cfb;
+    --lane-visit-ink: #b7c2fd;
+
+    --duotone-ink: #a33478;
+}
+
+/* ── Sandstone: light, warm, deep teal ──────────────────────────────────── */
+:root[data-theme='sandstone'] {
+    --color-bg: #f4f1ec;
+    --color-surface: #ebe6de;
+    --surface-card: #fcfaf7;
+    --color-text: #24211d;
+
+    --color-neutral-100: #f7f4ef;
+    --color-neutral-200: #ebe6de;
+    --color-neutral-300: #d9d2c7;
+    --color-neutral-400: #bdb4a6;
+    --color-neutral-500: #9c9285;
+    --color-neutral-600: #7d7468;
+    --color-neutral-700: #625b52;
+    --color-neutral-800: #47423b;
+    --color-neutral-900: #2f2b26;
+
+    --color-accent: #0f766e;
+    --color-accent-100: #e3f3f1;
+    --color-accent-200: #c5e7e2;
+    --color-accent-300: #94d3ca;
+    --color-accent-400: #5bb8ab;
+    --color-accent-500: #2a9a8d;
+    --color-accent-600: #0f766e;
+    --color-accent-700: #0d5f59;
+    --color-accent-800: #0b4c47;
+    --color-accent-900: #093c38;
+
+    --hairline-soft: rgb(36 33 29 / 0.1);
+    --color-divider: color-mix(in srgb, var(--color-text) 15%, transparent);
+    --chrome-hover: rgb(36 33 29 / 0.06);
+    --tile-slate-bg: #ece6dc;
+    --tile-slate-ink: #4a443c;
+
+    --duotone-ink: #3d6b65;
 }
 
 /*
@@ -172,12 +287,10 @@
     display: none;
 }
 
-:root[data-theme='volt'] .ii-logo-light,
-:root[data-theme='indigo-night'] .ii-logo-light {
+:root[data-scheme='dark'] .ii-logo-light {
     display: none;
 }
 
-:root[data-theme='volt'] .ii-logo-dark,
-:root[data-theme='indigo-night'] .ii-logo-dark {
+:root[data-scheme='dark'] .ii-logo-dark {
     display: block;
 }

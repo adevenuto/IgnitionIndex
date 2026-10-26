@@ -1558,6 +1558,78 @@
                         'hub-side-2': '#4a50c8',
                         'hub-side-3': '#1c2150',
                     },
+                    lagoon: {
+                        ink: '#e4f2f0',
+                        'ink-soft': '#9fb9b6',
+                        brand: '#2dd4bf',
+                        'brand-deep': '#6ee7d6',
+                        amber: '#e8ad44',
+                        red: '#f2735c',
+                        green: '#86d36a',
+                        ring: 'rgba(228, 242, 240, 0.22)',
+                        tick: 'rgba(228, 242, 240, 0.26)',
+                        'tick-major': 'rgba(228, 242, 240, 0.5)',
+                        track: 'rgba(228, 242, 240, 0.12)',
+                        card: '#0f1f21',
+                        hairline: 'rgba(255, 255, 255, 0.08)',
+                        'brand-light': '#a3f1e5',
+                        'brand-tint': 'rgba(45, 212, 191, 0.16)',
+                        'brand-halo': 'rgba(45, 212, 191, 0.2)',
+                        'hub-top-1': '#a3f1e5',
+                        'hub-top-2': '#2dd4bf',
+                        'hub-top-3': '#1a8a7e',
+                        'hub-side-1': '#12403c',
+                        'hub-side-2': '#155e57',
+                        'hub-side-3': '#0f2e2c',
+                    },
+                    neon: {
+                        ink: '#f4eaf6',
+                        'ink-soft': '#b9a8bf',
+                        brand: '#f472b6',
+                        'brand-deep': '#f9a8d4',
+                        amber: '#eab04a',
+                        red: '#f2735c',
+                        green: '#34d399',
+                        ring: 'rgba(244, 234, 246, 0.22)',
+                        tick: 'rgba(244, 234, 246, 0.26)',
+                        'tick-major': 'rgba(244, 234, 246, 0.5)',
+                        track: 'rgba(244, 234, 246, 0.12)',
+                        card: '#1a1320',
+                        hairline: 'rgba(255, 255, 255, 0.08)',
+                        'brand-light': '#fbcfe8',
+                        'brand-tint': 'rgba(244, 114, 182, 0.16)',
+                        'brand-halo': 'rgba(244, 114, 182, 0.2)',
+                        'hub-top-1': '#fbcfe8',
+                        'hub-top-2': '#f472b6',
+                        'hub-top-3': '#db4f9c',
+                        'hub-side-1': '#4a1c37',
+                        'hub-side-2': '#6e2453',
+                        'hub-side-3': '#331627',
+                    },
+                    sandstone: {
+                        ink: '#24211d',
+                        'ink-soft': '#625b52',
+                        brand: '#0f766e',
+                        'brand-deep': '#0d5f59',
+                        amber: '#c08a2e',
+                        red: '#b4442f',
+                        green: '#3f8a5f',
+                        ring: 'rgba(36, 33, 29, 0.26)',
+                        tick: 'rgba(36, 33, 29, 0.3)',
+                        'tick-major': 'rgba(36, 33, 29, 0.55)',
+                        track: 'rgba(36, 33, 29, 0.1)',
+                        card: '#fcfaf7',
+                        hairline: 'rgba(36, 33, 29, 0.1)',
+                        'brand-light': '#94d3ca',
+                        'brand-tint': 'rgba(15, 118, 110, 0.12)',
+                        'brand-halo': 'rgba(15, 118, 110, 0.16)',
+                        'hub-top-1': '#94d3ca',
+                        'hub-top-2': '#2a9a8d',
+                        'hub-top-3': '#0f766e',
+                        'hub-side-1': '#0b4c47',
+                        'hub-side-2': '#0d5f59',
+                        'hub-side-3': '#093c38',
+                    },
                 };
 
                 function adoptHostTheme(hostDoc) {
@@ -1575,7 +1647,10 @@
                     }
                     // Match the host's colour scheme, or the browser paints an
                     // opaque white backdrop behind a frame whose scheme differs.
-                    root.style.colorScheme = palette ? 'dark' : 'light';
+                    root.style.colorScheme =
+                        hostDoc?.documentElement.dataset.scheme === 'dark'
+                            ? 'dark'
+                            : 'light';
                 }
 
                 const host = adoptHostFont();
@@ -1587,7 +1662,11 @@
                         remeasure();
                     }).observe(host.documentElement, {
                         attributes: true,
-                        attributeFilter: ['data-font', 'data-theme'],
+                        attributeFilter: [
+                            'data-font',
+                            'data-theme',
+                            'data-scheme',
+                        ],
                     });
                 }
 

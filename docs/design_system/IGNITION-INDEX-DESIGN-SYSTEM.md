@@ -73,6 +73,14 @@ takes the deep step for its **text**, so the color coding survives intact.
 The two status colors are functional: they encode service state and nothing else. Do not
 introduce a green "all good" state; on interval is the brand blue.
 
+**Themes** *(2026-10)*. Colour is themable. Each person picks a theme in Settings →
+Appearance; the default is **Volt** (charcoal with an electric lime). A theme is a block of token
+overrides in `resources/css/ignition/themes.css`, keyed on `<html data-theme>`, with what every
+dark theme shares on `data-scheme='dark'`. Dark themes invert the neutral and accent ramps (100 is
+a deep tint to sit on, 700 a light ink to read), lift the status and lane inks, and use a deeper
+elevation. Themes: Volt, Indigo Night, Lagoon, Neon (dark), Daylight, Sandstone (light). The
+values below are **Daylight's**; read every role as "the theme's" rather than a fixed hex.
+
 **Colour pass** *(2026-10)*. The palette widened so the light design carries colour. Each role
 below has one job; none of them stands in for status.
 

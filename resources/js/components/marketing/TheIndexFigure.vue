@@ -86,7 +86,15 @@ type Palette = {
 };
 
 /** One per theme on trial (resources/css/ignition/themes.css). */
-const PALETTES: Record<'daylight' | 'volt' | 'indigo-night', Palette> = {
+type ThemeId =
+    | 'daylight'
+    | 'volt'
+    | 'indigo-night'
+    | 'lagoon'
+    | 'neon'
+    | 'sandstone';
+
+const PALETTES: Record<ThemeId, Palette> = {
     daylight: {
         paper: '#f2f2f3',
         ink: '29,31,32',
@@ -129,17 +137,58 @@ const PALETTES: Record<'daylight' | 'volt' | 'indigo-night', Palette> = {
         due: '#eab04a',
         overdue: '#f2735c',
     },
+    lagoon: {
+        paper: '#0f1f21',
+        ink: '228,242,240',
+        inkHex: '#e4f2f0',
+        accent: '#2dd4bf',
+        accentRgb: '45,212,191',
+        accentTop: '#6ee7d6',
+        accentLeft: '#1a8a7e',
+        onAccent: '#062420',
+        onAccentEdge: 'rgba(6,36,32,0.3)',
+        ground: '#0c1a1c',
+        due: '#e8ad44',
+        overdue: '#f2735c',
+    },
+    neon: {
+        paper: '#1a1320',
+        ink: '244,234,246',
+        inkHex: '#f4eaf6',
+        accent: '#f472b6',
+        accentRgb: '244,114,182',
+        accentTop: '#f9a8d4',
+        accentLeft: '#a33478',
+        onAccent: '#1a0b14',
+        onAccentEdge: 'rgba(26,11,20,0.3)',
+        ground: '#150f1a',
+        due: '#eab04a',
+        overdue: '#f2735c',
+    },
+    sandstone: {
+        paper: '#f4f1ec',
+        ink: '36,33,29',
+        inkHex: '#24211d',
+        accent: '#0f766e',
+        accentRgb: '15,118,110',
+        accentTop: '#2a9a8d',
+        accentLeft: '#0b4c47',
+        onAccent: '#fcfaf7',
+        onAccentEdge: 'rgba(252,250,247,0.34)',
+        ground: '#ece7df',
+        due: '#c08a2e',
+        overdue: '#b4442f',
+    },
 };
 
-const themeId = ref<keyof typeof PALETTES>('daylight');
+const themeId = ref<ThemeId>('volt');
 const P = computed(() => PALETTES[themeId.value]);
 /** The theme's ink at an opacity. */
 const inkA = (alpha: number) => `rgba(${P.value.ink},${alpha})`;
 
 function readTheme(): void {
     const theme = document.documentElement.dataset.theme;
-    themeId.value =
-        theme === 'volt' || theme === 'indigo-night' ? theme : 'daylight';
+    themeId.value = theme && theme in PALETTES ? (theme as ThemeId) : 'volt';
 }
 
 type LayerKind = 'wire' | 'solid';

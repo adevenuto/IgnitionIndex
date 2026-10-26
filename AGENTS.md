@@ -17,7 +17,13 @@
 > Pill tabs and pill badges are allowed. The chrome is light — the navy top bar, rail and
 > checker strip are retired — and default buttons and inputs are 48px. A colour pass followed:
 > the brand is vivid blue (also the primary button), each entry type has a lane hue, vehicles
-> show their paint colour, and soft glows are allowed on grounds — see the doc's §2. The doc's §2–§4 describe the current rules; where an
+> show their paint colour, and soft glows are allowed on grounds — see the doc's §2.
+>
+> **Themes.** Colour now comes from a theme the user picks in Settings → Appearance
+> (`App\Enums\Theme`, `resources/css/ignition/themes.css`, rendered on `<html data-theme
+data-scheme>`). **Volt** (charcoal + lime) is the default; Indigo Night, Lagoon, Neon, Daylight
+> and Sandstone are the others. Never hard-code a colour a theme should own: use the tokens, and
+> check new UI in at least one dark and one light theme. The doc's §2–§4 describe the current rules; where an
 > older comment in the code cites the square, mark-framed geometry, the doc wins.
 >
 > **Do** take every color, font, space and radius from the CSS variables in `styles.css`
