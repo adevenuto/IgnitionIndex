@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import CaptureConfirmation from '@/components/capture/CaptureConfirmation.vue';
 import CaptureFieldInput from '@/components/capture/CaptureFieldInput.vue';
 import CaptureStep from '@/components/capture/CaptureStep.vue';
 import ReviewCard from '@/components/capture/ReviewCard.vue';
@@ -11,10 +12,12 @@ import { useCaptureFlow } from '@/composables/useCaptureFlow';
 import { useCaptureReader } from '@/composables/useCaptureReader';
 import { provideVoiceInput } from '@/composables/useVoiceInput';
 import type {
+    CaptureContext,
     CaptureField,
     CaptureLane,
     CaptureReading,
 } from '@/lib/capture/lanes';
+import { describeFieldValue } from '@/lib/capture/lanes';
 import { resolveSpeechLocally } from '@/lib/capture/resolveSpeech';
 import { formatNumber } from '@/lib/format';
 
@@ -35,6 +38,8 @@ const props = withDefaults(
     defineProps<{
         lane: CaptureLane;
         vehicleId: number;
+        /** What is known about the vehicle: the lane's checks run against it. */
+        context: CaptureContext;
         /** A one-tap value per field, e.g. the odometer estimate. */
         suggestions?: Record<string, { label: string; value: number }>;
         /** The quick-add form's server errors, by posted field name. */
@@ -51,7 +56,7 @@ const emit = defineEmits<{
 /** Lets the sheet show its Save button only once the flow reaches review. */
 const atReview = defineModel<boolean>('atReview', { default: false });
 
-const flow = useCaptureFlow(props.lane);
+const flow = useCaptureFlow(props.lane, () => props.context);
 const reader = useCaptureReader(props.lane.id, () => props.vehicleId);
 // Held here rather than per step, so the steps share one microphone.
 provideVoiceInput(() => props.vehicleId);
@@ -72,6 +77,30 @@ const stepSuggestions = computed(() =>
 
 const message = computed(() => reader.error.value ?? flow.note.value);
 
+/** The photo being read, shown back under the scan line until the read ends. */
+const scanning = ref<File | null>(null);
+
+const reference = computed(() =>
+    flow.step.value?.reference === 'lastOdometer' &&
+    props.context.lastOdometer !== null
+        ? `${formatNumber(props.context.lastOdometer)} mi`
+        : null,
+);
+
+/** The last capture filled something on the step now showing. */
+const capturedHere = computed(
+    () =>
+        flow.outcome.value?.applied.some((key) =>
+            flow.step.value?.fields.includes(key),
+        ) ?? false,
+);
+
+function filledAt(key: string): number | null {
+    const outcome = flow.outcome.value;
+
+    return outcome?.applied.includes(key) ? outcome.at : null;
+}
+
 watch(
     flow.atReview,
     (value) => {
@@ -81,7 +110,11 @@ watch(
 );
 
 async function onPhoto(file: File): Promise<void> {
-    const reading = await reader.read(file);
+    scanning.value = file;
+
+    const reading = await reader.read(file).finally(() => {
+        scanning.value = null;
+    });
 
     if (reading) {
         flow.apply(reading, 'photo');
@@ -110,20 +143,7 @@ async function onSpeech(transcript: string): Promise<void> {
 function display(field: CaptureField): string | null {
     const raw = flow.values[field.key];
 
-    if (raw === '') {
-        return null;
-    }
-
-    const value = Number(raw);
-
-    switch (field.unit) {
-        case 'usd':
-            return `$${value.toFixed(2)}`;
-        case 'gal':
-            return `${raw} gal`;
-        case 'mi':
-            return `${formatNumber(value)} mi`;
-    }
+    return raw === '' ? null : describeFieldValue(field, Number(raw));
 }
 </script>
 
@@ -148,7 +168,10 @@ function display(field: CaptureField): string | null {
             :key="flow.step.value.id"
             :step="flow.step.value"
             :busy="reader.reading.value"
+            :scanning="scanning"
+            :reference="reference"
             :message="message"
+            :captured="capturedHere"
             @photo="onPhoto"
             @speech="onSpeech"
         >
@@ -159,11 +182,22 @@ function display(field: CaptureField): string | null {
                 :model-value="flow.values[field.key]"
                 :provenance="flow.provenance[field.key]"
                 :flag="flow.flags[field.key]"
+                :filled-at="filledAt(field.key)"
                 @update:model-value="
                     flow.set(field.key, String($event), 'typed')
                 "
                 @enter="flow.next()"
             />
+
+            <template #status>
+                <!-- Every field, not just this step's: one sentence can fill the next step too. -->
+                <CaptureConfirmation
+                    v-if="flow.outcome.value"
+                    :outcome="flow.outcome.value"
+                    :fields="lane.fields"
+                    :values="flow.values"
+                />
+            </template>
 
             <template #after>
                 <div

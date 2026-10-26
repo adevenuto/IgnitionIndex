@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import { CircleAlert } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import CaptureProvenance from '@/components/capture/CaptureProvenance.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { CaptureField, Provenance } from '@/lib/capture/lanes';
 
 /*
- * One captured value, large enough to check at arm's length at a pump.
+ * One captured value, set as a readout: large enough to check at arm's length
+ * at a pump, with its unit inside the field rather than trailing after it.
  *
  * It carries no `name`: the flow posts its values through hidden inputs, so a
  * field can be on screen, or not, without changing what is submitted. Enter
  * moves the flow on rather than submitting the sheet from the middle of it.
+ *
+ * A value a capture just filled takes the steel border for a moment, so the
+ * eye goes to what changed. Colour only — nothing in the system moves to say so.
  */
 const props = defineProps<{
     field: CaptureField;
     provenance: Provenance | null;
     flag: string | null;
+    /** When a capture last filled this field, to mark it as just filled. */
+    filledAt: number | null;
 }>();
 
 const value = defineModel<string>({ required: true });
@@ -30,6 +36,24 @@ const step = computed(() =>
     props.field.precision === 0 ? '1' : String(10 ** -props.field.precision),
 );
 const units = { mi: 'mi', gal: 'gal', usd: '$' } as const;
+
+const fresh = ref(false);
+let fade = 0;
+
+watch(
+    () => props.filledAt,
+    (at) => {
+        window.clearTimeout(fade);
+        fresh.value = at !== null;
+
+        if (at !== null) {
+            fade = window.setTimeout(() => (fresh.value = false), 1600);
+        }
+    },
+    { immediate: true },
+);
+
+onBeforeUnmount(() => window.clearTimeout(fade));
 </script>
 
 <template>
@@ -39,10 +63,10 @@ const units = { mi: 'mi', gal: 'gal', usd: '$' } as const;
             <CaptureProvenance :provenance="provenance" />
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="relative">
             <span
                 v-if="field.unit === 'usd'"
-                class="font-display text-h3 text-(--color-neutral-700)"
+                class="font-display text-h2 pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-(--color-neutral-700)"
                 aria-hidden="true"
                 >$</span
             >
@@ -55,12 +79,16 @@ const units = { mi: 'mi', gal: 'gal', usd: '$' } as const;
                 :inputmode="field.precision === 0 ? 'numeric' : 'decimal'"
                 :placeholder="field.placeholder"
                 :aria-describedby="flag ? `${id}-flag` : undefined"
-                class="font-display text-h2 md:text-h2 h-14 tabular-nums"
+                class="font-display text-readout md:text-readout h-18 [appearance:textfield] tabular-nums transition-[color,border-color,box-shadow] duration-[var(--dur-slow)] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                :class="[
+                    field.unit === 'usd' ? 'pl-10' : 'pr-16',
+                    fresh && 'border-accent',
+                ]"
                 @keydown.enter.prevent="emit('enter')"
             />
             <span
                 v-if="field.unit !== 'usd'"
-                class="text-body text-(--color-neutral-700)"
+                class="font-display text-title pointer-events-none absolute top-1/2 right-5 -translate-y-1/2 text-(--color-neutral-700)"
                 aria-hidden="true"
                 >{{ units[field.unit] }}</span
             >

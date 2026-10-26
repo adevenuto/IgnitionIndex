@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import type { CaptureReading } from '@/lib/capture/lanes';
+import type { CaptureContext, CaptureReading } from '@/lib/capture/lanes';
 import { fuelLane } from '@/lib/capture/fuel';
 import { formatNumber, todayIso } from '@/lib/format';
 import type { QuickAddVehicle } from '@/types/garage';
@@ -33,6 +33,11 @@ const atReview = defineModel<boolean>('atReview', { default: false });
 const occurredOn = ref(todayIso());
 const fullTank = ref(true);
 const notes = ref('');
+
+const context = computed((): CaptureContext => ({
+    lastOdometer: props.vehicle.last_odometer,
+    projectedOdometer: props.vehicle.projected_odometer ?? null,
+}));
 
 const suggestions = computed(
     (): Record<string, { label: string; value: number }> => {
@@ -78,6 +83,7 @@ function perGallon(values: Record<string, string>): string | null {
         v-model:at-review="atReview"
         :lane="fuelLane"
         :vehicle-id="vehicle.id"
+        :context="context"
         :suggestions="suggestions"
         :errors="errors"
         @reading="onReading"

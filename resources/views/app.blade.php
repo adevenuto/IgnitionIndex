@@ -18,6 +18,15 @@
 
         <meta name="theme-color" content="#f2f2f3">
 
+        {{-- The type face chosen in the trial picker (resources/js/lib/fonts.ts),
+             applied before first paint so it never flashes the default. --}}
+        <script>
+            try {
+                var face = localStorage.getItem('ii-font');
+                if (face) document.documentElement.dataset.font = face;
+            } catch (e) {}
+        </script>
+
         {{-- Pre-launch. robots.txt asks crawlers not to fetch the site; this asks
              them not to index it if they do anyway, which is the half that keeps
              it out of results. Laravel Cloud only sends X-Robots-Tag on its own

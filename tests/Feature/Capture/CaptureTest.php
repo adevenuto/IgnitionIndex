@@ -176,6 +176,17 @@ test('an implausible price per gallon is flagged', function () {
         ->assertJsonPath('flags.0.message', 'That works out to $38.50 a gallon.');
 });
 
+test('gallons no tank could take, or too few for a fill-up, are flagged', function (float $gallons, string $message) {
+    $this->reader->answer = fuelAnswer(['gallons' => $gallons]);
+
+    capture(['transcript' => 'pump'])
+        ->assertJsonPath('flags.0.field', 'gallons')
+        ->assertJsonPath('flags.0.message', $message);
+})->with([
+    'too many' => [125.0, '125 gallons is more than a tank holds.'],
+    'too few' => [0.2, '0.2 gallons is too little for a fill-up.'],
+]);
+
 test('pump numbers that agree raise nothing', function () {
     $this->reader->answer = fuelAnswer(['odometer' => 62_400, 'gallons' => 12.5, 'total_cost' => 48.24, 'price_per_gallon' => 3.859]);
 

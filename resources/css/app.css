@@ -33,12 +33,17 @@
  * counterpart.
  */
 @theme inline {
-    /* ── Families. --font-barlow and --font-barlow-condensed are emitted into
-         <head> by laravel-vite-plugin's font handling; see vite.config.ts.
+    /* ── Families. Each face's variable (--font-inter, --font-manrope, ...) is
+         emitted into <head> by laravel-vite-plugin's font handling; see
+         vite.config.ts. --font-ui, in product.css, picks one of them, which is
+         how the type-face picker swaps the whole app. Since the 2026-10
+         softening both roles share it: headings are told apart by weight and
+         size, not by a condensed face. `font-display` is kept as the heading hook so call
+         sites keep saying what they are, and it adds tighter tracking.
          Deliberately NOT named --font-heading: layer 1 carries a token of that
          name holding a literal stack, and one name with two values is a trap. ── */
-    --font-sans: var(--font-barlow);
-    --font-display: var(--font-barlow-condensed);
+    --font-sans: var(--font-ui);
+    --font-display: var(--font-ui);
     --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 
     /* ── Type scale (design doc §3).
@@ -60,47 +65,53 @@
     --text-title: 19px;
     --text-title--line-height: 1.2;
     --text-title--font-weight: 600;
+    --text-title--letter-spacing: -0.01em;
     --text-h3: 25px;
     --text-h3--line-height: 1.2;
     --text-h3--font-weight: 600;
+    --text-h3--letter-spacing: -0.015em;
     --text-h2: 32px;
     --text-h2--line-height: 1.1;
     --text-h2--font-weight: 600;
+    --text-h2--letter-spacing: -0.02em;
     --text-h1: 38px;
     --text-h1--line-height: 1.1;
     --text-h1--font-weight: 600;
-    --text-h1--letter-spacing: -0.01em;
+    --text-h1--letter-spacing: -0.025em;
     --text-metric: 34px;
     --text-metric--line-height: 1.1;
     --text-metric--font-weight: 600;
+    --text-metric--letter-spacing: -0.02em;
     --text-readout: 52px;
     --text-readout--line-height: 1;
     --text-readout--font-weight: 600;
+    --text-readout--letter-spacing: -0.025em;
 
-    /* ── Geometry. §4: everything is square.
-         Zeroed rather than deleted so the ~109 existing rounded-* classes become
-         no-ops immediately and the app is square on day one; removing the
-         classes themselves is cosmetic debt payable per file as screens migrate.
+    /* ── Geometry (§4, softened 2026-10). One radius scale: chips 8, controls
+         12, frames 16, and full for pills; values live in product.css. The
+         upper keys all land on the frame radius so a stray rounded-3xl stays
+         in the family rather than ballooning. ── */
+    --radius-xs: var(--radius-chip);
+    --radius-sm: var(--radius-chip);
+    --radius-md: var(--radius-control);
+    --radius-lg: var(--radius-frame);
+    --radius-xl: var(--radius-frame);
+    --radius-2xl: var(--radius-frame);
+    --radius-3xl: var(--radius-frame);
+    --radius-4xl: var(--radius-frame);
 
-         `rounded-full` is NOT covered by this: Tailwind has no --radius-full
-         key, it is a static calc(infinity * 1px). It is overridden below. ── */
-    --radius-xs: 0;
-    --radius-sm: 0;
-    --radius-md: 0;
-    --radius-lg: 0;
-    --radius-xl: 0;
-    --radius-2xl: 0;
-    --radius-3xl: 0;
-    --radius-4xl: 0;
-
-    /* ── Elevation. §4: nothing inside the app window casts a shadow. Same
-         argument as the radius scale — zeroed so existing shadow-* classes stop
-         painting rather than needing a synchronised sweep. ── */
+    /* ── Elevation (§4, softened 2026-10). Frames take shadow-card, overlays
+         take shadow-overlay, and nothing else casts one. The stock keys are
+         mapped onto the same two steps so a leftover shadow-sm or shadow-lg
+         in a shadcn primitive lands on one of them rather than inventing a
+         third. Slate-tinted, low and wide: a lift, not a drop. ── */
+    --shadow-card: var(--elevation-card);
+    --shadow-overlay: var(--elevation-overlay);
     --shadow-xs: none;
-    --shadow-sm: none;
-    --shadow-md: none;
-    --shadow-lg: none;
-    --shadow-xl: none;
+    --shadow-sm: var(--elevation-card);
+    --shadow-md: var(--elevation-card);
+    --shadow-lg: var(--elevation-overlay);
+    --shadow-xl: var(--elevation-overlay);
 
     /* ── Motion. Industry ships no motion tokens; these are held at the previous
          system's values so transitions stay coherent during migration. ── */
@@ -136,6 +147,23 @@
         72%,
         100% {
             transform: rotate(-120deg);
+        }
+    }
+
+    /* ── A photo being read: a scan line passing down it and back. Position
+         only, on the `translate` property so it replaces the resting
+         translate-y-1/2 rather than adding to it. Always paired with
+         motion-safe:, and only ever shown while a read is in flight, so it
+         never runs on a screen at rest. ── */
+    --animate-capture-scan: capture-scan 1.6s var(--ease-standard) infinite
+        alternate;
+
+    @keyframes capture-scan {
+        from {
+            translate: 0 0;
+        }
+        to {
+            translate: 0 calc(100% - 2px);
         }
     }
 
@@ -182,16 +210,7 @@
     --color-ring: var(--ring);
 }
 
-/*
- * `rounded-full` has no theme key to zero — it is a static utility compiling to
- * calc(infinity * 1px). Pills and circles are forbidden by §4, so it is
- * neutralised here while the ~16 call sites are removed file by file.
- */
 @layer utilities {
-    .rounded-full {
-        border-radius: 0;
-    }
-
     /*
       Anchors an SVG rotation to the dial's hub.
 
@@ -277,8 +296,8 @@
       records the matching precedent that nothing in a blueprint system deforms,
       so a press is a background step rather than a squash. No scale, no shadow,
       no tilt. The same job is done with what the system does have: the hairline
-      goes dashed and accent, the fill takes an accent wash, and the corner
-      registration marks brighten — the drawing's own way of saying "this one".
+      goes dashed and accent and the fill takes an accent wash — the drawing's
+      own way of saying "this one".
 
       Doubled for specificity, as ii-awaiting-setup is: these override utilities
       from the same layer (bg-(--color-neutral-100), hover:bg-accent-100) and a
@@ -309,12 +328,6 @@
             var(--color-accent) 14%,
             transparent
         );
-    }
-
-    .ii-card-lifted .ii-corner,
-    .ii-card-target .ii-corner {
-        color: var(--color-accent);
-        transition: color var(--dur-fast) var(--ease-standard);
     }
 
     /*

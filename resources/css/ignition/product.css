@@ -41,8 +41,47 @@
     --gauge-track: rgb(29 31 32 / 0.14);
     --gauge-tick: rgb(29 31 32 / 0.35);
 
-    /* The one legitimate elevation in the system: §4 allows the app window
-       itself to sit above the ground. Nothing inside it casts a shadow. */
+    /* ── Softened surfaces (§4, 2026-10). Frames are near-white and lift off
+         the paper ground with shadow-card; their hairline is lighter than the
+         16% divider, which was drawn for a square, shadowless frame and reads
+         as a heavy outline once a shadow carries the edge. Named --surface-*
+         rather than --color-card, which app.css already maps to shadcn's
+         --card: one name with two meanings would loop. ── */
+    /* The type face (§3). One face for headings and body, chosen here; the
+       trial picker (resources/js/lib/fonts.ts) swaps it per browser through
+       <html data-font>. */
+    --font-ui: var(--font-inter);
+
+    --surface-card: #fdfdfe;
+    --hairline-soft: rgb(29 31 32 / 0.09);
+
+    /* The radius scale and the two elevations, as values. app.css maps
+       Tailwind's rounded-* and shadow-* keys onto these; plain CSS (the frame
+       primitive, the tag) reads them directly, since @theme inline emits
+       nothing to :root. */
+    --radius-chip: 8px;
+    --radius-control: 12px;
+    --radius-frame: 16px;
+    --radius-pill: 9999px;
+    --elevation-card:
+        0 1px 2px rgb(15 23 42 / 0.05), 0 4px 16px -8px rgb(15 23 42 / 0.12);
+    --elevation-overlay:
+        0 1px 3px rgb(15 23 42 / 0.08), 0 24px 48px -16px rgb(15 23 42 / 0.3);
+
+    /* ── Tile hues (§2, 2026-10). Icon tiles only: a light fill and an icon
+         ink that clears 3:1 on it. Never on text, borders, charts or status;
+         amber and rust are never tile hues. ── */
+    --tile-steel-bg: var(--color-accent-100);
+    --tile-steel-ink: var(--color-accent-700);
+    --tile-violet-bg: #f1edfc;
+    --tile-violet-ink: #6847b8;
+    --tile-teal-bg: #e5f4f1;
+    --tile-teal-ink: #2f7a6d;
+    --tile-slate-bg: #eceef2;
+    --tile-slate-ink: #3f4652;
+
+    /* The app window's own elevation, from before frames had one. Kept for
+       the shell. */
     --shell-elevation: 0 14px 40px rgb(22 35 58 / 0.22);
 
     /* ── Layout constants carried over from the previous system ── */
@@ -57,4 +96,25 @@
     --dur-fast: 120ms;
     --dur-base: 200ms;
     --dur-slow: 320ms;
+}
+
+/* The trial faces, one per <html data-font>. */
+:root[data-font='plus-jakarta-sans'] {
+    --font-ui: var(--font-plus-jakarta-sans);
+}
+
+:root[data-font='manrope'] {
+    --font-ui: var(--font-manrope);
+}
+
+:root[data-font='dm-sans'] {
+    --font-ui: var(--font-dm-sans);
+}
+
+:root[data-font='figtree'] {
+    --font-ui: var(--font-figtree);
+}
+
+:root[data-font='outfit'] {
+    --font-ui: var(--font-outfit);
 }

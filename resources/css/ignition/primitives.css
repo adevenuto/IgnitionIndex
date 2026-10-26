@@ -1,92 +1,32 @@
 /*
  * Layer 2b — the Ignition Index component primitives.
  *
- * Transcribed from the Industry sheet's .blueprint / .corner / .duotone rules
- * and the artboard's inline overrides. Prefixed `ii-` so nothing here can
+ * Transcribed from the Industry sheet's .blueprint / .duotone rules and the
+ * artboard's inline overrides, then softened in 2026-10 (see §4). Prefixed `ii-` so nothing here can
  * collide with a Tailwind utility of the same name.
  *
  * These are plain classes rather than @utility because they are multi-element
- * treatments (a frame plus four corner marks), not single-property utilities.
+ * treatments, not single-property utilities.
  */
 
 @layer components {
     /*
-     * The blueprint frame. Design doc §4: square, hairline, no shadow.
-     *
-     * The Industry sheet leaves .card transparent and every card in the artboard
-     * overrides it inline to --color-neutral-100; §4's prose agrees with the
-     * artboard, so the fill is baked in here rather than repeated at each call
-     * site.
+     * The frame. Design doc §4, softened 2026-10: rounded, a light hairline, a
+     * near-white fill and the one card elevation. The `+` corner marks this
+     * once carried are retired; the class keeps its name so every frame in
+     * the app changed in one place.
      */
     .ii-blueprint {
         position: relative;
-        border: 1px solid var(--color-divider);
-        border-radius: 0;
-        background: var(--color-neutral-100);
+        border: 1px solid var(--hairline-soft);
+        border-radius: var(--radius-frame);
+        background: var(--surface-card);
+        box-shadow: var(--elevation-card);
     }
 
-    /*
-     * A blueprint draws its corner marks OUTSIDE the box, while overlay
-     * treatments clip theirs. When a frame wraps a clipped child the frame has
-     * to win, or the marks are cut off.
-     */
-    .ii-blueprint.ii-duotone,
-    .ii-blueprint:has(> .ii-duotone) {
-        overflow: visible;
-    }
-
-    /*
-     * Corner marks. Four children rather than pseudo-elements: each mark needs
-     * two strokes, and a box only has two pseudo-elements. Industry's own answer
-     * is four children, so this matches the source.
-     */
-    .ii-corner {
-        position: absolute;
-        width: 11px;
-        height: 11px;
-        color: color-mix(in srgb, var(--color-text) 55%, transparent);
-        pointer-events: none;
-    }
-
-    .ii-corner::before,
-    .ii-corner::after {
-        content: '';
-        position: absolute;
-        background: currentcolor;
-    }
-
-    .ii-corner::before {
-        left: 5px;
-        top: 0;
-        width: 1px;
-        height: 100%;
-    }
-
-    .ii-corner::after {
-        top: 5px;
-        left: 0;
-        width: 100%;
-        height: 1px;
-    }
-
-    .ii-corner-tl {
-        top: -6px;
-        left: -6px;
-    }
-
-    .ii-corner-tr {
-        top: -6px;
-        right: -6px;
-    }
-
-    .ii-corner-bl {
-        bottom: -6px;
-        left: -6px;
-    }
-
-    .ii-corner-br {
-        bottom: -6px;
-        right: -6px;
+    /* A photo inside a frame takes the frame's corners. */
+    .ii-blueprint > .ii-duotone {
+        border-radius: inherit;
     }
 
     /*
@@ -120,7 +60,7 @@
     .ii-tag {
         display: inline-flex;
         align-items: center;
-        border-radius: 0;
+        border-radius: var(--radius-pill);
         padding: 3px 10px;
         font-size: 11px;
         letter-spacing: 0.02em;

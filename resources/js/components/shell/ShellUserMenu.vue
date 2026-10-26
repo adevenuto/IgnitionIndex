@@ -39,7 +39,7 @@ const initials = computed(() =>
             class="flex cursor-pointer items-center gap-[11px] border-0 bg-transparent p-0 text-left"
         >
             <span
-                class="font-display bg-accent flex size-[34px] flex-none items-center justify-center text-[15px] font-semibold"
+                class="font-display bg-accent flex size-[34px] flex-none items-center justify-center rounded-full text-[15px] font-semibold"
                 :style="{ color: 'var(--shell-active-ink)' }"
                 aria-hidden="true"
             >

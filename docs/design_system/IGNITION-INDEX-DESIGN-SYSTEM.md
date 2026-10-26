@@ -7,6 +7,17 @@ soft-shadow look. Do not carry over `CarTrak` as a product name, the red `#c9152
 accent, the pill/rounded-`--radius-lg` geometry, or the white floating cards. Where old styles
 conflict with this document, this document wins.
 
+> **2026-10 revision: softened blueprint.** The steel accent, the navy shell, the checker strip
+> and the gauge stay. The geometry and type have changed:
+> - the `+` corner marks are retired
+> - cards, controls and chips are rounded, with one soft elevation
+> - type is Inter
+> - the primary button is near-black
+> - icon tiles may carry one of four tile hues
+>
+> §2–§4 have been rewritten to match. The reference artboards below predate this revision; take
+> their layout, not their geometry.
+
 Reference designs in this project:
 
 - `Ignition Index.dc.html` — the vehicle-detail screen and the canonical app shell.
@@ -49,7 +60,8 @@ re-typing the hexes.
 | `--color-bg` | `#f2f2f3` | Content ground. Also the paper ink of the light logo variant. |
 | `--color-neutral-100` | `#f5f5f8` | Card and plate fills on the content ground. |
 | `--color-text` | `#1d1f20` | Body and heading ink. |
-| `--color-accent` | `#5980a6` | Steel. Primary button, active nav, "on interval" gauges. |
+| `--color-accent` | `#5980a6` | Steel. Active nav, links, focus, progress, "on interval" gauges. |
+| `--primary` | `#1d1f20` | Near-black. The primary button and the selected segment of a tab control. |
 | `--color-accent-700` | `#416180` | Accent used at paragraph size (the base accent is only 3:1). |
 | `--color-accent-900` | `#1d2d3d` | Full reversed field (the landing's Fleet section). |
 | `--color-divider` | `#1d1f20` @ 16% | Every hairline. |
@@ -69,12 +81,21 @@ The two status colors are the **only** colors outside the steel accent, and they
 they encode service state and nothing else. Do not introduce a green "all good" state; on
 interval is steel. Do not tint charts, avatars or categories.
 
+**Tile hues** *(2026-10)*. Icon tiles, and only icon tiles, may take one of four hues, so that
+a row of methods or features can be told apart at a glance: `--tile-steel`, `--tile-violet`,
+`--tile-teal` and `--tile-slate`. Each is a pair: a light fill (`--tile-*-bg`) and an icon ink
+(`--tile-*-ink`) that clears 3:1 on it. A tile hue never colours text, a border, a chart or a
+status, and amber and rust are never tile hues: they still mean service state and nothing else.
+
 On the navy shell, text is `#f2f2f3` at full opacity for primary, `rgba(242,242,243,.72)` for
 secondary nav items, `rgba(242,242,243,.38–.55)` for eyebrow labels and metadata only.
 
 ## 3. Type
 
-`var(--font-heading)` = Barlow Condensed 600. `var(--font-body)` = Barlow 400/500/700.
+`var(--font-heading)` and `var(--font-body)` are both **Inter** *(2026-10; was Barlow Condensed
+and Barlow)*. Headings are told apart by weight and size, not by a condensed face, so most of
+the uppercase below is now reserved for eyebrows. Headings are sentence case with a slight
+negative tracking.
 
 | Use | Spec |
 | --- | --- |
@@ -92,18 +113,17 @@ or body copy.
 
 ## 4. Geometry
 
-Square. `border-radius: 0` everywhere — Industry already resets `.btn`, `.card`, `.input`, `.tag`,
-`.seg` and `.dialog` to 0. There are no pills, no rounded avatars, no soft shadows on content.
+*(Rewritten 2026-10.)* Rounded, from one scale: `--radius-sm` 8px for chips, tags and icon tiles
+inside a control; `--radius-md` 12px for buttons, inputs and selects; `--radius-lg` 16px for
+cards, panels and dialogs; `--radius-full` for pill tabs, badges and avatars.
 
-Every card, figure and framed region is a **blueprint object**: `class="card blueprint"` plus four
-`<i class="corner tl">`/`tr`/`bl`/`br` children, which draw the `+` registration marks. Never omit
-the marks from a framed element. Cards keep a hairline border and a near-transparent fill
-(`--color-neutral-100`), never a drop shadow. The single elevated object on screen is the app
-window itself.
+Every card, figure and framed region is a **frame** (`BlueprintFrame`): a hairline border, a
+near-white fill and `--shadow-card`, a soft single-step elevation. The `+` registration marks
+are retired. Dialogs and sheets take `--shadow-overlay`. Nothing else casts a shadow: no shadows
+on buttons, inputs or rows.
 
-Photographs go through `class="duotone"` so they desaturate and wash into the steel accent. That
-includes vehicle photos — it is what keeps a wall of user-uploaded car pictures from fighting the
-interface. Frame them square with the blueprint marks; never round or circle-crop.
+Photographs still go through `class="duotone"` so a wall of user-uploaded car pictures does not
+fight the interface. They take the frame's radius.
 
 Spacing comes from `--space-1 … --space-8` (3.4 / 6.8 / 10.2 / 13.6 / 20.4 / 27.2px — the 0.85×
 density is already baked in). Section rhythm on the landing page is 96px between sections, 78px
@@ -133,8 +153,9 @@ Icons: **Lucide, stroke-width 1.5**, sized 14–19px in chrome. No filled icons,
 - **Left rail** (`--shell-navy-deep`, 216px): an eyebrow label, then **Garage** (with a vehicle
   count), **History**, **Insights**. The active item is a solid `--color-accent` block with
   `#0d1626` ink — square, full-width, no indicator bar. Below it a **Due next** list (three
-  items, status dot + name + percent) and, pinned to the bottom, the **Upgrade to Fleet**
-  outlined cell. Hover on an inactive item is `rgba(89,128,166,.22)`.
+  items, status dot + name + percent). *(2026-10: the **Upgrade to Fleet** cell that was
+  pinned to the bottom is removed, along with every Fleet mention in the product and on the
+  landing page, until Fleet is a real initiative.)* Hover on an inactive item is `rgba(89,128,166,.22)`.
 - **Content**: breadcrumb → vehicle switcher row → vehicle header card → gauges.
 
 ## 6. The gauge
@@ -216,10 +237,10 @@ Vehicle names are whatever the owner typed. The product's own vocabulary: **gara
 - [ ] Industry stylesheet linked; no hard-coded hex, font name or spacing px that a token carries
 - [ ] Navy shell + checker strip + paper content ground
 - [ ] Logo: dark variant on light grounds, `-light` variant on navy — never on a filled chip
-- [ ] Every card is `card blueprint` with all four corner marks
-- [ ] Nothing rounded; no shadows inside the content area
+- [ ] Every card is a frame (`BlueprintFrame`): rounded `--radius-lg`, hairline, `--shadow-card`, no corner marks
+- [ ] Radii from the scale (8 / 12 / 16 / full); shadows only on frames and overlays
 - [ ] Photographs wrapped in `duotone`
-- [ ] Only steel, amber and rust; amber/rust only ever mean service state
+- [ ] Only steel, amber and rust, plus tile hues on icon tiles; amber/rust only ever mean service state
 - [ ] Lucide icons at stroke-width 1.5
 - [ ] Gauge percent counts up toward due, basis printed, order fixed
 - [ ] Focus rings are `2px solid var(--color-accent)` with `2px` offset — never browser default

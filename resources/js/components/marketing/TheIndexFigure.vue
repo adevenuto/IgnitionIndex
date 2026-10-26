@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { cn } from '@/lib/utils';
 
 /*
  * Fig. 01 — the index. An exploded isometric of the data model, for the
- * marketing hero: Vehicles + Readings + Intervals feed Gauges, with Fleet
- * drawn as an addition on top rather than a step in the stack.
+ * marketing hero: Vehicles + Readings + Intervals feed Gauges.
  *
  * Geometry is derived, not transcribed. Every point goes through project(),
  * a 2:1 isometric projection, so the slab pitch and plate size are two
@@ -19,9 +18,8 @@ import { cn } from '@/lib/utils';
  *    illustration whose fills are compositional (five tonal steps that read as
  *    stacked planes under one light), not semantic. Wiring them to
  *    var(--color-*) would mean a token tweak silently flattens the drawing's
- *    depth. The four values used are the system's own — #5980a6 accent,
- *    #16233a shell navy, #1d1f20 ink, #f2f2f3 paper — plus derived tints of
- *    them. Do not "fix" this to tokens.
+ *    depth. The values used are the system's own — #5980a6 accent, #1d1f20
+ *    ink, #f2f2f3 paper — plus derived tints of them. Do not "fix" this to tokens.
  *
  * 2. FONT SIZES ARE AUTHORED IN VIEWBOX UNITS, ~2× their rendered size. The
  *    760-unit viewBox renders into a ~378px hero column, so an authored 21
@@ -72,9 +70,8 @@ const polygon = (points: [number, number][]) => points.map(fmt).join(' ');
 const PAPER = '#f2f2f3';
 const INK = '#1d1f20';
 const ACCENT = '#5980a6';
-const NAVY = '#16233a';
 
-type LayerKind = 'wire' | 'solid' | 'outline';
+type LayerKind = 'wire' | 'solid';
 
 /** Three faces plus edge and ink, per layer treatment. */
 const FACES: Record<
@@ -97,14 +94,6 @@ const FACES: Record<
         edge: 'rgba(242,242,243,0.34)',
         ink: PAPER,
     },
-    // Dashed navy: present but not included.
-    outline: {
-        top: 'rgba(22,35,58,0.08)',
-        right: 'rgba(22,35,58,0.13)',
-        left: 'rgba(22,35,58,0.2)',
-        edge: NAVY,
-        ink: NAVY,
-    },
 };
 
 const LAYERS: { name: string; kind: LayerKind }[] = [
@@ -112,7 +101,6 @@ const LAYERS: { name: string; kind: LayerKind }[] = [
     { name: 'Readings', kind: 'wire' },
     { name: 'Intervals', kind: 'wire' },
     { name: 'Gauges', kind: 'solid' },
-    { name: 'Fleet', kind: 'outline' },
 ];
 
 /* ── Vehicles on the plane ───────────────────────────────────────────────── */
@@ -224,7 +212,6 @@ const slabs = computed(() =>
             key: layer.name,
             label: layer.name.toUpperCase(),
             face,
-            dash: layer.kind === 'outline' ? '8 5' : undefined,
             top: polygon([a, b, c, d]),
             right: polygon([
                 c,
@@ -240,17 +227,6 @@ const slabs = computed(() =>
     }),
 );
 
-/** Leader off the top slab, naming who Fleet is for. */
-const fleetLeader = computed(() => {
-    const [x, y] = project(0, 0, BASE + (LAYERS.length - 1) * PITCH);
-
-    return {
-        path: `M${x.toFixed(1)},${y.toFixed(1)} L${(x - 66).toFixed(1)},${(y - 38).toFixed(1)} H${(x - 172).toFixed(1)}`,
-        textX: (x - 168).toFixed(1),
-        textY: (y - 46).toFixed(1),
-    };
-});
-
 /* ── Inputs ──────────────────────────────────────────────────────────────── */
 
 /*
@@ -259,7 +235,48 @@ const fleetLeader = computed(() => {
  * viewBox space rather than projected — they are annotations on the drawing,
  * not objects in it.
  */
-const PILL = { x: 16, width: 230, height: 70 };
+/** Inner padding of a plate, the same on both sides of its text. */
+const PILL_PAD = 16;
+const PILL = { x: 16, height: 70 };
+
+/*
+ * Both plates take the width of the longest line on either, plus the same
+ * padding on each side — so the text sits as far from the right edge as from
+ * the left, and the two plates still line up. Measured, not guessed: the face
+ * can change under the drawing (the type-face picker), and each face sets
+ * "15,100 mi · Sep 8" to a different length. Until the first measurement,
+ * a width that fits the widest face on offer.
+ */
+const textEls = ref<SVGTextElement[]>([]);
+const contentWidth = ref(218);
+const plateWidth = computed(() => contentWidth.value + PILL_PAD * 2);
+
+async function measure(): Promise<void> {
+    await document.fonts.ready;
+
+    const widths = textEls.value.map((el) => el.getComputedTextLength());
+
+    if (widths.length > 0) {
+        contentWidth.value = Math.ceil(Math.max(...widths));
+    }
+}
+
+let observer: MutationObserver | null = null;
+
+onMounted(() => {
+    void measure();
+
+    // A new face is chosen on <html data-font>; measure once it has loaded.
+    observer = new MutationObserver(() =>
+        requestAnimationFrame(() => void measure()),
+    );
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-font'],
+    });
+});
+
+onBeforeUnmount(() => observer?.disconnect());
 
 const inputs = [
     {
@@ -294,6 +311,9 @@ const connectors = computed(() =>
             BASE + input.target * PITCH - THICKNESS / 2,
         );
         const startY = input.y + PILL.height / 2;
+        const right = PILL.x + plateWidth.value;
+        // The vertical leg stays clear of a plate that has grown.
+        const leg = Math.max(input.leg, right + 28);
 
         return {
             key: input.label,
@@ -303,7 +323,7 @@ const connectors = computed(() =>
             endY: endY.toFixed(1),
             // Out of the plate, one rounded turn down, one turn into the slab.
             path:
-                `M${PILL.x + PILL.width},${startY} H${input.leg - 16} q16,0 16,-16` +
+                `M${right},${startY} H${leg - 16} q16,0 16,-16` +
                 ` V${(endY + 16).toFixed(1)} q0,-16 16,-16 H${endX.toFixed(1)}`,
         };
     }),
@@ -312,10 +332,10 @@ const connectors = computed(() =>
 
 <template>
     <svg
-        viewBox="0 0 760 736"
+        viewBox="0 90 760 646"
         :class="cn('block h-auto w-full', props.class)"
         role="img"
-        aria-label="Isometric diagram of the Ignition Index data model: vehicles, readings and intervals feed the gauges layer, with fleet roll-up drawn as an additional layer for teams. Three vehicles sit on the ground plane, marked on interval, due soon and overdue."
+        aria-label="Isometric diagram of the Ignition Index data model: vehicles, readings and intervals feed the gauges layer. Three vehicles sit on the ground plane, marked on interval, due soon and overdue."
     >
         <!-- Ground plane -->
         <polygon :points="ground" fill="#ececed" />
@@ -340,21 +360,18 @@ const connectors = computed(() =>
                 :fill="slab.face.left"
                 :stroke="slab.face.edge"
                 stroke-width="1.6"
-                :stroke-dasharray="slab.dash"
             />
             <polygon
                 :points="slab.right"
                 :fill="slab.face.right"
                 :stroke="slab.face.edge"
                 stroke-width="1.6"
-                :stroke-dasharray="slab.dash"
             />
             <polygon
                 :points="slab.top"
                 :fill="slab.face.top"
                 :stroke="slab.face.edge"
                 stroke-width="1.6"
-                :stroke-dasharray="slab.dash"
             />
 
             <g :transform="slab.labelTransform">
@@ -362,8 +379,8 @@ const connectors = computed(() =>
                     x="0"
                     y="9"
                     text-anchor="middle"
-                    font-family="Barlow Condensed, Barlow, sans-serif"
-                    font-size="34"
+                    style="font-family: var(--font-ui)"
+                    font-size="28"
                     font-weight="600"
                     letter-spacing="1"
                     :fill="slab.face.ink"
@@ -379,25 +396,6 @@ const connectors = computed(() =>
                 stroke-width="1.6"
             />
         </g>
-
-        <!-- Fleet leader -->
-        <path
-            :d="fleetLeader.path"
-            fill="none"
-            :stroke="NAVY"
-            stroke-width="1.6"
-        />
-        <text
-            :x="fleetLeader.textX"
-            :y="fleetLeader.textY"
-            font-family="Barlow, sans-serif"
-            font-size="21"
-            font-weight="700"
-            letter-spacing="2.4"
-            :fill="NAVY"
-        >
-            FOR TEAMS
-        </text>
 
         <!-- Connectors first, so the plates sit on top of their own leaders -->
         <g v-for="connector in connectors" :key="connector.key">
@@ -421,28 +419,30 @@ const connectors = computed(() =>
             <rect
                 :x="PILL.x"
                 :y="input.y"
-                :width="PILL.width"
+                :width="plateWidth"
                 :height="PILL.height"
                 :fill="PAPER"
                 :stroke="input.border"
                 stroke-width="1.6"
             />
             <text
-                :x="PILL.x + 16"
-                :y="input.y + 24"
-                font-family="Barlow, sans-serif"
+                ref="textEls"
+                :x="PILL.x + PILL_PAD"
+                :y="input.y + 25"
+                style="font-family: var(--font-ui)"
                 font-size="21"
                 font-weight="700"
-                letter-spacing="2.4"
+                letter-spacing="2"
                 fill="rgba(29,31,32,0.6)"
             >
                 {{ input.label }}
             </text>
             <text
-                :x="PILL.x + 16"
-                :y="input.y + 56"
-                font-family="Barlow Condensed, Barlow, sans-serif"
-                font-size="30"
+                ref="textEls"
+                :x="PILL.x + PILL_PAD"
+                :y="input.y + 57"
+                style="font-family: var(--font-ui)"
+                font-size="25"
                 font-weight="600"
                 :fill="INK"
             >
