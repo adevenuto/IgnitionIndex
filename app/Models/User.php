@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Theme;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -22,6 +23,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $name
  * @property string $email
  * @property Carbon|null $email_verified_at
+ * @property Theme|null $theme
  * @property string $password
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
@@ -37,6 +39,15 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+
+    /**
+     * The colour theme to show this person: their choice, or the default
+     * until they make one (Settings → Appearance).
+     */
+    public function colourTheme(): Theme
+    {
+        return $this->theme ?? Theme::default();
+    }
 
     /**
      * @return HasMany<Vehicle, $this>
@@ -57,6 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'theme' => Theme::class,
         ];
     }
 }

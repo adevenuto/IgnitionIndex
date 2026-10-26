@@ -1,0 +1,296 @@
+/*
+ * Layer 1c — the colour themes (Settings → Appearance; App\Enums\Theme),
+ * applied through <html data-theme> and <html data-scheme>, both rendered by
+ * app.blade.php from the person's choice. Volt is the default. Daylight is
+ * product.css as written, with no overrides.
+ *
+ * Each theme is one accent with everything else tuned to it. A theme
+ * re-points tokens and nothing else — grounds, the neutral and accent ramps,
+ * primary, status, lanes, tiles, gauges and elevation — because every
+ * component already reads those tokens. Dark themes invert both ramps, so 100
+ * is a deep tint to sit on and 700 a light ink to read; what every dark
+ * theme shares hangs off data-scheme='dark'.
+ *
+ * Unlayered :root[...] selectors, so they beat both Industry's @theme layer
+ * and product.css's :root. A new theme is a block here, a case in the enum,
+ * and palettes in the two homepage figures.
+ */
+
+/* ── Shared by every dark theme ─────────────────────────────────────────── */
+:root[data-scheme='dark'] {
+    color-scheme: dark;
+
+    --color-divider: color-mix(in srgb, var(--color-text) 14%, transparent);
+    --hairline-soft: rgb(255 255 255 / 0.08);
+    --chrome-hover: color-mix(in srgb, var(--color-text) 8%, transparent);
+    --gauge-track: color-mix(in srgb, var(--color-text) 14%, transparent);
+    --gauge-tick: color-mix(in srgb, var(--color-text) 38%, transparent);
+
+    /* A slate drop shadow vanishes on dark: a deeper black one, plus a
+       faint top highlight so a card's edge catches the light. */
+    --elevation-card:
+        inset 0 1px 0 rgb(255 255 255 / 0.04),
+        0 10px 28px -14px rgb(0 0 0 / 0.65);
+    --elevation-overlay:
+        inset 0 1px 0 rgb(255 255 255 / 0.05),
+        0 28px 56px -16px rgb(0 0 0 / 0.75);
+
+    --tile-slate-bg: var(--color-surface);
+    --tile-slate-ink: var(--color-neutral-800);
+
+    /* Lane hues lifted for dark grounds; each sits on a deep tint of itself
+       and is read in a light step. A theme may retune them. */
+    --lane-fuel: #ff8a3d;
+    --lane-fuel-ink: #ffb07a;
+    --lane-visit: #a78bfa;
+    --lane-visit-ink: #c9b8fd;
+    --lane-expense: #34d399;
+    --lane-expense-ink: #7be6bd;
+    --lane-odometer: #38bdf8;
+    --lane-odometer-ink: #84d6fb;
+
+    --lane-fuel-bg: color-mix(
+        in oklab,
+        var(--lane-fuel) 20%,
+        var(--surface-card)
+    );
+    --lane-visit-bg: color-mix(
+        in oklab,
+        var(--lane-visit) 20%,
+        var(--surface-card)
+    );
+    --lane-expense-bg: color-mix(
+        in oklab,
+        var(--lane-expense) 20%,
+        var(--surface-card)
+    );
+    --lane-odometer-bg: color-mix(
+        in oklab,
+        var(--lane-odometer) 20%,
+        var(--surface-card)
+    );
+}
+
+/* ── Volt: charcoal and electric lime ───────────────────────────────────── */
+:root[data-theme='volt'] {
+    --color-bg: #0f1110;
+    --color-surface: #212522;
+    --surface-card: #181b19;
+    --color-text: #eef2ea;
+
+    --color-neutral-100: #1d201e;
+    --color-neutral-200: #262a27;
+    --color-neutral-300: #343935;
+    --color-neutral-400: #4b514c;
+    --color-neutral-500: #6a716b;
+    --color-neutral-600: #8b928c;
+    --color-neutral-700: #a9b0aa;
+    --color-neutral-800: #c9cfca;
+    --color-neutral-900: #e3e8e3;
+
+    --color-accent: #c6f135;
+    --color-accent-100: #232a10;
+    --color-accent-200: #2e3a12;
+    --color-accent-300: #485d16;
+    --color-accent-400: #6f8f1e;
+    --color-accent-500: #a3d12a;
+    --color-accent-600: #c6f135;
+    --color-accent-700: #d9f77a;
+    --color-accent-800: #e7fbab;
+    --color-accent-900: #f3fdd6;
+
+    --primary-foreground: #0f1110;
+    --primary-hover: #d4f65c;
+    --primary-active: #b3dd1f;
+
+    --status-due: #e8a93f;
+    --status-overdue: #f26b52;
+    --status-due-ink: #f2bf66;
+    --status-overdue-ink: #ff8a73;
+
+    --duotone-ink: #6f8f1e;
+}
+
+/* ── Indigo Night: deep navy and indigo ─────────────────────────────────── */
+:root[data-theme='indigo-night'] {
+    --color-bg: #0a0f1e;
+    --color-surface: #18223a;
+    --surface-card: #111a2e;
+    --color-text: #e6e9f4;
+
+    --color-neutral-100: #151d33;
+    --color-neutral-200: #1d2742;
+    --color-neutral-300: #2a3554;
+    --color-neutral-400: #3f4b6e;
+    --color-neutral-500: #5c688b;
+    --color-neutral-600: #7f8aab;
+    --color-neutral-700: #a3adc8;
+    --color-neutral-800: #c6cde0;
+    --color-neutral-900: #e1e5f0;
+
+    --color-accent: #6366f1;
+    --color-accent-100: #1c2150;
+    --color-accent-200: #252b6b;
+    --color-accent-300: #333b93;
+    --color-accent-400: #4a50c8;
+    --color-accent-500: #5b5fe6;
+    --color-accent-600: #6366f1;
+    --color-accent-700: #a5a8ff;
+    --color-accent-800: #c7c9ff;
+    --color-accent-900: #e3e4ff;
+
+    /* A step deeper than the accent for the button fill, so white text
+       clears 4.5:1; hover and press go deeper still. */
+    --primary: #585bef;
+    --primary-foreground: #ffffff;
+    --primary-hover: #4f52e3;
+    --primary-active: #4447d1;
+
+    --status-due: #eab04a;
+    --status-overdue: #f2735c;
+    --status-due-ink: #f4c46c;
+    --status-overdue-ink: #ff917b;
+
+    --duotone-ink: #4a50c8;
+}
+
+/* ── Lagoon: dark teal-slate and aqua ──────────────────────────────────── */
+:root[data-theme='lagoon'] {
+    --color-bg: #091416;
+    --color-surface: #16292b;
+    --surface-card: #0f1f21;
+    --color-text: #e4f2f0;
+
+    --color-neutral-100: #12222a;
+    --color-neutral-200: #182c2f;
+    --color-neutral-300: #223a3d;
+    --color-neutral-400: #355155;
+    --color-neutral-500: #527074;
+    --color-neutral-600: #7a9894;
+    --color-neutral-700: #9fb9b6;
+    --color-neutral-800: #c3d6d3;
+    --color-neutral-900: #dfece9;
+
+    --color-accent: #2dd4bf;
+    --color-accent-100: #0f2e2c;
+    --color-accent-200: #12403c;
+    --color-accent-300: #155e57;
+    --color-accent-400: #1a8a7e;
+    --color-accent-500: #22b3a3;
+    --color-accent-600: #2dd4bf;
+    --color-accent-700: #6ee7d6;
+    --color-accent-800: #a3f1e5;
+    --color-accent-900: #d2f8f2;
+
+    --primary-foreground: #062420;
+    --primary-hover: #5eead4;
+    --primary-active: #14b8a6;
+
+    --status-due: #e8ad44;
+    --status-overdue: #f2735c;
+    --status-due-ink: #f2c06a;
+    --status-overdue-ink: #ff917b;
+
+    /* Expense's emerald sits too near the aqua: a warmer green here. */
+    --lane-expense: #86d36a;
+    --lane-expense-ink: #b2e59f;
+
+    --duotone-ink: #1a8a7e;
+}
+
+/* ── Neon: plum-black and hot pink ──────────────────────────────────────── */
+:root[data-theme='neon'] {
+    --color-bg: #110c15;
+    --color-surface: #241a2b;
+    --surface-card: #1a1320;
+    --color-text: #f4eaf6;
+
+    --color-neutral-100: #1d1523;
+    --color-neutral-200: #261c2d;
+    --color-neutral-300: #34283c;
+    --color-neutral-400: #4c3d56;
+    --color-neutral-500: #6c5b76;
+    --color-neutral-600: #93819c;
+    --color-neutral-700: #b9a8bf;
+    --color-neutral-800: #d6c9da;
+    --color-neutral-900: #ebe2ee;
+
+    --color-accent: #f472b6;
+    --color-accent-100: #331627;
+    --color-accent-200: #4a1c37;
+    --color-accent-300: #6e2453;
+    --color-accent-400: #a33478;
+    --color-accent-500: #db4f9c;
+    --color-accent-600: #f472b6;
+    --color-accent-700: #f9a8d4;
+    --color-accent-800: #fbcfe8;
+    --color-accent-900: #fde7f3;
+
+    --primary-foreground: #1a0b14;
+    --primary-hover: #f9a8d4;
+    --primary-active: #ec4899;
+
+    --status-due: #eab04a;
+    --status-overdue: #f2735c;
+    --status-due-ink: #f4c46c;
+    --status-overdue-ink: #ff917b;
+
+    /* Service's violet sits too near the pink: a cooler blue-violet here. */
+    --lane-visit: #8b9cfb;
+    --lane-visit-ink: #b7c2fd;
+
+    --duotone-ink: #a33478;
+}
+
+/* ── Sandstone: light, warm, deep teal ──────────────────────────────────── */
+:root[data-theme='sandstone'] {
+    --color-bg: #f4f1ec;
+    --color-surface: #ebe6de;
+    --surface-card: #fcfaf7;
+    --color-text: #24211d;
+
+    --color-neutral-100: #f7f4ef;
+    --color-neutral-200: #ebe6de;
+    --color-neutral-300: #d9d2c7;
+    --color-neutral-400: #bdb4a6;
+    --color-neutral-500: #9c9285;
+    --color-neutral-600: #7d7468;
+    --color-neutral-700: #625b52;
+    --color-neutral-800: #47423b;
+    --color-neutral-900: #2f2b26;
+
+    --color-accent: #0f766e;
+    --color-accent-100: #e3f3f1;
+    --color-accent-200: #c5e7e2;
+    --color-accent-300: #94d3ca;
+    --color-accent-400: #5bb8ab;
+    --color-accent-500: #2a9a8d;
+    --color-accent-600: #0f766e;
+    --color-accent-700: #0d5f59;
+    --color-accent-800: #0b4c47;
+    --color-accent-900: #093c38;
+
+    --hairline-soft: rgb(36 33 29 / 0.1);
+    --color-divider: color-mix(in srgb, var(--color-text) 15%, transparent);
+    --chrome-hover: rgb(36 33 29 / 0.06);
+    --tile-slate-bg: #ece6dc;
+    --tile-slate-ink: #4a443c;
+
+    --duotone-ink: #3d6b65;
+}
+
+/*
+ * The logo: the navy mark on light grounds, the paper outline on dark. Both
+ * are rendered (ShellBrand, Welcome) and these rules show one.
+ */
+.ii-logo-dark {
+    display: none;
+}
+
+:root[data-scheme='dark'] .ii-logo-light {
+    display: none;
+}
+
+:root[data-scheme='dark'] .ii-logo-dark {
+    display: block;
+}

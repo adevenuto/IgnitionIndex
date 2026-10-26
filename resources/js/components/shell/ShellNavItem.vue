@@ -6,8 +6,8 @@ import type { NavItem } from '@/types';
 /*
  * One rail destination.
  *
- * Active is a near-black pill with paper ink, the same mark as the selected
- * tab in the log sheet (design doc §5, light since 2026-10). Inactive is
+ * Active is a light brand tint with brand ink (design doc §5): a clear
+ * "you are here" that leaves solid colour to the actions. Inactive is
  * secondary ink that lifts to full ink on a faint ink wash.
  */
 defineProps<{ item: NavItem; active: boolean }>();
@@ -19,7 +19,7 @@ defineProps<{ item: NavItem; active: boolean }>();
         class="ease-standard flex items-center gap-[11px] rounded-md p-(--space-3) text-[14px] transition-colors duration-[var(--dur-fast)]"
         :class="
             active
-                ? 'bg-primary text-primary-foreground font-semibold'
+                ? 'bg-accent-100 text-accent-700 font-semibold'
                 : 'text-(--chrome-ink-secondary) hover:bg-(--chrome-hover) hover:text-(--chrome-ink)'
         "
         :aria-current="active ? 'page' : undefined"

@@ -41,7 +41,7 @@ watch(
 
                 <!-- A ruler down the edge, every tenth of the height. -->
                 <div
-                    class="absolute inset-y-0 left-0 w-3 bg-[repeating-linear-gradient(to_bottom,var(--color-neutral-100)_0_1px,transparent_1px_10%)] opacity-80"
+                    class="absolute inset-y-0 left-0 w-3 bg-[repeating-linear-gradient(to_bottom,rgb(245_245_248)_0_1px,transparent_1px_10%)] opacity-80"
                     aria-hidden="true"
                 />
 

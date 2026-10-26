@@ -3,6 +3,7 @@ import { DollarSign, Fuel, Gauge, Wrench } from '@lucide/vue';
 import { computed } from 'vue';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCents, formatDate, formatMiles } from '@/lib/format';
+import { laneTone } from '@/lib/lanes';
 import type { VehicleEvent } from '@/types/garage';
 
 /*
@@ -87,7 +88,8 @@ const secondary = computed(() =>
             >
                 <CardContent class="flex items-start gap-3">
                     <span
-                        class="flex size-10 shrink-0 items-center justify-center rounded-md bg-(--tile-steel-bg) text-(--tile-steel-ink)"
+                        class="flex size-10 shrink-0 items-center justify-center rounded-md"
+                        :class="laneTone(event.type).tile"
                     >
                         <component :is="icons[event.type]" class="size-5" />
                     </span>

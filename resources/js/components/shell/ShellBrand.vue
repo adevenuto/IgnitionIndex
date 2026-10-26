@@ -13,8 +13,9 @@ import { garage } from '@/routes';
  * around them, so the lockup is the only thing identifying the product.
  *
  * Every ground the lockup sits on is light since the 2026-10 chrome change, so
- * it is always the navy mark with ink text. (The paper-on-navy variant,
- * ignition-index-logo-light.png, is kept in public/img but no longer used.)
+ * it is the navy mark with ink text — except under a dark trial theme, where
+ * the paper outline (ignition-index-logo-light.png) shows instead. Both are
+ * rendered; themes.css shows one (.ii-logo-light / .ii-logo-dark).
  * Design doc §1 is explicit that the mark never sits on a filled chip or box.
  *
  * `href` exists because this renders an anchor. The auth layout used to wrap it
@@ -53,7 +54,13 @@ const target = computed(() => props.href ?? garage());
         <img
             src="/img/ignition-index-logo.png"
             alt=""
-            class="block flex-none"
+            class="ii-logo-light block flex-none"
+            :class="stacked ? 'w-20' : 'w-12'"
+        />
+        <img
+            src="/img/ignition-index-logo-light.png"
+            alt=""
+            class="ii-logo-dark flex-none"
             :class="stacked ? 'w-20' : 'w-12'"
         />
 

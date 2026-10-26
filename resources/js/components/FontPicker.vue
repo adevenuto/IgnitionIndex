@@ -31,6 +31,7 @@ function chooseFigure(id: FigureChoice): void {
 }
 
 const active = ref(currentFont());
+
 const open = ref(true);
 
 function choose(id: string): void {

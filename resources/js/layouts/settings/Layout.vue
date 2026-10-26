@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { toUrl } from '@/lib/utils';
+import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editProfile } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import type { NavItem } from '@/types';
@@ -24,6 +25,7 @@ import type { NavItem } from '@/types';
 const sidebarNavItems: NavItem[] = [
     { title: 'Profile', href: editProfile() },
     { title: 'Security', href: editSecurity() },
+    { title: 'Appearance', href: editAppearance() },
 ];
 
 const { isCurrentOrParentUrl } = useCurrentUrl();
@@ -48,9 +50,9 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                                 as-child
                                 :class="[
                                     'h-11 w-full justify-start rounded-md px-3 text-[14px]',
-                                    // The same near-black pill as the rail's active item.
+                                    // The same tint as the rail's active item.
                                     isCurrentOrParentUrl(item.href)
-                                        ? 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground'
+                                        ? 'bg-accent-100 text-accent-700 hover:bg-accent-100 hover:text-accent-700'
                                         : 'text-muted-foreground hover:bg-hover-surface hover:text-foreground',
                                 ]"
                             >

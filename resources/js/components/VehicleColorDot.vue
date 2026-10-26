@@ -2,10 +2,10 @@
 /*
  * The paint-colour chip shown beside a vehicle's name.
  *
- * A SQUARE, not a dot. Design doc §7: the owner's identity colour is "the one
- * place a non-system color is allowed, and only as a 10px square" — a circle
- * would be both the wrong geometry (§4 bans round shapes) and the wrong
- * semantics, since every other square of colour in this system means status.
+ * Round since the 2026-10 colour pass (§2, vehicle colour): the owner's paint
+ * colour is the car's identity and now shows as a dot here, a band along the
+ * top of its cards and a tint on its tiles. Squares of colour still mean
+ * status elsewhere, which is why this one is not a square.
  *
  * Colour is never the only identifier — it always sits next to the name — so
  * this is decorative to assistive tech unless a name is known, in which case it
@@ -31,8 +31,8 @@ withDefaults(
 <template>
     <span
         v-if="color"
-        class="inline-block shrink-0 ring-1 ring-(--color-divider)"
-        :class="size === 'sm' ? 'size-[7px]' : 'size-[10px]'"
+        class="inline-block shrink-0 rounded-full ring-1 ring-(--color-divider)"
+        :class="size === 'sm' ? 'size-2' : 'size-3'"
         :style="{ backgroundColor: color }"
         :title="label ?? undefined"
         :aria-hidden="label ? undefined : true"

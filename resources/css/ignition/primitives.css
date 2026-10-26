@@ -48,7 +48,7 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
-        background: var(--color-accent);
+        background: var(--duotone-ink);
         mix-blend-mode: color;
     }
 

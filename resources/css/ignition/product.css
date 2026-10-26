@@ -70,15 +70,53 @@
     --elevation-overlay:
         0 1px 3px rgb(15 23 42 / 0.08), 0 24px 48px -16px rgb(15 23 42 / 0.3);
 
-    /* ── Tile hues (§2, 2026-10). Icon tiles only: a light fill and an icon
-         ink that clears 3:1 on it. Never on text, borders, charts or status;
-         amber and rust are never tile hues. ── */
-    --tile-steel-bg: var(--color-accent-100);
-    --tile-steel-ink: var(--color-accent-700);
-    --tile-violet-bg: #f1edfc;
-    --tile-violet-ink: #6847b8;
-    --tile-teal-bg: #e5f4f1;
-    --tile-teal-ink: #2f7a6d;
+    /* ── Brand (§2, vivid since 2026-10). Industry's steel ramp is overridden
+         here rather than edited in tokens.css, which stays a verbatim copy:
+         this :root is unlayered, so it wins over the @theme layer, and every
+         bg-accent / text-accent-700 / ring and the on-interval gauge follow.
+         White on the 600 base is ~4.7:1, so it carries button text. ── */
+    --color-accent: #2f6bed;
+    --color-accent-100: #e8effd;
+    --color-accent-200: #d2e0fc;
+    --color-accent-300: #a9c3f9;
+    --color-accent-400: #7aa1f4;
+    --color-accent-500: #4f82f0;
+    --color-accent-600: #2f6bed;
+    --color-accent-700: #2253c4;
+    --color-accent-800: #1d4396;
+    --color-accent-900: #183570;
+
+    /* The content ground, a breath cooler than Industry's paper grey. */
+    --color-bg: #f3f5f9;
+
+    /* Photos wash into the old steel: the vivid brand would turn every car
+       picture electric blue. */
+    --duotone-ink: #5980a6;
+
+    /* ── Lane hues (§2, 2026-10): one per kind of entry, so a fuel-up, a
+         service, an expense and a mileage reading can be told apart at a
+         glance. Each is a trio — the colour, a tint to sit on, and a deep
+         ink that clears 4.5:1 on the tint for text and icons. They identify
+         the entry type and nothing else: never status (amber and rust keep
+         that), never body text. Fuel's orange is set redder and brighter
+         than the due amber so the two never read as one. ── */
+    --lane-fuel: #ea6c1f;
+    --lane-fuel-bg: #fdeee3;
+    --lane-fuel-ink: #a8470c;
+    --lane-visit: #7a5af0;
+    --lane-visit-bg: #efeafd;
+    --lane-visit-ink: #5536c4;
+    --lane-expense: #16a36a;
+    --lane-expense-bg: #e2f5ec;
+    --lane-expense-ink: #0d7048;
+    --lane-odometer: #0ea5e9;
+    --lane-odometer-bg: #e1f3fc;
+    --lane-odometer-ink: #076a99;
+
+    /* ── Tile hues: icon tiles that are not about an entry type. Brand for
+         the product's own actions, slate for neutral ones. ── */
+    --tile-brand-bg: var(--color-accent-100);
+    --tile-brand-ink: var(--color-accent-700);
     --tile-slate-bg: #eceef2;
     --tile-slate-ink: #3f4652;
 

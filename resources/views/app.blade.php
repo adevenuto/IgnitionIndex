@@ -1,26 +1,29 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+{{-- The colour theme (Settings → Appearance, App\Enums\Theme), rendered here so
+     the first paint is already in it. Guests and anyone who has not chosen get
+     the default. --}}
+@php($theme = auth()->user()?->colourTheme() ?? \App\Enums\Theme::default())
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $theme->value }}" data-scheme="{{ $theme->isDark() ? 'dark' : 'light' }}">
     <head>
         <meta charset="utf-8">
         {{-- viewport-fit=cover is required or env(safe-area-inset-*) resolves to
              0px on iOS, and the navy chrome stops short of the safe areas. --}}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-        {{-- Inline style to set the HTML background color based on our theme in app.css.
-             This runs before the CSS bundle loads, so it cannot use var(); the value
-             MUST track --color-bg in resources/css/ignition/tokens.css, or cold
-             loads flash the wrong colour. --}}
+        {{-- The theme's ground, before the CSS bundle loads (so it cannot use var()).
+             The value comes from Theme::swatches(), which MUST track --color-bg in
+             themes.css / product.css, or cold loads flash the wrong colour. --}}
         <style>
             html {
-                background-color: #f2f2f3;
+                background-color: {{ $theme->swatches()['ground'] }};
             }
         </style>
 
-        {{-- Matches the near-white top bar (--surface-card), so a phone's status bar
-             reads as part of the chrome. --}}
-        <meta name="theme-color" content="#fdfdfe">
+        {{-- Matches the top bar (--surface-card), so a phone's status bar reads as
+             part of the chrome. --}}
+        <meta name="theme-color" content="{{ $theme->swatches()['card'] }}">
 
-        {{-- The type face chosen in the trial picker (resources/js/lib/fonts.ts),
+        {{-- The type face chosen in the design trial (resources/js/lib/fonts.ts),
              applied before first paint so it never flashes the default. --}}
         <script>
             try {

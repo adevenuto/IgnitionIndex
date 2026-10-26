@@ -26,9 +26,8 @@ export { default as Button } from "./Button.vue"
  * the press feedback is a background step instead, which is what Industry's
  * own .btn:active does.
  *
- * The primary fill is near-black ink since 2026-10, not steel: steel remains
- * the brand on nav, links, focus and gauges, and the one "do this" button
- * reads as the action on any ground.
+ * The primary fill is the vivid brand blue since the 2026-10 colour pass, so
+ * the one "do this" button is the most colourful thing on the screen.
  *
  * destructive is an OUTLINE rather than a fill on purpose. Rust is a service
  * status colour (section 2), and filling a button with it puts a status colour
@@ -47,10 +46,13 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Ink lifts toward slate on hover and press: a step you can see on a
-        // near-black fill, where darkening further would not register.
+        // The brand blue deepens a step on hover and two on press.
         default:
-          "border-primary bg-primary text-primary-foreground hover:border-[color-mix(in_oklab,var(--primary)_84%,white)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]",
+          "border-primary bg-primary text-primary-foreground hover:border-(--primary-hover) hover:bg-(--primary-hover) active:border-(--primary-active) active:bg-(--primary-active)",
+        // Ink: for the app's one foundational action (Log entry) and nothing
+        // else, so it stands apart from the blue every other main button uses.
+        ink:
+          "border-foreground bg-foreground text-background hover:border-[color-mix(in_oklab,var(--foreground)_86%,var(--background))] hover:bg-[color-mix(in_oklab,var(--foreground)_86%,var(--background))] active:bg-[color-mix(in_oklab,var(--foreground)_76%,var(--background))]",
         destructive:
           "border-destructive bg-transparent text-destructive hover:bg-destructive/10 active:bg-destructive/18 focus-visible:ring-destructive/20",
         outline:
