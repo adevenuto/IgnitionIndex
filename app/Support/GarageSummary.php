@@ -35,6 +35,7 @@ readonly class GarageSummary
         public int $needsReadingCount,
         public int $vehicleCount,
         public array $dueNext = [],
+        public ?int $onlyVehicleId = null,
     ) {}
 
     public static function for(User $user): self
@@ -58,6 +59,9 @@ readonly class GarageSummary
             'due_count' => $this->dueCount,
             'needs_reading_count' => $this->needsReadingCount,
             'vehicle_count' => $this->vehicleCount,
+            // The shell's Log button goes straight to a lone car instead of
+            // asking which one.
+            'only_vehicle_id' => $this->onlyVehicleId,
             'due_next' => array_map(
                 static fn (DueNextItem $item): array => $item->toArray(),
                 $this->dueNext,
@@ -114,6 +118,7 @@ readonly class GarageSummary
                 static fn (array $row): DueNextItem => $row['item'],
                 array_slice($ranked, 0, self::DUE_NEXT_LIMIT),
             ),
+            $vehicles->count() === 1 ? $vehicles->first()?->id : null,
         );
     }
 }

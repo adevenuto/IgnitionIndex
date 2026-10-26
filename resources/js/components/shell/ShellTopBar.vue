@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { Bell, Menu, Plus, Search } from '@lucide/vue';
+import { Bell, Plus, Search } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ShellBrand from '@/components/shell/ShellBrand.vue';
 import ShellUserMenu from '@/components/shell/ShellUserMenu.vue';
@@ -14,10 +14,10 @@ import { notifications } from '@/routes';
  * floating in the content" — which is why the previous centre FAB is gone
  * rather than restyled.
  *
- * Below md the 194px brand column collapses to the logo alone, Log entry
- * becomes an icon button, and search collapses to a magnifier.
+ * Below md the 194px brand column collapses to the logo alone, and Log entry
+ * and the menu move to the bottom tab bar (ShellTabBar), where a thumb is.
  */
-defineEmits<{ add: []; openNav: [] }>();
+defineEmits<{ add: [] }>();
 
 const page = usePage();
 const unread = computed(() => page.props.unreadNotifications ?? 0);
@@ -29,16 +29,6 @@ const search = ref('');
     <header
         class="flex h-[66px] flex-none items-center gap-[18px] border-b border-(--chrome-hairline) bg-(--chrome-bar) px-[22px]"
     >
-        <button
-            type="button"
-            class="-ml-1 flex size-9 flex-none items-center justify-center md:hidden"
-            :style="{ color: 'var(--chrome-ink)' }"
-            @click="$emit('openNav')"
-        >
-            <Menu class="size-5" :stroke-width="1.6" />
-            <span class="sr-only">Open navigation</span>
-        </button>
-
         <ShellBrand class="hidden md:flex" />
         <ShellBrand compact class="md:hidden" />
 
@@ -49,7 +39,7 @@ const search = ref('');
         -->
         <Button
             variant="ink"
-            class="h-10 flex-none gap-2 px-5 max-md:w-10 max-md:px-0 max-md:[&>span]:sr-only"
+            class="h-10 flex-none gap-2 px-5 max-md:hidden"
             @click="$emit('add')"
         >
             <Plus class="size-4" :stroke-width="1.8" />

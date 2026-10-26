@@ -180,6 +180,12 @@ Icons: **Lucide, stroke-width 1.5**, sized 14–19px in chrome. No filled icons,
   pinned to the bottom is removed, along with every Fleet mention in the product and on the
   landing page, until Fleet is a real initiative.)* Hover on an inactive item is a faint ink
   wash (`--chrome-hover`). The mobile drawer is the same rail on the same light ground.
+- **Phones** *(2026-10)*: the rail and the top bar's Log entry give way to a **bottom tab bar**
+  (`ShellTabBar`) — Garage · History · **Log** · Insights · More. Log is the app's core action, so
+  it is a large raised button in the accent at the centre of the bar; More opens the drawer.
+  Wherever it is pressed without a vehicle in view, Log fetches one (`useLogEntry`): no cars → add
+  one; one car → that car's page with the sheet open; several → the garage in pick mode, where a
+  tap on a card opens the sheet for it.
 - **Content**: breadcrumb → vehicle switcher row → vehicle header card → gauges.
 
 ## 6. The gauge
