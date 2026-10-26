@@ -162,7 +162,12 @@ onMounted(() => {
                     <img
                         src="/img/ignition-index-logo.png"
                         alt=""
-                        class="block w-12 flex-none"
+                        class="ii-logo-light block w-12 flex-none"
+                    />
+                    <img
+                        src="/img/ignition-index-logo-light.png"
+                        alt=""
+                        class="ii-logo-dark w-12 flex-none"
                     />
                     <span
                         class="font-display text-foreground text-[18px]/[1.05] font-bold tracking-[0.01em] uppercase"
@@ -187,7 +192,7 @@ onMounted(() => {
                     <Link
                         v-if="user"
                         :href="garage()"
-                        class="bg-primary text-primary-foreground ease-standard hover:bg-accent-700 hover:border-accent-700 active:bg-accent-800 flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)]"
+                        class="bg-primary text-primary-foreground ease-standard flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)] hover:border-(--primary-hover) hover:bg-(--primary-hover) active:bg-(--primary-active)"
                     >
                         Garage
                     </Link>
@@ -200,7 +205,7 @@ onMounted(() => {
                         </Link>
                         <Link
                             :href="register()"
-                            class="bg-primary text-primary-foreground ease-standard hover:bg-accent-700 hover:border-accent-700 active:bg-accent-800 flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)]"
+                            class="bg-primary text-primary-foreground ease-standard flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)] hover:border-(--primary-hover) hover:bg-(--primary-hover) active:bg-(--primary-active)"
                         >
                             Start free
                         </Link>
@@ -253,7 +258,7 @@ onMounted(() => {
                         >
                             <Link
                                 :href="register()"
-                                class="bg-primary text-primary-foreground ease-standard hover:bg-accent-700 hover:border-accent-700 active:bg-accent-800 flex h-12 items-center rounded-md border border-(--primary) px-6 text-[15px] font-semibold transition-colors duration-[var(--dur-fast)]"
+                                class="bg-primary text-primary-foreground ease-standard flex h-12 items-center rounded-md border border-(--primary) px-6 text-[15px] font-semibold transition-colors duration-[var(--dur-fast)] hover:border-(--primary-hover) hover:bg-(--primary-hover) active:bg-(--primary-active)"
                             >
                                 Start free
                             </Link>
@@ -338,8 +343,8 @@ onMounted(() => {
                         class="max-w-[44ch] text-[16px]/[1.55] text-pretty text-(--color-neutral-800)"
                     >
                         The needle shows how much of the interval you have used.
-                        Blue is on interval, amber is due soon, rust is overdue.
-                        Nothing else competes for the color.
+                        The brand colour means on interval, amber due soon, rust
+                        overdue. Nothing else competes for the colour.
                     </p>
                 </div>
 
@@ -533,7 +538,12 @@ onMounted(() => {
                 <img
                     src="/img/ignition-index-logo.png"
                     alt=""
-                    class="block w-10 flex-none"
+                    class="ii-logo-light block w-10 flex-none"
+                />
+                <img
+                    src="/img/ignition-index-logo-light.png"
+                    alt=""
+                    class="ii-logo-dark w-10 flex-none"
                 />
                 <span
                     class="font-display text-foreground text-[15px] font-bold tracking-[0.02em] uppercase"

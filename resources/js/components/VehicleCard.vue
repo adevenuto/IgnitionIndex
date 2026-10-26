@@ -86,7 +86,7 @@ const specs = computed(() =>
                         class="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md"
                         :class="
                             vehicle.color
-                                ? 'bg-[color-mix(in_oklab,var(--vehicle)_18%,white)] text-[color-mix(in_oklab,var(--vehicle)_55%,black)] ring-1 ring-(--hairline-soft)'
+                                ? 'bg-[color-mix(in_oklab,var(--vehicle)_18%,var(--surface-card))] text-[color-mix(in_oklab,var(--vehicle)_55%,var(--color-text))] ring-1 ring-(--hairline-soft)'
                                 : 'bg-(--tile-slate-bg) text-(--tile-slate-ink)'
                         "
                         :style="

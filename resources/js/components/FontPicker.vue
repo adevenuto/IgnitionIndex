@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { Check, Type, X } from '@lucide/vue';
 import { ref } from 'vue';
-import type { FigureChoice } from '@/lib/fonts';
+import type { FigureChoice, ThemeChoice } from '@/lib/fonts';
 import {
     applyFigure,
     applyFont,
+    applyTheme,
+    currentTheme,
+    THEME_CHOICES,
     currentFont,
     FONT_CHOICES,
     FONT_PICKER_KEY,
@@ -31,6 +34,12 @@ function chooseFigure(id: FigureChoice): void {
 }
 
 const active = ref(currentFont());
+const theme = ref<ThemeChoice>(currentTheme());
+
+function chooseTheme(id: ThemeChoice): void {
+    applyTheme(id);
+    theme.value = id;
+}
 const open = ref(true);
 
 function choose(id: string): void {
@@ -72,6 +81,32 @@ function dismiss(): void {
                 >
                     <X class="size-4" :stroke-width="1.5" />
                 </button>
+            </div>
+
+            <div class="grid gap-1.5 px-2 pt-1">
+                <span class="ii-eyebrow">Theme</span>
+                <div
+                    class="bg-muted grid grid-cols-3 gap-1 rounded-md p-1"
+                    role="radiogroup"
+                    aria-label="Theme"
+                >
+                    <button
+                        v-for="option in THEME_CHOICES"
+                        :key="option.id"
+                        type="button"
+                        role="radio"
+                        :aria-checked="theme === option.id"
+                        class="h-8 cursor-pointer rounded-sm text-[13px] font-semibold transition-colors duration-[var(--dur-fast)]"
+                        :class="
+                            theme === option.id
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-muted-foreground hover:bg-hover-surface hover:text-foreground'
+                        "
+                        @click="chooseTheme(option.id)"
+                    >
+                        {{ option.label }}
+                    </button>
+                </div>
             </div>
 
             <div class="grid gap-1.5 px-2 pt-1 pb-2">

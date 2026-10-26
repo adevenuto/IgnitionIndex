@@ -20,12 +20,23 @@
              reads as part of the chrome. --}}
         <meta name="theme-color" content="#fdfdfe">
 
-        {{-- The type face chosen in the trial picker (resources/js/lib/fonts.ts),
-             applied before first paint so it never flashes the default. --}}
+        {{-- The type face and theme chosen in the design trial (resources/js/lib/fonts.ts),
+             applied before first paint so neither flashes the default. A dark theme
+             also repaints the ground and the phone's status bar here, since the
+             inline values above are the light theme's. Keep the colours in step
+             with --color-bg and --surface-card in resources/css/ignition/themes.css. --}}
         <script>
             try {
+                var root = document.documentElement;
                 var face = localStorage.getItem('ii-font');
-                if (face) document.documentElement.dataset.font = face;
+                if (face) root.dataset.font = face;
+                var theme = localStorage.getItem('ii-theme');
+                var grounds = { volt: ['#0f1110', '#181b19'], 'indigo-night': ['#0a0f1e', '#111a2e'] };
+                if (grounds[theme]) {
+                    root.dataset.theme = theme;
+                    root.style.backgroundColor = grounds[theme][0];
+                    document.querySelector('meta[name="theme-color"]').setAttribute('content', grounds[theme][1]);
+                }
             } catch (e) {}
         </script>
 

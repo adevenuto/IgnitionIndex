@@ -18,8 +18,9 @@ import { cn } from '@/lib/utils';
  *    illustration whose fills are compositional (five tonal steps that read as
  *    stacked planes under one light), not semantic. Wiring them to
  *    var(--color-*) would mean a token tweak silently flattens the drawing's
- *    depth. The values used are the system's own — #2f6bed brand blue, #1d1f20
- *    ink, #f2f2f3 paper — plus derived tints of them. Do not "fix" this to tokens.
+ *    depth. Each theme on trial has its own palette below (the system's own
+ *    values plus derived tints), picked from <html data-theme>. Do not "fix"
+ *    this to tokens.
  *
  * 2. FONT SIZES ARE AUTHORED IN VIEWBOX UNITS, ~2× their rendered size. The
  *    760-unit viewBox renders into a ~378px hero column, so an authored 21
@@ -67,34 +68,106 @@ const polygon = (points: [number, number][]) => points.map(fmt).join(' ');
 
 /* ── Palette ─────────────────────────────────────────────────────────────── */
 
-const PAPER = '#f2f2f3';
-const INK = '#1d1f20';
-const ACCENT = '#2f6bed';
+type Palette = {
+    paper: string;
+    /** Ink as an "r,g,b" triple, for the translucent hairlines and fills. */
+    ink: string;
+    inkHex: string;
+    accent: string;
+    accentRgb: string;
+    accentTop: string;
+    accentLeft: string;
+    /** Ink for the label on the solid (accent) slab. */
+    onAccent: string;
+    onAccentEdge: string;
+    ground: string;
+    due: string;
+    overdue: string;
+};
+
+/** One per theme on trial (resources/css/ignition/themes.css). */
+const PALETTES: Record<'daylight' | 'volt' | 'indigo-night', Palette> = {
+    daylight: {
+        paper: '#f2f2f3',
+        ink: '29,31,32',
+        inkHex: '#1d1f20',
+        accent: '#2f6bed',
+        accentRgb: '47,107,237',
+        accentTop: '#5b8cf2',
+        accentLeft: '#2253c4',
+        onAccent: '#f2f2f3',
+        onAccentEdge: 'rgba(242,242,243,0.34)',
+        ground: '#ececed',
+        due: '#c08a2e',
+        overdue: '#b4442f',
+    },
+    volt: {
+        paper: '#181b19',
+        ink: '238,242,234',
+        inkHex: '#eef2ea',
+        accent: '#c6f135',
+        accentRgb: '198,241,53',
+        accentTop: '#d9f77a',
+        accentLeft: '#8fb823',
+        onAccent: '#0f1110',
+        onAccentEdge: 'rgba(15,17,16,0.3)',
+        ground: '#141715',
+        due: '#e8a93f',
+        overdue: '#f26b52',
+    },
+    'indigo-night': {
+        paper: '#111a2e',
+        ink: '230,233,244',
+        inkHex: '#e6e9f4',
+        accent: '#6366f1',
+        accentRgb: '99,102,241',
+        accentTop: '#8b8ef6',
+        accentLeft: '#4a4fcf',
+        onAccent: '#ffffff',
+        onAccentEdge: 'rgba(255,255,255,0.25)',
+        ground: '#0e1628',
+        due: '#eab04a',
+        overdue: '#f2735c',
+    },
+};
+
+const themeId = ref<keyof typeof PALETTES>('daylight');
+const P = computed(() => PALETTES[themeId.value]);
+/** The theme's ink at an opacity. */
+const inkA = (alpha: number) => `rgba(${P.value.ink},${alpha})`;
+
+function readTheme(): void {
+    const theme = document.documentElement.dataset.theme;
+    themeId.value =
+        theme === 'volt' || theme === 'indigo-night' ? theme : 'daylight';
+}
 
 type LayerKind = 'wire' | 'solid';
 
 /** Three faces plus edge and ink, per layer treatment. */
-const FACES: Record<
-    LayerKind,
-    { top: string; right: string; left: string; edge: string; ink: string }
-> = {
-    // A line drawing: near-transparent fills, dark hairlines.
-    wire: {
-        top: 'rgba(47,107,237,0.07)',
-        right: 'rgba(29,31,32,0.045)',
-        left: 'rgba(29,31,32,0.075)',
-        edge: 'rgba(29,31,32,0.42)',
-        ink: INK,
-    },
-    // The one solid object on the board — where the product happens.
-    solid: {
-        top: '#5b8cf2',
-        right: ACCENT,
-        left: '#2253c4',
-        edge: 'rgba(242,242,243,0.34)',
-        ink: PAPER,
-    },
-};
+const FACES = computed(
+    (): Record<
+        LayerKind,
+        { top: string; right: string; left: string; edge: string; ink: string }
+    > => ({
+        // A line drawing: near-transparent fills, hairlines in the ink.
+        wire: {
+            top: `rgba(${P.value.accentRgb},0.07)`,
+            right: inkA(0.045),
+            left: inkA(0.075),
+            edge: inkA(0.42),
+            ink: P.value.inkHex,
+        },
+        // The one solid object on the board — where the product happens.
+        solid: {
+            top: P.value.accentTop,
+            right: P.value.accent,
+            left: P.value.accentLeft,
+            edge: P.value.onAccentEdge,
+            ink: P.value.onAccent,
+        },
+    }),
+);
 
 const LAYERS: { name: string; kind: LayerKind }[] = [
     { name: 'Vehicles', kind: 'wire' },
@@ -129,9 +202,9 @@ const vehicles = computed(() =>
     (
         [
             // Ordered back to front, so severity increases toward the reader.
-            [ACCENT, 1.58, 1.02],
-            ['#c08a2e', 1.98, 1.36],
-            ['#b4442f', 1.46, 1.58],
+            [P.value.accent, 1.58, 1.02],
+            [P.value.due, 1.98, 1.36],
+            [P.value.overdue, 1.46, 1.58],
         ] as [string, number, number][]
     ).map(([color, x, y]) => ({
         key: `${x}-${y}`,
@@ -198,7 +271,7 @@ const slabs = computed(() =>
     LAYERS.map((layer, index) => {
         const top = BASE + index * PITCH;
         const bottom = top - THICKNESS;
-        const face = FACES[layer.kind];
+        const face = FACES.value[layer.kind];
 
         const a = project(0, 0, top);
         const b = project(1, 0, top);
@@ -264,27 +337,30 @@ async function measure(): Promise<void> {
 let observer: MutationObserver | null = null;
 
 onMounted(() => {
+    readTheme();
     void measure();
 
-    // A new face is chosen on <html data-font>; measure once it has loaded.
-    observer = new MutationObserver(() =>
-        requestAnimationFrame(() => void measure()),
-    );
+    // A new face (data-font) or theme (data-theme) is chosen on <html>:
+    // recolour, and measure once a new face has loaded.
+    observer = new MutationObserver(() => {
+        readTheme();
+        requestAnimationFrame(() => void measure());
+    });
     observer.observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ['data-font'],
+        attributeFilter: ['data-font', 'data-theme'],
     });
 });
 
 onBeforeUnmount(() => observer?.disconnect());
 
-const inputs = [
+const inputs = computed(() => [
     {
         label: 'ODOMETER',
         value: '15,100 mi · Sep 8',
         y: 560,
-        border: ACCENT,
-        stroke: ACCENT,
+        border: P.value.accent,
+        stroke: P.value.accent,
         dash: 'none',
         // Readings — the layer an odometer entry lands in.
         target: 1,
@@ -294,17 +370,17 @@ const inputs = [
         label: 'INTERVAL',
         value: 'every 5,000 mi',
         y: 630,
-        border: 'rgba(29,31,32,0.4)',
-        stroke: 'rgba(29,31,32,0.45)',
+        border: inkA(0.4),
+        stroke: inkA(0.45),
         dash: '7 6',
         // Intervals.
         target: 2,
         leg: 292,
     },
-];
+]);
 
 const connectors = computed(() =>
-    inputs.map((input) => {
+    inputs.value.map((input) => {
         const [endX, endY] = project(
             0,
             0.6,
@@ -338,17 +414,17 @@ const connectors = computed(() =>
         aria-label="Isometric diagram of the Ignition Index data model: vehicles, readings and intervals feed the gauges layer. Three vehicles sit on the ground plane, marked on interval, due soon and overdue."
     >
         <!-- Ground plane -->
-        <polygon :points="ground" fill="#ececed" />
+        <polygon :points="ground" :fill="P.ground" />
         <path
             :d="groundGrid"
             fill="none"
-            stroke="rgba(29,31,32,0.13)"
+            :stroke="inkA(0.13)"
             stroke-width="1.6"
         />
-        <polygon :points="footprint" fill="rgba(29,31,32,0.1)" />
+        <polygon :points="footprint" :fill="inkA(0.1)" />
         <path
             :d="axis"
-            stroke="rgba(29,31,32,0.3)"
+            :stroke="inkA(0.3)"
             stroke-width="1.6"
             stroke-dasharray="4 5"
         />
@@ -392,7 +468,7 @@ const connectors = computed(() =>
             <path
                 :d="slab.riser"
                 fill="none"
-                stroke="rgba(29,31,32,0.35)"
+                :stroke="inkA(0.35)"
                 stroke-width="1.6"
             />
         </g>
@@ -421,7 +497,7 @@ const connectors = computed(() =>
                 :y="input.y"
                 :width="plateWidth"
                 :height="PILL.height"
-                :fill="PAPER"
+                :fill="P.paper"
                 :stroke="input.border"
                 stroke-width="1.6"
             />
@@ -433,7 +509,7 @@ const connectors = computed(() =>
                 font-size="21"
                 font-weight="700"
                 letter-spacing="2"
-                fill="rgba(29,31,32,0.6)"
+                :fill="inkA(0.6)"
             >
                 {{ input.label }}
             </text>
@@ -444,7 +520,7 @@ const connectors = computed(() =>
                 style="font-family: var(--font-ui)"
                 font-size="25"
                 font-weight="600"
-                :fill="INK"
+                :fill="P.inkHex"
             >
                 {{ input.value }}
             </text>
@@ -458,8 +534,8 @@ const connectors = computed(() =>
         <g v-for="vehicle in vehicles" :key="vehicle.key">
             <polygon
                 :points="vehicle.plate"
-                :fill="PAPER"
-                stroke="rgba(29,31,32,0.35)"
+                :fill="P.paper"
+                :stroke="inkA(0.35)"
                 stroke-width="1.6"
             />
             <polygon :points="vehicle.chip" :fill="vehicle.color" />

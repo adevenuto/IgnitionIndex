@@ -6,6 +6,8 @@
 @import './ignition/tokens.css';
 /* Layer 1b — product tokens Industry does not carry (chrome, status, motion). */
 @import './ignition/product.css';
+/* Layer 1c — themes on trial: re-point the tokens above under <html data-theme>. */
+@import './ignition/themes.css';
 /* Layer 2 — shadcn's semantic variable names, expressed in Ignition terms. */
 @import './ignition/shadcn-bridge.css';
 /* Layer 2b — blueprint frame, corner marks, duotone, tags, checker strip. */

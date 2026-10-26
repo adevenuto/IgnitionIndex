@@ -37,6 +37,10 @@
        that, steel before that.) */
     --primary: var(--color-accent);
     --primary-foreground: #ffffff;
+    /* The primary's hover and press steps, named so a theme whose accent
+       ramp runs the other way (dark grounds) can still deepen them. */
+    --primary-hover: var(--color-accent-700);
+    --primary-active: var(--color-accent-800);
 
     /* ── Quiet fills ──
        .btn-secondary in the Industry sheet is outline-only: a hairline border

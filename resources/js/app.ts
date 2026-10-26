@@ -21,7 +21,8 @@ void createInertiaApp({
         }
     },
     progress: {
-        color: '#4B5563',
+        // Follows the theme's accent rather than a fixed grey.
+        color: 'var(--color-accent)',
     },
 });
 

@@ -22,7 +22,13 @@ defineProps<{
 </script>
 
 <template>
-    <div class="flex gap-(--space-3) overflow-x-auto pb-1">
+    <!--
+      relative is load-bearing: the "Add a vehicle" chip's sr-only label is
+      absolutely positioned, and with no positioned ancestor it escaped this
+      scroll container and widened the whole page on a phone — 528px at 390
+      with three cars, which also widened the log sheet past the screen.
+    -->
+    <div class="relative flex gap-(--space-3) overflow-x-auto pb-1">
         <Link
             v-for="vehicle in vehicles"
             :key="vehicle.id"

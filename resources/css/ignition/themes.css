@@ -1,0 +1,183 @@
+/*
+ * Layer 1c — themes on trial (2026-10), chosen in the homepage design-trial
+ * panel and applied through <html data-theme>. Daylight, the light look, is
+ * no attribute at all: it is product.css as written.
+ *
+ * Each theme is one accent with everything else tuned to it, following
+ * Anthony's references: Volt is charcoal with an electric lime (the EV
+ * dashboard), Indigo Night is deep navy with indigo (Laravael UI's dark
+ * mode). A theme re-points tokens and nothing else — grounds, the neutral and
+ * accent ramps (both inverted, so 100 is a deep tint to sit on and 700 a
+ * light ink to read), primary, status, lanes, tiles, gauges and elevation —
+ * because every component already reads those tokens.
+ *
+ * Unlayered :root[data-theme] selectors, so they beat both Industry's @theme
+ * layer and product.css's :root. TEMPORARY with the rest of the trial: once a
+ * theme is chosen it becomes the tokens and this file goes.
+ */
+
+/* ── Shared by both dark themes ─────────────────────────────────────────── */
+:root[data-theme='volt'],
+:root[data-theme='indigo-night'] {
+    color-scheme: dark;
+
+    --color-divider: color-mix(in srgb, var(--color-text) 14%, transparent);
+    --hairline-soft: rgb(255 255 255 / 0.08);
+    --chrome-hover: color-mix(in srgb, var(--color-text) 8%, transparent);
+    --gauge-track: color-mix(in srgb, var(--color-text) 14%, transparent);
+    --gauge-tick: color-mix(in srgb, var(--color-text) 38%, transparent);
+
+    /* A slate drop shadow vanishes on dark: a deeper black one, plus a
+       faint top highlight so a card's edge catches the light. */
+    --elevation-card:
+        inset 0 1px 0 rgb(255 255 255 / 0.04),
+        0 10px 28px -14px rgb(0 0 0 / 0.65);
+    --elevation-overlay:
+        inset 0 1px 0 rgb(255 255 255 / 0.05),
+        0 28px 56px -16px rgb(0 0 0 / 0.75);
+
+    --tile-slate-bg: var(--color-surface);
+    --tile-slate-ink: var(--color-neutral-800);
+
+    /* Lanes sit on a deep tint of themselves and are read in a light step. */
+    --lane-fuel-bg: color-mix(
+        in oklab,
+        var(--lane-fuel) 20%,
+        var(--surface-card)
+    );
+    --lane-visit-bg: color-mix(
+        in oklab,
+        var(--lane-visit) 20%,
+        var(--surface-card)
+    );
+    --lane-expense-bg: color-mix(
+        in oklab,
+        var(--lane-expense) 20%,
+        var(--surface-card)
+    );
+    --lane-odometer-bg: color-mix(
+        in oklab,
+        var(--lane-odometer) 20%,
+        var(--surface-card)
+    );
+}
+
+/* ── Volt: charcoal and electric lime ───────────────────────────────────── */
+:root[data-theme='volt'] {
+    --color-bg: #0f1110;
+    --color-surface: #212522;
+    --surface-card: #181b19;
+    --color-text: #eef2ea;
+
+    --color-neutral-100: #1d201e;
+    --color-neutral-200: #262a27;
+    --color-neutral-300: #343935;
+    --color-neutral-400: #4b514c;
+    --color-neutral-500: #6a716b;
+    --color-neutral-600: #8b928c;
+    --color-neutral-700: #a9b0aa;
+    --color-neutral-800: #c9cfca;
+    --color-neutral-900: #e3e8e3;
+
+    --color-accent: #c6f135;
+    --color-accent-100: #232a10;
+    --color-accent-200: #2e3a12;
+    --color-accent-300: #485d16;
+    --color-accent-400: #6f8f1e;
+    --color-accent-500: #a3d12a;
+    --color-accent-600: #c6f135;
+    --color-accent-700: #d9f77a;
+    --color-accent-800: #e7fbab;
+    --color-accent-900: #f3fdd6;
+
+    --primary-foreground: #0f1110;
+    --primary-hover: #d4f65c;
+    --primary-active: #b3dd1f;
+
+    --status-due: #e8a93f;
+    --status-overdue: #f26b52;
+    --status-due-ink: #f2bf66;
+    --status-overdue-ink: #ff8a73;
+
+    /* Lane hues lifted to sit at the lime's brightness. */
+    --lane-fuel: #ff8a3d;
+    --lane-fuel-ink: #ffb07a;
+    --lane-visit: #a78bfa;
+    --lane-visit-ink: #c9b8fd;
+    --lane-expense: #34d399;
+    --lane-expense-ink: #7be6bd;
+    --lane-odometer: #38bdf8;
+    --lane-odometer-ink: #84d6fb;
+
+    --duotone-ink: #6f8f1e;
+}
+
+/* ── Indigo Night: deep navy and indigo ─────────────────────────────────── */
+:root[data-theme='indigo-night'] {
+    --color-bg: #0a0f1e;
+    --color-surface: #18223a;
+    --surface-card: #111a2e;
+    --color-text: #e6e9f4;
+
+    --color-neutral-100: #151d33;
+    --color-neutral-200: #1d2742;
+    --color-neutral-300: #2a3554;
+    --color-neutral-400: #3f4b6e;
+    --color-neutral-500: #5c688b;
+    --color-neutral-600: #7f8aab;
+    --color-neutral-700: #a3adc8;
+    --color-neutral-800: #c6cde0;
+    --color-neutral-900: #e1e5f0;
+
+    --color-accent: #6366f1;
+    --color-accent-100: #1c2150;
+    --color-accent-200: #252b6b;
+    --color-accent-300: #333b93;
+    --color-accent-400: #4a50c8;
+    --color-accent-500: #5b5fe6;
+    --color-accent-600: #6366f1;
+    --color-accent-700: #a5a8ff;
+    --color-accent-800: #c7c9ff;
+    --color-accent-900: #e3e4ff;
+
+    /* A step deeper than the accent for the button fill, so white text
+       clears 4.5:1; hover and press go deeper still. */
+    --primary: #585bef;
+    --primary-foreground: #ffffff;
+    --primary-hover: #4f52e3;
+    --primary-active: #4447d1;
+
+    --status-due: #eab04a;
+    --status-overdue: #f2735c;
+    --status-due-ink: #f4c46c;
+    --status-overdue-ink: #ff917b;
+
+    --lane-fuel: #fb8c4a;
+    --lane-fuel-ink: #ffb486;
+    --lane-visit: #a78bfa;
+    --lane-visit-ink: #c9b8fd;
+    --lane-expense: #34d399;
+    --lane-expense-ink: #7be6bd;
+    --lane-odometer: #38bdf8;
+    --lane-odometer-ink: #84d6fb;
+
+    --duotone-ink: #4a50c8;
+}
+
+/*
+ * The logo: the navy mark on light grounds, the paper outline on dark. Both
+ * are rendered (ShellBrand, Welcome) and these rules show one.
+ */
+.ii-logo-dark {
+    display: none;
+}
+
+:root[data-theme='volt'] .ii-logo-light,
+:root[data-theme='indigo-night'] .ii-logo-light {
+    display: none;
+}
+
+:root[data-theme='volt'] .ii-logo-dark,
+:root[data-theme='indigo-night'] .ii-logo-dark {
+    display: block;
+}
