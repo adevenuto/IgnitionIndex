@@ -70,20 +70,4 @@
         border: 1px solid var(--ii-tag-border, currentcolor);
         color: var(--ii-tag-ink, currentcolor);
     }
-
-    /*
-     * The checker strip (§1). Rendered once per page by the shell, never by a
-     * screen — it is chrome, not content.
-     */
-    .ii-checker {
-        height: 10px;
-        background-color: var(--shell-navy-deep);
-        background-image: conic-gradient(
-            var(--shell-checker-ink) 90deg,
-            transparent 0 180deg,
-            var(--shell-checker-ink) 0 270deg,
-            transparent 0
-        );
-        background-size: 10px 10px;
-    }
 }

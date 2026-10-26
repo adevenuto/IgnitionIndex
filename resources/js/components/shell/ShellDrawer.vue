@@ -37,8 +37,7 @@ onBeforeUnmount(stopListening);
     <Sheet v-model:open="open">
         <SheetContent
             side="left"
-            class="w-[264px] border-0 p-0"
-            :style="{ background: 'var(--shell-navy-deep)' }"
+            class="w-[264px] border-0 bg-(--chrome-rail) p-0"
             @click="onClick"
         >
             <SheetTitle class="sr-only">Navigation</SheetTitle>

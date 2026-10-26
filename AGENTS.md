@@ -14,12 +14,13 @@
 > **2026-10 softening.** The blueprint geometry has been softened: the `+` corner marks are
 > retired, and cards, controls and chips now use a radius scale and one soft elevation. Type is
 > Inter, the primary button is near-black, and icon tiles may take one of the four tile hues.
-> Pill tabs and pill badges are allowed. The doc's §2–§4 describe the current rules; where an
+> Pill tabs and pill badges are allowed. The chrome is light — the navy top bar, rail and
+> checker strip are retired — and default buttons and inputs are 48px. The doc's §2–§4 describe the current rules; where an
 > older comment in the code cites the square, mark-framed geometry, the doc wins.
 >
 > **Do** take every color, font, space and radius from the CSS variables in `styles.css`
 > (`var(--color-*)`, `var(--font-*)`, `var(--space-*)`). Never hard-code a hex, a font name, or a
 > px value the tokens already carry. The design doc lists the two roles the token sheet does not
-> carry (shell navy, service-status amber/rust) and exactly where each is allowed.
+> carry (the light chrome, service-status amber/rust) and exactly where each is allowed.
 >
 > If a design decision is not covered by the doc, ask rather than inventing one.

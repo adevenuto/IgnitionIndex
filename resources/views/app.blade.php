@@ -16,7 +16,9 @@
             }
         </style>
 
-        <meta name="theme-color" content="#f2f2f3">
+        {{-- Matches the near-white top bar (--surface-card), so a phone's status bar
+             reads as part of the chrome. --}}
+        <meta name="theme-color" content="#fdfdfe">
 
         {{-- The type face chosen in the trial picker (resources/js/lib/fonts.ts),
              applied before first paint so it never flashes the default. --}}

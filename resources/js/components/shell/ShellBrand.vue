@@ -12,9 +12,10 @@ import { garage } from '@/routes';
  * one line beneath, which is what the auth screens want: there is no chrome
  * around them, so the lockup is the only thing identifying the product.
  *
- * The light logo variant is the one with navy ink lifted to paper, so the mark
- * reads as a line drawing on the navy shell. Design doc §1 is explicit that the
- * mark never sits on a filled chip or box.
+ * Every ground the lockup sits on is light since the 2026-10 chrome change, so
+ * it is always the navy mark with ink text. (The paper-on-navy variant,
+ * ignition-index-logo-light.png, is kept in public/img but no longer used.)
+ * Design doc §1 is explicit that the mark never sits on a filled chip or box.
  *
  * `href` exists because this renders an anchor. The auth layout used to wrap it
  * in a second <Link>, which nests one anchor inside another — invalid HTML, and
@@ -23,28 +24,14 @@ import { garage } from '@/routes';
 const props = withDefaults(
     defineProps<{
         compact?: boolean;
-        ground?: 'navy' | 'paper';
         orientation?: 'inline' | 'stacked';
         href?: NonNullable<InertiaLinkProps['href']>;
     }>(),
     {
         compact: false,
-        ground: 'navy',
         orientation: 'inline',
         href: undefined,
     },
-);
-
-// §1: the light variant is for the navy shell only; on paper the mark is used
-// as-is, in navy ink.
-const mark = computed(() =>
-    props.ground === 'navy'
-        ? '/img/ignition-index-logo-light.png'
-        : '/img/ignition-index-logo.png',
-);
-
-const ink = computed(() =>
-    props.ground === 'navy' ? 'var(--shell-ink)' : 'var(--color-text)',
 );
 
 const stacked = computed(() => props.orientation === 'stacked');
@@ -64,7 +51,7 @@ const target = computed(() => props.href ?? garage());
         "
     >
         <img
-            :src="mark"
+            src="/img/ignition-index-logo.png"
             alt=""
             class="block flex-none"
             :class="stacked ? 'w-20' : 'w-12'"
@@ -72,16 +59,14 @@ const target = computed(() => props.href ?? garage());
 
         <span
             v-if="stacked"
-            class="font-display text-[22px]/none font-semibold tracking-[0.06em] uppercase"
-            :style="{ color: ink }"
+            class="font-display text-foreground text-[22px]/none font-bold tracking-[0.02em] uppercase"
         >
             Ignition Index
         </span>
 
         <span
             v-else-if="!compact"
-            class="font-display text-[20px]/[1.05] font-semibold tracking-[0.02em] uppercase"
-            :style="{ color: ink }"
+            class="font-display text-foreground text-[18px]/[1.05] font-bold tracking-[0.01em] uppercase"
         >
             Ignition<br />Index
         </span>

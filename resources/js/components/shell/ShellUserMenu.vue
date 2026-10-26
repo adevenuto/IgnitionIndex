@@ -13,7 +13,7 @@ import { logout } from '@/routes';
 import { edit as editProfile } from '@/routes/profile';
 
 /*
- * The user block, far right of the navy bar. Per design doc §5 this is also the
+ * The user block, far right of the top bar. Per design doc §5 this is also the
  * disclosure for Settings — there is no Settings item in the rail.
  *
  * Billing is named in the doc but has no route yet, so it is not rendered; a
@@ -40,7 +40,7 @@ const initials = computed(() =>
         >
             <span
                 class="font-display bg-accent flex size-[34px] flex-none items-center justify-center rounded-full text-[15px] font-semibold"
-                :style="{ color: 'var(--shell-active-ink)' }"
+                :style="{ color: 'var(--surface-card)' }"
                 aria-hidden="true"
             >
                 {{ initials }}
@@ -48,13 +48,13 @@ const initials = computed(() =>
             <span class="hidden leading-[1.2] md:block">
                 <span
                     class="block text-[13px] font-medium"
-                    :style="{ color: 'var(--shell-ink)' }"
+                    :style="{ color: 'var(--chrome-ink)' }"
                 >
                     {{ user?.name }}
                 </span>
                 <span
                     class="block text-[11px]"
-                    :style="{ color: 'var(--shell-ink-meta)' }"
+                    :style="{ color: 'var(--chrome-ink-meta)' }"
                 >
                     Personal garage
                 </span>
@@ -62,7 +62,7 @@ const initials = computed(() =>
             <ChevronDown
                 class="hidden size-[14px] md:block"
                 :stroke-width="1.6"
-                :style="{ color: 'var(--shell-ink-meta)' }"
+                :style="{ color: 'var(--chrome-ink-meta)' }"
             />
             <span class="sr-only">Account menu</span>
         </DropdownMenuTrigger>

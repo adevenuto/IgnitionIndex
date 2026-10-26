@@ -36,15 +36,15 @@ function swatch(status: string): string {
             v-for="item in items"
             :key="`${item.vehicle_id}-${item.service_name}`"
             :href="showVehicle(item.vehicle_id)"
-            class="ease-standard flex items-center gap-(--space-3) px-(--space-3) py-(--space-2) text-[13px] text-[var(--shell-ink-secondary)] transition-colors duration-[var(--dur-fast)] hover:bg-[var(--shell-hover)] hover:text-[var(--shell-ink)]"
+            class="ease-standard flex items-center gap-(--space-3) rounded-md px-(--space-3) py-(--space-2) text-[13px] text-(--chrome-ink-secondary) transition-colors duration-[var(--dur-fast)] hover:bg-(--chrome-hover) hover:text-(--chrome-ink)"
         >
             <span
-                class="size-[6px] flex-none"
+                class="size-[7px] flex-none rounded-full"
                 :style="{ background: swatch(item.status) }"
                 aria-hidden="true"
             />
             <span class="flex-1 truncate">{{ item.service_name }}</span>
-            <span class="text-[11px] text-[var(--shell-ink-eyebrow)]">
+            <span class="text-[11px] text-[var(--chrome-ink-eyebrow)]">
                 {{ item.percent }}%
             </span>
             <span class="sr-only">

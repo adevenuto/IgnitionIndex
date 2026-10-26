@@ -4,7 +4,7 @@
 
 /* Layer 1 — Industry design-system tokens, verbatim. */
 @import './ignition/tokens.css';
-/* Layer 1b — product tokens Industry does not carry (shell navy, status, motion). */
+/* Layer 1b — product tokens Industry does not carry (chrome, status, motion). */
 @import './ignition/product.css';
 /* Layer 2 — shadcn's semantic variable names, expressed in Ignition terms. */
 @import './ignition/shadcn-bridge.css';
@@ -169,9 +169,9 @@
     /* ── Product palette. These map product.css's names into Tailwind's colour
          namespace; the Industry palette needs no entry here because tokens.css
          already registers it via @theme. ── */
-    --color-shell-navy: var(--shell-navy);
-    --color-shell-navy-deep: var(--shell-navy-deep);
-    --color-shell-ink: var(--shell-ink);
+    --color-chrome-bar: var(--chrome-bar);
+    --color-chrome-rail: var(--chrome-rail);
+    --color-chrome-ink: var(--chrome-ink);
     --color-status-due: var(--status-due);
     --color-status-overdue: var(--status-overdue);
     --color-status-ok-ink: var(--status-ok-ink);

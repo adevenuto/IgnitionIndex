@@ -7,15 +7,17 @@ soft-shadow look. Do not carry over `CarTrak` as a product name, the red `#c9152
 accent, the pill/rounded-`--radius-lg` geometry, or the white floating cards. Where old styles
 conflict with this document, this document wins.
 
-> **2026-10 revision: softened blueprint.** The steel accent, the navy shell, the checker strip
-> and the gauge stay. The geometry and type have changed:
+> **2026-10 revision: softened blueprint.** The steel accent and the gauge stay. The geometry,
+> type and chrome have changed:
 > - the `+` corner marks are retired
 > - cards, controls and chips are rounded, with one soft elevation
 > - type is Inter
 > - the primary button is near-black
 > - icon tiles may carry one of four tile hues
+> - the chrome is light: the navy top bar, rail and checker strip are retired (§1, §5)
+> - default buttons and inputs are 48px
 >
-> §2–§4 have been rewritten to match. The reference artboards below predate this revision; take
+> §1–§5 have been rewritten to match. The reference artboards below predate this revision; take
 > their layout, not their geometry.
 
 Reference designs in this project:
@@ -33,21 +35,13 @@ CSS variables. Never hard-code a value the tokens already carry.
 
 - **Name:** Ignition Index. Never "CarTrak", never "Ignition-Index", never "II" in UI copy.
 - **Mark:** `assets/ignition-index-logo.png` — a checkered-flag `i` inside a gear, navy ink on
-  transparency. On light grounds use it as-is. On the navy shell use
-  `assets/ignition-index-logo-light.png`, a derived variant in which the navy ink is lifted to
-  paper (`#f2f2f3`) and the light fills drop out, so the mark reads as a paper line drawing. Never
-  put the mark on a filled chip or box.
-- **Lockup:** logo chip + the wordmark set in two condensed uppercase lines, `IGNITION` over
-  `INDEX`, `var(--font-heading)` at 20px/1.05, letter-spacing `0.02em`.
-- **Checker motif:** the flag pattern is reused as a 10px-tall texture strip separating the navy
-  header from the content below. It is decoration, used exactly once per page.
-  ```css
-  height: 10px;
-  background: #101a2b;
-  background-image: conic-gradient(rgba(242,242,243,.16) 90deg, transparent 0 180deg,
-                                   rgba(242,242,243,.16) 0 270deg, transparent 0);
-  background-size: 10px 10px;
-  ```
+  transparency. Every ground is light since 2026-10, so it is always used as-is; the paper
+  variant (`ignition-index-logo-light.png`) is retired with the navy chrome. Never put the mark on
+  a filled chip or box.
+- **Lockup:** logo + the wordmark in two uppercase lines, `IGNITION` over `INDEX`, the heading
+  face bold at 18px/1.05, letter-spacing `0.01em`, in ink.
+- **Checker motif:** *retired 2026-10.* The 10px checkered strip under the navy header went with
+  the navy chrome; the flag lives on in the mark.
 
 ## 2. Color
 
@@ -65,8 +59,7 @@ re-typing the hexes.
 | `--color-accent-700` | `#416180` | Accent used at paragraph size (the base accent is only 3:1). |
 | `--color-accent-900` | `#1d2d3d` | Full reversed field (the landing's Fleet section). |
 | `--color-divider` | `#1d1f20` @ 16% | Every hairline. |
-| **`--shell-navy`** *(new)* | `#16233a` | Top bar, footer, active vehicle chip, Fleet price card. |
-| **`--shell-navy-deep`** *(new)* | `#101a2b` | Left rail, checker strip ground. |
+| **`--chrome-*`** *(2026-10)* | near-white + ink | Top bar, rail, drawer, homepage header and footer. Replaces `--shell-navy`. |
 | **`--status-due`** *(new)* | `#c08a2e` | Amber. Gauge ≥ 75% of interval. |
 | **`--status-overdue`** *(new)* | `#b4442f` | Rust. Gauge ≥ 100%. Also notification badges. |
 
@@ -87,8 +80,8 @@ a row of methods or features can be told apart at a glance: `--tile-steel`, `--t
 (`--tile-*-ink`) that clears 3:1 on it. A tile hue never colours text, a border, a chart or a
 status, and amber and rust are never tile hues: they still mean service state and nothing else.
 
-On the navy shell, text is `#f2f2f3` at full opacity for primary, `rgba(242,242,243,.72)` for
-secondary nav items, `rgba(242,242,243,.38–.55)` for eyebrow labels and metadata only.
+In the chrome, text is `--chrome-ink` (ink) for primary and `--chrome-ink-secondary`
+(`--color-neutral-700`) for inactive nav items, eyebrows and metadata.
 
 ## 3. Type
 
@@ -133,29 +126,32 @@ Icons: **Lucide, stroke-width 1.5**, sized 14–19px in chrome. No filled icons,
 
 ## 5. App shell
 
+*(Rewritten 2026-10: the chrome is light.)*
+
 ```
-┌──────────────────────────────────────────────── 66px navy top bar ──┐
-│ [logo chip] IGNITION/INDEX   [Log entry ▸]  [search]  ···  [bell] [user ▾] │
-├──── 10px checker strip ─────────────────────────────────────────────┤
-│ 216px  │                                                            │
-│ navy   │   content ground (--color-bg), 26px / 30px padding         │
-│ rail   │                                                            │
-└────────┴────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────── 66px top bar (near-white) ──┐
+│ [logo] IGNITION/INDEX   [■ Log entry]  [search]  ···  [bell] [user ▾]        │
+├──── 1px hairline ───────────────────────────────────────────────────────────┤
+│ 216px  │                                                                    │
+│ light  │   content ground (--color-bg), 26px / 30px padding                 │
+│ rail   │                                                                    │
+└────────┴────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Top bar** (`--shell-navy`, 66px): brand lockup at far left in a 194px column; then the
-  **Log entry** primary button (this is the app's one primary action and it lives in the chrome,
-  not floating in the content); then a search field as an outlined box on navy. Right side:
-  notification bell with an overdue-rust count badge, a hairline divider, then the user block —
-  34px square accent avatar with initials, name, and a scope line beneath it
+- **Top bar** (`--chrome-bar`, 66px, hairline under it): brand lockup at far left in a 194px
+  column; then the **Log entry** button in the near-black primary (this is the app's one primary
+  action and it lives in the chrome, not floating in the content); then a search field as an
+  outlined box. Right side: notification bell with an overdue-rust count pill, a hairline
+  divider, then the user block — a 34px round steel avatar with initials, name, and a scope line beneath it
   ("Personal garage" / the fleet or group name). The user block is the disclosure for
   **Settings**, **Billing** and **Log out**; there is no Settings item in the rail.
-- **Left rail** (`--shell-navy-deep`, 216px): an eyebrow label, then **Garage** (with a vehicle
-  count), **History**, **Insights**. The active item is a solid `--color-accent` block with
-  `#0d1626` ink — square, full-width, no indicator bar. Below it a **Due next** list (three
+- **Left rail** (`--chrome-rail`, 216px, hairline to its right): an eyebrow label, then
+  **Garage** (with a vehicle count), **History**, **Insights**. The active item is a near-black
+  pill with paper ink — the same mark as the log sheet's selected tab. Below it a **Due next** list (three
   items, status dot + name + percent). *(2026-10: the **Upgrade to Fleet** cell that was
   pinned to the bottom is removed, along with every Fleet mention in the product and on the
-  landing page, until Fleet is a real initiative.)* Hover on an inactive item is `rgba(89,128,166,.22)`.
+  landing page, until Fleet is a real initiative.)* Hover on an inactive item is a faint ink
+  wash (`--chrome-hover`). The mobile drawer is the same rail on the same light ground.
 - **Content**: breadcrumb → vehicle switcher row → vehicle header card → gauges.
 
 ## 6. The gauge
@@ -205,7 +201,7 @@ VIN as the last line in 11px letterspaced metadata.
 
 Above it, the **vehicle switcher**: a horizontal row of 150px-wide blueprint chips, one per
 vehicle, each showing the identity square, the pet name in condensed 17px, and the model beneath.
-The active chip inverts to `--shell-navy` with paper ink. A dashed 54px square at the end adds a
+The active chip inverts to the near-black primary with paper ink. A dashed 54px square at the end adds a
 vehicle. This row is the scale seam — see below.
 
 ## 8. Fleet (paid tier)
@@ -235,8 +231,8 @@ Vehicle names are whatever the owner typed. The product's own vocabulary: **gara
 ## 10. Checklist before you ship a screen
 
 - [ ] Industry stylesheet linked; no hard-coded hex, font name or spacing px that a token carries
-- [ ] Navy shell + checker strip + paper content ground
-- [ ] Logo: dark variant on light grounds, `-light` variant on navy — never on a filled chip
+- [ ] Light chrome (bar and rail edged with hairlines) + paper content ground; no navy, no checker strip
+- [ ] Logo: the dark mark, as-is — never on a filled chip
 - [ ] Every card is a frame (`BlueprintFrame`): rounded `--radius-lg`, hairline, `--shadow-card`, no corner marks
 - [ ] Radii from the scale (8 / 12 / 16 / full); shadows only on frames and overlays
 - [ ] Photographs wrapped in `duotone`

@@ -17,7 +17,7 @@ export { default as Button } from "./Button.vue"
  *   destructive -> outlined rust (see below)
  *   link      -> no Industry equivalent; left as shadcn shipped it
  *
- * Buttons are set in the heading role at 14px/600, sentence case. (Before the
+ * Buttons are set in the heading role at 15px/600 (sm: 13px), sentence case. (Before the
  * 2026-10 softening this was condensed uppercase; Inter carries no condensed
  * face, and uppercase Inter at button size shouts.)
  *
@@ -64,9 +64,11 @@ export const buttonVariants = cva(
         link: "border-transparent text-accent underline-offset-4 hover:underline",
       },
       size: {
-        "default": "h-11 px-[22px] has-[>svg]:px-4",
+        // 48px since 2026-10, the log sheet's size: the main action on a page
+        // should be as easy to hit as the one in the sheet.
+        "default": "h-12 px-6 text-[15px] has-[>svg]:px-5",
         "sm": "h-9 gap-1.5 px-4 text-sm has-[>svg]:px-3",
-        "lg": "h-14 px-[26px] text-h3 has-[>svg]:px-5",
+        "lg": "h-14 px-7 text-[15px] has-[>svg]:px-6",
         "icon": "size-9",
         "icon-sm": "size-8",
         "icon-lg": "size-10",

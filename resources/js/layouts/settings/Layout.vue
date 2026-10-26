@@ -47,10 +47,11 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                                 variant="ghost"
                                 as-child
                                 :class="[
-                                    'w-full justify-start rounded-md',
+                                    'h-11 w-full justify-start rounded-md px-3 text-[14px]',
+                                    // The same near-black pill as the rail's active item.
                                     isCurrentOrParentUrl(item.href)
-                                        ? 'bg-hover-surface text-foreground'
-                                        : 'text-muted-foreground hover:text-foreground',
+                                        ? 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground'
+                                        : 'text-muted-foreground hover:bg-hover-surface hover:text-foreground',
                                 ]"
                             >
                                 <Link

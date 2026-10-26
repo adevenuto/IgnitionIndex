@@ -95,7 +95,8 @@ claimQuickAdd(onQuickAdd);
                 {{ vehicles.length === 1 ? 'vehicle' : 'vehicles' }}
             </p>
 
-            <Button as-child variant="outline" size="sm">
+            <!-- The page's main action: the near-black primary at full size. -->
+            <Button as-child>
                 <Link :href="create()">
                     <Plus />
                     Add Vehicle

@@ -15,11 +15,7 @@ defineProps<{
         <div class="w-full max-w-[var(--content-max)]">
             <div class="flex flex-col gap-8">
                 <div class="flex flex-col items-center gap-6">
-                    <ShellBrand
-                        ground="paper"
-                        orientation="stacked"
-                        :href="home()"
-                    />
+                    <ShellBrand orientation="stacked" :href="home()" />
                     <div class="space-y-2 text-center">
                         <h1 class="font-display text-h1">{{ title }}</h1>
                         <p class="text-muted-foreground text-body text-center">

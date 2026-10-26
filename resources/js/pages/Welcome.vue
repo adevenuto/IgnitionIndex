@@ -5,7 +5,6 @@ import FontPicker from '@/components/FontPicker.vue';
 import GaugeDial from '@/components/GaugeDial.vue';
 import GaugeLegend from '@/components/GaugeLegend.vue';
 import TheIndexFigure from '@/components/marketing/TheIndexFigure.vue';
-import ShellCheckerStrip from '@/components/shell/ShellCheckerStrip.vue';
 import { BlueprintFrame } from '@/components/ui/blueprint';
 import { fontPickerEnabled } from '@/lib/fonts';
 import { gaugeColor, gaugeInk, gaugeStatusLabel } from '@/lib/gauge';
@@ -148,19 +147,18 @@ onMounted(() => {
     <Head title="Know what your car needs next" />
 
     <div class="bg-background text-foreground flex min-h-dvh flex-col">
-        <header :style="{ background: 'var(--shell-navy)' }">
+        <header class="border-b border-(--chrome-hairline) bg-(--chrome-bar)">
             <div
                 class="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-(--space-6) px-7 py-3.5"
             >
                 <a href="#top" class="mr-auto flex items-center gap-[11px]">
                     <img
-                        src="/img/ignition-index-logo-light.png"
+                        src="/img/ignition-index-logo.png"
                         alt=""
                         class="block w-12 flex-none"
                     />
                     <span
-                        class="font-display text-[20px]/[1.05] font-semibold tracking-[0.02em] uppercase"
-                        :style="{ color: 'var(--color-bg)' }"
+                        class="font-display text-foreground text-[18px]/[1.05] font-bold tracking-[0.01em] uppercase"
                     >
                         Ignition<br />Index
                     </span>
@@ -172,7 +170,7 @@ onMounted(() => {
                         v-for="link in navLinks"
                         :key="link.href"
                         :href="link.href"
-                        class="ease-standard text-(--shell-ink-secondary) transition-colors duration-[var(--dur-fast)] hover:text-(--color-bg)"
+                        class="ease-standard text-(--chrome-ink-secondary) transition-colors duration-[var(--dur-fast)] hover:text-(--chrome-ink)"
                     >
                         {{ link.label }}
                     </a>
@@ -182,30 +180,26 @@ onMounted(() => {
                     <Link
                         v-if="user"
                         :href="garage()"
-                        class="bg-accent hover:bg-accent-700 active:bg-accent-800 hover:border-accent-700 active:border-accent-800 ease-standard flex h-[36px] items-center rounded-md border border-(--color-accent) px-3.5 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)]"
-                        :style="{ color: 'var(--color-bg)' }"
+                        class="bg-primary text-primary-foreground ease-standard flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]"
                     >
                         Garage
                     </Link>
                     <template v-else>
                         <Link
                             :href="login()"
-                            class="ease-standard text-[14px] text-(--shell-ink-secondary) transition-colors duration-[var(--dur-fast)] hover:text-(--color-bg)"
+                            class="ease-standard text-[14px] text-(--chrome-ink-secondary) transition-colors duration-[var(--dur-fast)] hover:text-(--chrome-ink)"
                         >
                             Sign in
                         </Link>
                         <Link
                             :href="register()"
-                            class="bg-accent hover:bg-accent-700 active:bg-accent-800 hover:border-accent-700 active:border-accent-800 ease-standard flex h-[36px] items-center rounded-md border border-(--color-accent) px-3.5 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)]"
-                            :style="{ color: 'var(--color-bg)' }"
+                            class="bg-primary text-primary-foreground ease-standard flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]"
                         >
                             Start free
                         </Link>
                     </template>
                 </div>
             </div>
-
-            <ShellCheckerStrip />
         </header>
 
         <main class="flex-1">
@@ -247,14 +241,13 @@ onMounted(() => {
                         >
                             <Link
                                 :href="register()"
-                                class="bg-primary text-primary-foreground ease-standard flex h-[46px] items-center rounded-md border border-(--primary) px-6 text-[15px] font-semibold transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]"
-                                :style="{ color: 'var(--color-bg)' }"
+                                class="bg-primary text-primary-foreground ease-standard flex h-12 items-center rounded-md border border-(--primary) px-6 text-[15px] font-semibold transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]"
                             >
                                 Start free
                             </Link>
                             <a
                                 href="#how"
-                                class="hover:bg-hover-surface bg-card ease-standard flex h-[46px] items-center rounded-md border border-(--color-divider) px-[22px] text-[15px] font-medium transition-colors duration-[var(--dur-fast)]"
+                                class="hover:bg-hover-surface bg-card ease-standard flex h-12 items-center rounded-md border border-(--color-divider) px-[22px] text-[15px] font-medium transition-colors duration-[var(--dur-fast)]"
                             >
                                 See how it works
                             </a>
@@ -499,7 +492,7 @@ onMounted(() => {
                         </ul>
                         <Link
                             :href="register()"
-                            class="ease-standard hover:bg-hover-surface active:bg-foreground/14 mt-(--space-8) flex h-[42px] items-center justify-center rounded-md border border-(--color-neutral-400) text-[15px] font-semibold transition-colors duration-[var(--dur-fast)] hover:border-(--color-accent)"
+                            class="ease-standard hover:bg-hover-surface active:bg-foreground/14 mt-(--space-8) flex h-12 items-center justify-center rounded-md border border-(--color-neutral-400) text-[15px] font-semibold transition-colors duration-[var(--dur-fast)] hover:border-(--color-accent)"
                         >
                             {{ tier.cta }}
                         </Link>
@@ -509,24 +502,18 @@ onMounted(() => {
         </main>
 
         <footer
-            class="mt-24"
-            :style="{
-                background: 'var(--shell-navy)',
-                color: 'var(--shell-ink-secondary)',
-            }"
+            class="mt-24 border-t border-(--chrome-hairline) bg-(--chrome-bar) text-(--chrome-ink-secondary)"
         >
-            <ShellCheckerStrip />
             <div
                 class="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-(--space-6) px-7 py-10"
             >
                 <img
-                    src="/img/ignition-index-logo-light.png"
+                    src="/img/ignition-index-logo.png"
                     alt=""
                     class="block w-10 flex-none"
                 />
                 <span
-                    class="font-display text-[16px] tracking-[0.06em] uppercase"
-                    :style="{ color: 'var(--color-bg)' }"
+                    class="font-display text-foreground text-[15px] font-bold tracking-[0.02em] uppercase"
                 >
                     Ignition Index
                 </span>

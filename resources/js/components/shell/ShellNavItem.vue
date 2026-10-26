@@ -6,9 +6,9 @@ import type { NavItem } from '@/types';
 /*
  * One rail destination.
  *
- * Active is a solid steel block with near-black ink — square, full width, no
- * indicator bar (design doc §5). Inactive sits at 72% paper and lifts to full
- * paper on a steel wash.
+ * Active is a near-black pill with paper ink, the same mark as the selected
+ * tab in the log sheet (design doc §5, light since 2026-10). Inactive is
+ * secondary ink that lifts to full ink on a faint ink wash.
  */
 defineProps<{ item: NavItem; active: boolean }>();
 </script>
@@ -19,8 +19,8 @@ defineProps<{ item: NavItem; active: boolean }>();
         class="ease-standard flex items-center gap-[11px] rounded-md p-(--space-3) text-[14px] transition-colors duration-[var(--dur-fast)]"
         :class="
             active
-                ? 'bg-accent font-semibold text-[var(--shell-active-ink)]'
-                : 'text-[var(--shell-ink-secondary)] hover:bg-[var(--shell-hover)] hover:text-[var(--shell-ink)]'
+                ? 'bg-primary text-primary-foreground font-semibold'
+                : 'text-(--chrome-ink-secondary) hover:bg-(--chrome-hover) hover:text-(--chrome-ink)'
         "
         :aria-current="active ? 'page' : undefined"
     >
