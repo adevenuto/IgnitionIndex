@@ -25,6 +25,7 @@ import {
     update as updateEvent,
 } from '@/actions/App/Http/Controllers/EventController';
 import { formatDate, formatMiles, todayIso } from '@/lib/format';
+import { laneTone } from '@/lib/lanes';
 import { boundsFor, rangeHint } from '@/lib/readings';
 import type {
     HistoryEvent,
@@ -296,9 +297,13 @@ const footer = provideSheetFooter();
                 :key="item.value"
                 :value="item.value"
                 :aria-label="item.label"
-                class="ease-standard data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-muted-foreground h-11 flex-1 rounded-md text-sm font-semibold transition-colors duration-[var(--dur-fast)] data-[state=on]:shadow-sm"
+                :class="[
+                    'ease-standard text-muted-foreground hover:bg-card hover:text-foreground h-11 flex-1 rounded-md border border-transparent text-sm font-semibold transition-colors duration-[var(--dur-fast)] data-[state=on]:shadow-sm',
+                    // Each type in its own colour (§2 lane hues).
+                    laneTone(item.value).selected,
+                ]"
             >
-                <component :is="item.icon" />
+                <component :is="item.icon" :class="laneTone(item.value).icon" />
                 {{ item.label }}
             </ToggleGroupItem>
         </ToggleGroup>

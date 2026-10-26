@@ -31,17 +31,22 @@ defineProps<{
             :class="
                 vehicle.is_active
                     ? 'border-primary bg-primary'
-                    : 'hover:border-accent bg-card border-(--hairline-soft)'
+                    : 'hover:border-accent bg-card border-l-[3px] border-(--hairline-soft) border-l-(--vehicle)'
             "
+            :style="{
+                '--vehicle': vehicle.color ?? 'var(--color-neutral-400)',
+            }"
             :aria-current="vehicle.is_active ? 'page' : undefined"
         >
             <span class="flex items-center gap-(--space-2)">
-                <!-- §7: the identity colour is a 10px SQUARE, never a dot. -->
+                <!-- §2 vehicle colour: a round swatch, ringed so white and silver still show. -->
                 <span
-                    class="size-[7px] flex-none"
-                    :style="{
-                        background: vehicle.color ?? 'var(--color-neutral-500)',
-                    }"
+                    class="size-2.5 flex-none rounded-full bg-(--vehicle) ring-1"
+                    :class="
+                        vehicle.is_active
+                            ? 'ring-primary-foreground/60'
+                            : 'ring-(--color-divider)'
+                    "
                     aria-hidden="true"
                 />
                 <span

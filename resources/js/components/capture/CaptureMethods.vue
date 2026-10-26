@@ -54,7 +54,7 @@ const methods = computed((): Method[] =>
         {
             key: 'photo' as const,
             icon: Camera,
-            tile: 'bg-(--tile-steel-bg) text-(--tile-steel-ink)',
+            tile: 'bg-(--tile-brand-bg) text-(--tile-brand-ink)',
             title: 'Snap',
             tag: 'Fastest',
             line: props.step.cards.photo,
@@ -62,7 +62,7 @@ const methods = computed((): Method[] =>
         {
             key: 'voice' as const,
             icon: Mic,
-            tile: 'bg-(--tile-violet-bg) text-(--tile-violet-ink)',
+            tile: 'bg-(--tile-brand-bg) text-(--tile-brand-ink)',
             title: 'Say it',
             tag: 'Hands-free',
             line: props.step.cards.voice,

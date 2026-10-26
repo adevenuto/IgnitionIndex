@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
  *    illustration whose fills are compositional (five tonal steps that read as
  *    stacked planes under one light), not semantic. Wiring them to
  *    var(--color-*) would mean a token tweak silently flattens the drawing's
- *    depth. The values used are the system's own — #5980a6 accent, #1d1f20
+ *    depth. The values used are the system's own — #2f6bed brand blue, #1d1f20
  *    ink, #f2f2f3 paper — plus derived tints of them. Do not "fix" this to tokens.
  *
  * 2. FONT SIZES ARE AUTHORED IN VIEWBOX UNITS, ~2× their rendered size. The
@@ -69,7 +69,7 @@ const polygon = (points: [number, number][]) => points.map(fmt).join(' ');
 
 const PAPER = '#f2f2f3';
 const INK = '#1d1f20';
-const ACCENT = '#5980a6';
+const ACCENT = '#2f6bed';
 
 type LayerKind = 'wire' | 'solid';
 
@@ -80,7 +80,7 @@ const FACES: Record<
 > = {
     // A line drawing: near-transparent fills, dark hairlines.
     wire: {
-        top: 'rgba(89,128,166,0.07)',
+        top: 'rgba(47,107,237,0.07)',
         right: 'rgba(29,31,32,0.045)',
         left: 'rgba(29,31,32,0.075)',
         edge: 'rgba(29,31,32,0.42)',
@@ -88,9 +88,9 @@ const FACES: Record<
     },
     // The one solid object on the board — where the product happens.
     solid: {
-        top: '#6d92b6',
+        top: '#5b8cf2',
         right: ACCENT,
-        left: '#496c8e',
+        left: '#2253c4',
         edge: 'rgba(242,242,243,0.34)',
         ink: PAPER,
     },

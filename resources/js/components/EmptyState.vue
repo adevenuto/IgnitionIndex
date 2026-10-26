@@ -21,10 +21,17 @@ defineProps<{
     <div
         class="mx-auto flex w-full max-w-[1400px] flex-1 flex-col items-center justify-center px-5 py-16 text-center"
     >
-        <span
-            class="mb-5 flex size-16 items-center justify-center rounded-lg bg-(--tile-steel-bg) text-(--tile-steel-ink)"
-        >
-            <component :is="icon" class="size-7" :stroke-width="1.5" />
+        <span class="relative isolate mb-5 flex">
+            <!-- A soft brand glow behind the tile (§2, tints and glows). -->
+            <span
+                class="ii-soft-glow pointer-events-none absolute -inset-16 -z-10"
+                aria-hidden="true"
+            />
+            <span
+                class="flex size-16 items-center justify-center rounded-lg bg-(--tile-brand-bg) text-(--tile-brand-ink)"
+            >
+                <component :is="icon" class="size-7" :stroke-width="1.5" />
+            </span>
         </span>
 
         <h2 class="font-display text-h2 mb-2">{{ title }}</h2>

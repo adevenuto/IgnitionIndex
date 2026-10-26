@@ -63,7 +63,16 @@ const lastReading = computed(() => {
 </script>
 
 <template>
-    <BlueprintFrame class="grid grid-cols-1 gap-0 p-0 xl:grid-cols-[420px_1fr]">
+    <!--
+      The car's paint colour runs along the top and tints the empty photo well
+      (§2, vehicle colour), handed down as --vehicle. overflow-hidden keeps a
+      photo inside the frame's rounded corners.
+    -->
+    <BlueprintFrame
+        class="grid grid-cols-1 gap-0 overflow-hidden p-0 xl:grid-cols-[420px_1fr]"
+        :class="vehicle.color && 'border-t-4 border-t-(--vehicle)'"
+        :style="vehicle.color ? { '--vehicle': vehicle.color } : undefined"
+    >
         <!--
           The photo is washed into the steel accent (§4). The clipping lives on
           an INNER wrapper so the frame's corner marks, which sit outside the
@@ -97,7 +106,7 @@ const lastReading = computed(() => {
             <Link
                 v-else
                 :href="edit(vehicle.id)"
-                class="ease-standard hover:border-accent hover:text-accent absolute inset-3 flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-(--color-neutral-400) text-(--color-neutral-700) transition-colors duration-[var(--dur-fast)]"
+                class="ease-standard hover:border-accent hover:text-accent absolute inset-3 flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-(--color-neutral-400) bg-[color-mix(in_oklab,var(--vehicle,transparent)_9%,transparent)] text-(--color-neutral-700) transition-colors duration-[var(--dur-fast)]"
             >
                 <ImagePlus class="size-6" :stroke-width="1.5" />
                 <span class="text-[13px]">Add a photo</span>
@@ -111,7 +120,7 @@ const lastReading = computed(() => {
                 <div class="min-w-0">
                     <div class="flex items-center gap-(--space-3)">
                         <span
-                            class="size-[10px] flex-none"
+                            class="size-3.5 flex-none rounded-full ring-1 ring-(--color-divider)"
                             :style="{
                                 background:
                                     vehicle.color ?? 'var(--color-neutral-500)',

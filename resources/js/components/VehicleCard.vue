@@ -49,7 +49,17 @@ const specs = computed(() =>
             setup prompt, off the same server-computed flag, so a car waiting on
             its gauges reads identically in the grid and on its own page.
         -->
-        <Card :class="vehicle.awaiting_setup && 'ii-awaiting-setup'">
+        <!--
+            The car's own paint colour runs along the top (§2, vehicle colour),
+            handed down as --vehicle so classes, not an inline colour, use it.
+        -->
+        <Card
+            :class="[
+                vehicle.color && 'border-t-4 border-t-(--vehicle)',
+                vehicle.awaiting_setup && 'ii-awaiting-setup',
+            ]"
+            :style="vehicle.color ? { '--vehicle': vehicle.color } : undefined"
+        >
             <CardContent>
                 <div class="flex items-start gap-3">
                     <div class="min-w-0 flex-1">
@@ -76,7 +86,12 @@ const specs = computed(() =>
                     </div>
 
                     <span
-                        class="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-(--tile-slate-bg) text-(--tile-slate-ink)"
+                        class="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md"
+                        :class="
+                            vehicle.color
+                                ? 'bg-[color-mix(in_oklab,var(--vehicle)_18%,white)] text-[color-mix(in_oklab,var(--vehicle)_55%,black)] ring-1 ring-(--hairline-soft)'
+                                : 'bg-(--tile-slate-bg) text-(--tile-slate-ink)'
+                        "
                         :style="
                             vehicle.photo_color
                                 ? { backgroundColor: vehicle.photo_color }

@@ -187,7 +187,7 @@ onMounted(() => {
                     <Link
                         v-if="user"
                         :href="garage()"
-                        class="bg-primary text-primary-foreground ease-standard flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]"
+                        class="bg-primary text-primary-foreground ease-standard hover:bg-accent-700 hover:border-accent-700 active:bg-accent-800 flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)]"
                     >
                         Garage
                     </Link>
@@ -200,7 +200,7 @@ onMounted(() => {
                         </Link>
                         <Link
                             :href="register()"
-                            class="bg-primary text-primary-foreground ease-standard flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]"
+                            class="bg-primary text-primary-foreground ease-standard hover:bg-accent-700 hover:border-accent-700 active:bg-accent-800 flex h-10 items-center rounded-md border border-(--primary) px-4 text-[14px] font-semibold transition-colors duration-[var(--dur-fast)]"
                         >
                             Start free
                         </Link>
@@ -209,12 +209,17 @@ onMounted(() => {
             </div>
         </header>
 
-        <main class="flex-1">
+        <main class="flex-1 overflow-x-clip">
             <!-- ── Hero ───────────────────────────────────────────────── -->
             <section
                 id="top"
-                class="mx-auto w-full max-w-[1200px] px-7 pt-[78px]"
+                class="relative isolate mx-auto w-full max-w-[1200px] px-7 pt-[78px]"
             >
+                <!-- A soft wash of the product's colours behind the first screen. -->
+                <div
+                    class="ii-hero-glow pointer-events-none absolute -inset-x-[30vw] -top-24 -bottom-40 -z-10"
+                    aria-hidden="true"
+                />
                 <div class="grid items-center gap-[54px] lg:grid-cols-2">
                     <div>
                         <p
@@ -248,7 +253,7 @@ onMounted(() => {
                         >
                             <Link
                                 :href="register()"
-                                class="bg-primary text-primary-foreground ease-standard flex h-12 items-center rounded-md border border-(--primary) px-6 text-[15px] font-semibold transition-colors duration-[var(--dur-fast)] hover:bg-[color-mix(in_oklab,var(--primary)_84%,white)] active:bg-[color-mix(in_oklab,var(--primary)_74%,white)]"
+                                class="bg-primary text-primary-foreground ease-standard hover:bg-accent-700 hover:border-accent-700 active:bg-accent-800 flex h-12 items-center rounded-md border border-(--primary) px-6 text-[15px] font-semibold transition-colors duration-[var(--dur-fast)]"
                             >
                                 Start free
                             </Link>
@@ -333,8 +338,8 @@ onMounted(() => {
                         class="max-w-[44ch] text-[16px]/[1.55] text-pretty text-(--color-neutral-800)"
                     >
                         The needle shows how much of the interval you have used.
-                        Steel is on interval, amber is due soon, rust is
-                        overdue. Nothing else competes for the color.
+                        Blue is on interval, amber is due soon, rust is overdue.
+                        Nothing else competes for the color.
                     </p>
                 </div>
 
@@ -385,44 +390,50 @@ onMounted(() => {
             </section>
 
             <!-- ── 02 How it works ────────────────────────────────────── -->
-            <section id="how" class="mx-auto w-full max-w-[1200px] px-7 pt-24">
-                <h6 class="ii-eyebrow text-(--color-accent-700)">
-                    02 — How it works
-                </h6>
-                <h2
-                    class="font-display mt-(--space-2) mb-(--space-8) text-[clamp(30px,3.2vw,42px)]/[1.1] font-bold tracking-[-0.03em]"
-                >
-                    Three inputs, then it runs itself
-                </h2>
-
-                <BlueprintFrame class="gap-0 p-0">
-                    <!-- The 1px gaps are the rules; each cell paints over them. -->
-                    <div
-                        class="grid gap-px overflow-hidden rounded-[inherit] bg-(--hairline-soft) md:grid-cols-3"
+            <!-- A tinted band, so the page changes key between sections. -->
+            <section
+                id="how"
+                class="mt-24 bg-[color-mix(in_oklab,var(--color-accent)_7%,var(--color-bg))] py-20"
+            >
+                <div class="mx-auto w-full max-w-[1200px] px-7">
+                    <h6 class="ii-eyebrow text-(--color-accent-700)">
+                        02 — How it works
+                    </h6>
+                    <h2
+                        class="font-display mt-(--space-2) mb-(--space-8) text-[clamp(30px,3.2vw,42px)]/[1.1] font-bold tracking-[-0.03em]"
                     >
+                        Three inputs, then it runs itself
+                    </h2>
+
+                    <BlueprintFrame class="gap-0 p-0">
+                        <!-- The 1px gaps are the rules; each cell paints over them. -->
                         <div
-                            v-for="step in steps"
-                            :key="step.n"
-                            class="flex flex-col gap-(--space-2) bg-(--surface-card) px-7 py-[30px]"
+                            class="grid gap-px overflow-hidden rounded-[inherit] bg-(--hairline-soft) md:grid-cols-3"
                         >
-                            <p
-                                class="font-display text-accent text-[58px]/[0.9] font-semibold"
+                            <div
+                                v-for="step in steps"
+                                :key="step.n"
+                                class="flex flex-col gap-(--space-2) bg-(--surface-card) px-7 py-[30px]"
                             >
-                                {{ step.n }}
-                            </p>
-                            <p
-                                class="font-display text-[22px]/[1.2] font-semibold tracking-[-0.015em]"
-                            >
-                                {{ step.title }}
-                            </p>
-                            <p
-                                class="text-[15px]/[1.55] text-pretty text-(--color-neutral-800)"
-                            >
-                                {{ step.body }}
-                            </p>
+                                <p
+                                    class="font-display text-accent text-[58px]/[0.9] font-semibold"
+                                >
+                                    {{ step.n }}
+                                </p>
+                                <p
+                                    class="font-display text-[22px]/[1.2] font-semibold tracking-[-0.015em]"
+                                >
+                                    {{ step.title }}
+                                </p>
+                                <p
+                                    class="text-[15px]/[1.55] text-pretty text-(--color-neutral-800)"
+                                >
+                                    {{ step.body }}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </BlueprintFrame>
+                    </BlueprintFrame>
+                </div>
             </section>
 
             <!-- ── 03 Pricing ─────────────────────────────────────────── -->

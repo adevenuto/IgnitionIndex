@@ -54,31 +54,47 @@ re-typing the hexes.
 | `--color-bg` | `#f2f2f3` | Content ground. Also the paper ink of the light logo variant. |
 | `--color-neutral-100` | `#f5f5f8` | Card and plate fills on the content ground. |
 | `--color-text` | `#1d1f20` | Body and heading ink. |
-| `--color-accent` | `#5980a6` | Steel. Active nav, links, focus, progress, "on interval" gauges. |
-| `--primary` | `#1d1f20` | Near-black. The primary button and the selected segment of a tab control. |
-| `--color-accent-700` | `#416180` | Accent used at paragraph size (the base accent is only 3:1). |
-| `--color-accent-900` | `#1d2d3d` | Full reversed field (the landing's Fleet section). |
+| `--color-accent` | `#2f6bed` | Brand blue *(2026-10; was steel `#5980a6`)*. Primary button, active nav, links, focus, progress, "on interval" gauges. |
+| `--primary` | `var(--color-accent)` | The primary button and selected pills. |
+| `--color-accent-700` | `#2253c4` | Accent at paragraph size: links, eyebrows, on-interval text. |
+| `--color-accent-900` | `#183570` | Deepest brand step. |
 | `--color-divider` | `#1d1f20` @ 16% | Every hairline. |
 | **`--chrome-*`** *(2026-10)* | near-white + ink | Top bar, rail, drawer, homepage header and footer. Replaces `--shell-navy`. |
 | **`--status-due`** *(new)* | `#c08a2e` | Amber. Gauge ≥ 75% of interval. |
 | **`--status-overdue`** *(new)* | `#b4442f` | Rust. Gauge ≥ 100%. Also notification badges. |
 
-**Bright values are for ink you can see, not ink you have to read.** Steel `--color-accent` and
+**Bright values are for ink you can see, not ink you have to read.** The bright accent steps and
 amber `--status-due` clear only ~3:1 against the content ground — fine for gauge arcs, borders,
 fills, icons and type at 20px+, but they fail at small sizes. Any text under ~14px uses the deep
-step instead: on interval → `--color-accent-700` (#416180), due soon → `#8a6a2e`, overdue →
+step instead: on interval → `--color-accent-700` (#2253c4), due soon → `#8a6a2e`, overdue →
 `#b4442f` (already dark enough). The status *tag* keeps the bright color on its **border** and
 takes the deep step for its **text**, so the color coding survives intact.
 
-The two status colors are the **only** colors outside the steel accent, and they are functional —
-they encode service state and nothing else. Do not introduce a green "all good" state; on
-interval is steel. Do not tint charts, avatars or categories.
+The two status colors are functional: they encode service state and nothing else. Do not
+introduce a green "all good" state; on interval is the brand blue.
 
-**Tile hues** *(2026-10)*. Icon tiles, and only icon tiles, may take one of four hues, so that
-a row of methods or features can be told apart at a glance: `--tile-steel`, `--tile-violet`,
-`--tile-teal` and `--tile-slate`. Each is a pair: a light fill (`--tile-*-bg`) and an icon ink
-(`--tile-*-ink`) that clears 3:1 on it. A tile hue never colours text, a border, a chart or a
-status, and amber and rust are never tile hues: they still mean service state and nothing else.
+**Colour pass** *(2026-10)*. The palette widened so the light design carries colour. Each role
+below has one job; none of them stands in for status.
+
+- **Brand: vivid blue.** `--color-accent` is `#2f6bed` (ramp 100–900 in `product.css`, which
+  overrides Industry's steel). It is the primary button, the active nav pill, the selected
+  state, links, focus, progress and the on-interval gauge. White on it is ~4.7:1. Photos still
+  wash into the old steel (`--duotone-ink`), because vivid blue would turn them electric.
+- **Lane hues: one per kind of entry.** Fuel `--lane-fuel` (orange, `#ea6c1f`), Service
+  `--lane-visit` (violet), Expense `--lane-expense` (emerald), Miles `--lane-odometer` (sky).
+  Each has a `-bg` tint and an `-ink` deep step (4.5:1 on the tint) for text and icons. They
+  identify an entry's type, on the Log entry tabs, History tiles and the review card's top edge,
+  and nothing else. Fuel's orange is deliberately redder and brighter than the due amber. The
+  lookup lives in `resources/js/lib/lanes.ts`.
+- **Vehicle colour: the owner's paint colour, as identity.** A round swatch beside the name
+  (ringed, so white and silver still show), a band along the top of the vehicle's cards, a tint
+  on its tiles and empty photo well, and an edge on its switcher chip. Passed as `--vehicle`.
+- **Tile hues:** `--tile-brand` for the product's own actions, `--tile-slate` for neutral ones.
+  (Violet and teal tiles are retired: violet now means Service.)
+- **Tints and glows:** the content ground is a breath cooler (`#f3f5f9`). Large, low-alpha
+  radial washes (`.ii-hero-glow`, `.ii-soft-glow`) are allowed on grounds — the homepage hero,
+  empty states, the sign-in screens — and tinted section bands on the homepage. They never sit
+  behind text at low contrast and never animate.
 
 In the chrome, text is `--chrome-ink` (ink) for primary and `--chrome-ink-secondary`
 (`--color-neutral-700`) for inactive nav items, eyebrows and metadata.

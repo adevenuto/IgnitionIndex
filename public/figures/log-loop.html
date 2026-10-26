@@ -11,8 +11,8 @@
             :root {
                 --ink: #1d1f20;
                 --ink-soft: #5d5d60;
-                --brand: #5980a6;
-                --brand-deep: #416180;
+                --brand: #2f6bed;
+                --brand-deep: #2253c4;
                 --amber: #c08a2e;
                 --red: #b4442f;
                 --green: #3f8a5f;
@@ -106,14 +106,14 @@
                 </filter>
 
                 <radialGradient id="hub-top" cx="42%" cy="35%" r="70%">
-                    <stop offset="0%" stop-color="#9db8d3" />
-                    <stop offset="55%" stop-color="#6b90b5" />
-                    <stop offset="100%" stop-color="#4c7096" />
+                    <stop offset="0%" stop-color="#9ab8f7" />
+                    <stop offset="55%" stop-color="#5b8cf2" />
+                    <stop offset="100%" stop-color="#2f6bed" />
                 </radialGradient>
                 <linearGradient id="hub-side" x1="0" x2="1">
-                    <stop offset="0%" stop-color="#36536f" />
-                    <stop offset="50%" stop-color="#4a6d91" />
-                    <stop offset="100%" stop-color="#2f4963" />
+                    <stop offset="0%" stop-color="#1d4396" />
+                    <stop offset="50%" stop-color="#2559cf" />
+                    <stop offset="100%" stop-color="#183570" />
                 </linearGradient>
                 <radialGradient id="hub-shadow">
                     <stop
@@ -126,25 +126,25 @@
                 <radialGradient id="hub-glow">
                     <stop
                         offset="0%"
-                        stop-color="#5980a6"
+                        stop-color="#2f6bed"
                         stop-opacity="0.28"
                     />
-                    <stop offset="100%" stop-color="#5980a6" stop-opacity="0" />
+                    <stop offset="100%" stop-color="#2f6bed" stop-opacity="0" />
                 </radialGradient>
                 <radialGradient id="pulse-glow">
                     <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
                     <stop
                         offset="35%"
-                        stop-color="#8fb0d0"
+                        stop-color="#8fb0f5"
                         stop-opacity="0.9"
                     />
-                    <stop offset="100%" stop-color="#5980a6" stop-opacity="0" />
+                    <stop offset="100%" stop-color="#2f6bed" stop-opacity="0" />
                 </radialGradient>
                 <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stop-color="#5980a6" stop-opacity="0.9" />
+                    <stop offset="0%" stop-color="#2f6bed" stop-opacity="0.9" />
                     <stop
                         offset="100%"
-                        stop-color="#5980a6"
+                        stop-color="#2f6bed"
                         stop-opacity="0.25"
                     />
                 </linearGradient>
@@ -192,7 +192,7 @@
                         rx="42"
                         ry="16"
                         fill="none"
-                        stroke="#5980a6"
+                        stroke="#2f6bed"
                         stroke-width="1.5"
                         opacity="0"
                     />
@@ -247,7 +247,7 @@
                     cy="364"
                     r="4"
                     fill="#ffffff"
-                    stroke="#5980a6"
+                    stroke="#2f6bed"
                     stroke-width="2"
                     opacity="0"
                 />
@@ -411,7 +411,7 @@
                         width="58"
                         height="22"
                         rx="11"
-                        fill="rgba(89,128,166,0.12)"
+                        fill="rgba(47,107,237,0.12)"
                     />
                     <text
                         id="date-from"
@@ -902,7 +902,7 @@
                     const inner = el('g', { class: 't' }, g);
                     el(
                         'circle',
-                        { r: 11, fill: 'rgba(89,128,166,0.16)' },
+                        { r: 11, fill: 'rgba(47,107,237,0.16)' },
                         inner,
                     );
                     if (ring.key === 'vehicles') {

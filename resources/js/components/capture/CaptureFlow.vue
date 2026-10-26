@@ -223,7 +223,7 @@ function display(field: CaptureField): string | null {
         </CaptureStep>
 
         <template v-else>
-            <ReviewCard>
+            <ReviewCard :lane="lane.id">
                 <ReviewRow
                     v-for="field in lane.fields"
                     :key="field.key"

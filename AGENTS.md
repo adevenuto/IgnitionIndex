@@ -15,7 +15,9 @@
 > retired, and cards, controls and chips now use a radius scale and one soft elevation. Type is
 > Inter, the primary button is near-black, and icon tiles may take one of the four tile hues.
 > Pill tabs and pill badges are allowed. The chrome is light — the navy top bar, rail and
-> checker strip are retired — and default buttons and inputs are 48px. The doc's §2–§4 describe the current rules; where an
+> checker strip are retired — and default buttons and inputs are 48px. A colour pass followed:
+> the brand is vivid blue (also the primary button), each entry type has a lane hue, vehicles
+> show their paint colour, and soft glows are allowed on grounds — see the doc's §2. The doc's §2–§4 describe the current rules; where an
 > older comment in the code cites the square, mark-framed geometry, the doc wins.
 >
 > **Do** take every color, font, space and radius from the CSS variables in `styles.css`

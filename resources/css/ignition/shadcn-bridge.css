@@ -32,11 +32,11 @@
     --popover-foreground: var(--color-text);
 
     /* ── Brand ── */
-    /* Near-black since the 2026-10 softening. Steel stays the brand — the
-       active nav, links, focus, progress and the gauges — but the one button
-       that says "do this" is ink, which reads as the action on any ground. */
-    --primary: var(--color-text);
-    --primary-foreground: var(--surface-card);
+    /* The brand blue since the 2026-10 colour pass: the one button that says
+       "do this" is the most colourful thing on the screen. (Near-black before
+       that, steel before that.) */
+    --primary: var(--color-accent);
+    --primary-foreground: #ffffff;
 
     /* ── Quiet fills ──
        .btn-secondary in the Industry sheet is outline-only: a hairline border

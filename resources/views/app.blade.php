@@ -8,11 +8,11 @@
 
         {{-- Inline style to set the HTML background color based on our theme in app.css.
              This runs before the CSS bundle loads, so it cannot use var(); the value
-             MUST track --color-bg in resources/css/ignition/tokens.css, or cold
+             MUST track --color-bg in resources/css/ignition/product.css, or cold
              loads flash the wrong colour. --}}
         <style>
             html {
-                background-color: #f2f2f3;
+                background-color: #f3f5f9;
             }
         </style>
 

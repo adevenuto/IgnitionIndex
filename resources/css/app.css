@@ -172,6 +172,18 @@
     --color-chrome-bar: var(--chrome-bar);
     --color-chrome-rail: var(--chrome-rail);
     --color-chrome-ink: var(--chrome-ink);
+    --color-lane-fuel: var(--lane-fuel);
+    --color-lane-fuel-bg: var(--lane-fuel-bg);
+    --color-lane-fuel-ink: var(--lane-fuel-ink);
+    --color-lane-visit: var(--lane-visit);
+    --color-lane-visit-bg: var(--lane-visit-bg);
+    --color-lane-visit-ink: var(--lane-visit-ink);
+    --color-lane-expense: var(--lane-expense);
+    --color-lane-expense-bg: var(--lane-expense-bg);
+    --color-lane-expense-ink: var(--lane-expense-ink);
+    --color-lane-odometer: var(--lane-odometer);
+    --color-lane-odometer-bg: var(--lane-odometer-bg);
+    --color-lane-odometer-ink: var(--lane-odometer-ink);
     --color-status-due: var(--status-due);
     --color-status-overdue: var(--status-overdue);
     --color-status-ok-ink: var(--status-ok-ink);
@@ -343,6 +355,40 @@
         .ii-card-landing {
             transition: none;
         }
+    }
+
+    /*
+      Soft colour washes (§2, tints and glows, 2026-10): large, low-alpha
+      radial gradients on a ground, never behind text at low contrast and
+      never animated. The hero mixes the brand with two lane hues so the
+      first screen carries the product's colours; the soft glow is a single
+      brand wash for quieter places (empty states, the sign-in screens).
+    */
+    .ii-hero-glow {
+        background:
+            radial-gradient(
+                38% 52% at 80% 32%,
+                color-mix(in oklab, var(--color-accent) 17%, transparent),
+                transparent 72%
+            ),
+            radial-gradient(
+                32% 46% at 14% 18%,
+                color-mix(in oklab, var(--lane-visit) 12%, transparent),
+                transparent 72%
+            ),
+            radial-gradient(
+                30% 32% at 44% 74%,
+                color-mix(in oklab, var(--lane-fuel) 9%, transparent),
+                transparent 72%
+            );
+    }
+
+    .ii-soft-glow {
+        background: radial-gradient(
+            50% 50% at 50% 42%,
+            color-mix(in oklab, var(--color-accent) 14%, transparent),
+            transparent 72%
+        );
     }
 
     /*
