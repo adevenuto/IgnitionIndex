@@ -27,6 +27,16 @@ import { responseMessage } from '@/lib/capture/responseMessage';
 const MAX_SECONDS = 8;
 // Shorter than this is a mis-tap, not something said.
 const MIN_MILLISECONDS = 400;
+/*
+ * Stopping on silence, so nobody has to tap again: once speech has been heard,
+ * this long a pause ends the recording; if nothing is said at all, the longer
+ * wait gives up without sending anything. The level is RMS-scaled (see
+ * meter), so ordinary speech sits well above the threshold and a quiet room
+ * well below it.
+ */
+const SPEECH_LEVEL = 0.12;
+const PAUSE_MILLISECONDS = 1500;
+const NOTHING_SAID_MILLISECONDS = 4000;
 // iOS records mp4; Chrome and Firefox record webm.
 const FORMATS = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'];
 
@@ -76,6 +86,10 @@ export function useVoiceInput(vehicleId: () => number) {
     let audio: AudioContext | null = null;
     let tap: MediaStreamAudioSourceNode | null = null;
     let frame = 0;
+    // Per recording: whether the meter is running (without it there is no
+    // silence to detect, and the cap alone ends it), and whether it heard speech.
+    let metering = false;
+    let heardSpeech = false;
 
     /**
      * Opened inside the tap itself: iOS only lets audio start from a gesture,
@@ -107,6 +121,9 @@ export function useVoiceInput(vehicleId: () => number) {
             tap.connect(analyser);
 
             const samples = new Uint8Array(analyser.fftSize);
+            let lastSpokeAt = startedAt;
+
+            metering = true;
 
             const tick = () => {
                 if (recorder === null) {
@@ -125,6 +142,27 @@ export function useVoiceInput(vehicleId: () => number) {
                 }
 
                 level.value = Math.min(1, Math.sqrt(sum / samples.length) * 4);
+
+                const now = performance.now();
+
+                if (level.value >= SPEECH_LEVEL) {
+                    heardSpeech = true;
+                    lastSpokeAt = now;
+                }
+
+                const quietFor = now - lastSpokeAt;
+
+                if (
+                    quietFor >=
+                    (heardSpeech
+                        ? PAUSE_MILLISECONDS
+                        : NOTHING_SAID_MILLISECONDS)
+                ) {
+                    stop();
+
+                    return;
+                }
+
                 remaining.value = Math.max(
                     0,
                     Math.ceil(
@@ -179,9 +217,11 @@ export function useVoiceInput(vehicleId: () => number) {
                 listening.value = false;
 
                 const long = performance.now() - startedAt >= MIN_MILLISECONDS;
+                // The meter heard nothing worth sending: skip the round trip.
+                const silent = metering && !heardSpeech;
 
                 resolve(
-                    !closed && long && chunks.length > 0
+                    !closed && long && !silent && chunks.length > 0
                         ? new Blob(chunks, {
                               type: active.mimeType || format || 'audio/mp4',
                           })
@@ -190,6 +230,8 @@ export function useVoiceInput(vehicleId: () => number) {
             };
 
             recorder = active;
+            metering = false;
+            heardSpeech = false;
             listening.value = true;
             remaining.value = MAX_SECONDS;
             active.start();
@@ -236,7 +278,7 @@ export function useVoiceInput(vehicleId: () => number) {
         }
     }
 
-    /** Records until stop() or the cap, then resolves with what was said. */
+    /** Records until a pause, stop() or the cap, then resolves with what was said. */
     async function listen(): Promise<string | null> {
         if (!supported || recorder !== null || transcribing.value) {
             return null;

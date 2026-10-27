@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { Check, CircleAlert } from '@lucide/vue';
+import { Check } from '@lucide/vue';
 import { computed } from 'vue';
 import type { CaptureField, CaptureOutcome } from '@/lib/capture/lanes';
 import { describeFieldValue } from '@/lib/capture/lanes';
 
 /*
  * One line saying what the last capture did, so a value never just appears:
- * what was heard or read, and — when a check refused it — what it was and why
- * it was left out.
+ * what was heard or read. A value a check refused is not repeated here — it
+ * gets a pop-up of its own (CaptureCheckDialog), because small print under
+ * the fields was easy to miss.
  *
  * Neutral ink with a steel icon, never amber or rust: those mean service state,
  * and this is a reading being checked, not a car needing work.
@@ -37,15 +38,6 @@ const applied = computed(() =>
         )
         .join(', '),
 );
-
-const rejected = computed(() =>
-    props.outcome.rejected
-        .filter((item) => item.field in byKey.value)
-        .map(
-            (item) =>
-                `${describeFieldValue(byKey.value[item.field], item.value)}. ${item.message}`,
-        ),
-);
 </script>
 
 <template>
@@ -59,20 +51,6 @@ const rejected = computed(() =>
                 :stroke-width="1.5"
             />
             <span>{{ verb }} {{ applied }}</span>
-        </p>
-
-        <p
-            v-for="(line, index) in rejected"
-            :key="index"
-            class="text-foreground flex items-start gap-2 text-sm"
-        >
-            <CircleAlert
-                class="text-accent-700 mt-0.5 size-4 shrink-0"
-                :stroke-width="1.5"
-            />
-            <span>
-                {{ verb }} {{ line }} Left out — try again, or type it.
-            </span>
         </p>
     </div>
 </template>

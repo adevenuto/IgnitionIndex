@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import CaptureConfirmation from '@/components/capture/CaptureConfirmation.vue';
+import CaptureCheckDialog from '@/components/capture/CaptureCheckDialog.vue';
 import CaptureFieldInput from '@/components/capture/CaptureFieldInput.vue';
 import CaptureStep from '@/components/capture/CaptureStep.vue';
 import ReviewCard from '@/components/capture/ReviewCard.vue';
@@ -145,6 +146,16 @@ function display(field: CaptureField): string | null {
 
     return raw === '' ? null : describeFieldValue(field, Number(raw));
 }
+
+function onKeep(keys: string[]): void {
+    const typed = flow.outcome.value?.source === 'typed';
+
+    flow.confirm(keys);
+
+    if (typed) {
+        flow.next();
+    }
+}
 </script>
 
 <template>
@@ -247,4 +258,19 @@ function display(field: CaptureField): string | null {
             <slot name="review" />
         </template>
     </StepFlow>
+
+    <!--
+        A refused or unlikely reading is said over the sheet, where it cannot
+        be missed. "Yes, it's right" on a typed value was a Next that stopped
+        to ask, so it carries on; on a capture it just keeps the value.
+    -->
+    <CaptureCheckDialog
+        :outcome="flow.outcome.value"
+        :fields="lane.fields"
+        @keep="onKeep"
+        @retry="
+            (keys: string[]) =>
+                keys.forEach((key) => flow.set(key, '', 'typed'))
+        "
+    />
 </template>

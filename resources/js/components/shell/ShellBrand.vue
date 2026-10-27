@@ -55,13 +55,13 @@ const target = computed(() => props.href ?? garage());
             src="/img/ignition-index-logo.png"
             alt=""
             class="ii-logo-light block flex-none"
-            :class="stacked ? 'w-20' : 'w-12'"
+            :class="stacked ? 'w-20' : 'w-15'"
         />
         <img
             src="/img/ignition-index-logo-light.png"
             alt=""
             class="ii-logo-dark flex-none"
-            :class="stacked ? 'w-20' : 'w-12'"
+            :class="stacked ? 'w-20' : 'w-15'"
         />
 
         <span

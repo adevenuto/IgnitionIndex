@@ -34,6 +34,8 @@ export function notBelowLast(field: string): CaptureCheck {
                   field,
                   message: `Lower than your last reading of ${formatNumber(last)} mi.`,
                   reject: true,
+                  headline: `${formatNumber(value)} mi is lower than your current mileage`,
+                  detail: `Your last reading was ${formatNumber(last)} mi, and an odometer only counts up.`,
               }
             : null;
     };
@@ -52,6 +54,9 @@ export function nearEstimate(field: string, tolerance = 3000): CaptureCheck {
             ? {
                   field,
                   message: `Far from the estimate of ≈${formatNumber(projected)} mi. Check it is the odometer and not a trip meter.`,
+                  confirm: true,
+                  headline: `${formatNumber(value)} mi is much ${value > projected ? 'higher' : 'lower'} than expected`,
+                  detail: `From how this car is driven, it should read about ${formatNumber(projected)} mi by now. Readings this far off are usually a trip meter or a slipped digit.`,
               }
             : null;
     };

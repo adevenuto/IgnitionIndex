@@ -141,12 +141,12 @@ const navLinks = [
                     <img
                         src="/img/ignition-index-logo.png"
                         alt=""
-                        class="ii-logo-light block w-12 flex-none"
+                        class="ii-logo-light block w-15 flex-none"
                     />
                     <img
                         src="/img/ignition-index-logo-light.png"
                         alt=""
-                        class="ii-logo-dark w-12 flex-none"
+                        class="ii-logo-dark w-15 flex-none"
                     />
                     <span
                         class="font-display text-foreground text-[18px]/[1.05] font-bold tracking-[0.01em] uppercase"
