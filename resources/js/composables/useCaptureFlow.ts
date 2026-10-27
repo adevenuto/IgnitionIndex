@@ -175,7 +175,40 @@ export function useCaptureFlow(
     }
 
     /** On to the first step not already filled, or review. */
+    /**
+     * A typed value a check would refuse — an odometer below the last
+     * reading — is kept in its field (the person may be mid-correction) but
+     * cannot be carried past its step: Next stops and says why, the same way
+     * a refused capture does.
+     */
+    function refusedOnStep(): CaptureOutcome['rejected'] {
+        const found = verdicts(values);
+
+        return (step.value?.fields ?? [])
+            .filter((key) => values[key] !== '' && found[key]?.reject)
+            .map((key) => ({
+                field: key,
+                value: Number(values[key]),
+                message: found[key].message,
+                headline: found[key].headline,
+                detail: found[key].detail,
+            }));
+    }
+
     function next(): void {
+        const refused = atReview.value ? [] : refusedOnStep();
+
+        if (refused.length > 0) {
+            outcome.value = {
+                at: performance.now(),
+                source: 'typed',
+                applied: [],
+                rejected: refused,
+            };
+
+            return;
+        }
+
         stepIndex.value = atReview.value
             ? stepIndex.value
             : nextUnfinished(stepIndex.value);

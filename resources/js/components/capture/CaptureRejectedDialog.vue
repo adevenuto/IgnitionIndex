@@ -14,9 +14,9 @@ import type { CaptureField, CaptureOutcome } from '@/lib/capture/lanes';
 import { describeFieldValue } from '@/lib/capture/lanes';
 
 /*
- * When a capture is refused — a spoken or photographed odometer below the
- * last reading — it is said in a pop-up over the sheet, not a line of small
- * print under the fields. The person was looking at the microphone, not the
+ * When a reading is refused — an odometer below the last one, whether spoken,
+ * photographed, or typed and carried to Next — it is said in a pop-up over
+ * the sheet, not a line of small print under the fields. The person was looking at the microphone, not the
  * form; a refusal they cannot miss is the point.
  *
  * It opens once per capture (keyed on the outcome's timestamp) and closing it
@@ -39,18 +39,45 @@ const item = computed(() => {
         return null;
     }
 
-    const heard =
-        props.outcome?.source === 'photo' ? 'Read from the photo' : 'Heard';
+    const value = describeFieldValue(field, first.value);
+    const source = props.outcome?.source;
+    const typed = source === 'typed';
 
     return {
-        title:
-            first.headline ??
-            `${describeFieldValue(field, first.value)} doesn't look right`,
-        detail:
-            first.detail ?? `${first.message} Please try again, or type it in.`,
-        heard: `${heard}: ${describeFieldValue(field, first.value)}`,
+        title: first.headline ?? `${value} doesn't look right`,
+        detail: `${first.detail ?? first.message} ${
+            typed
+                ? 'Check the number and enter it again.'
+                : 'Please try again, or type it in.'
+        }`,
+        said: `${
+            typed
+                ? 'Entered'
+                : source === 'photo'
+                  ? 'Read from the photo'
+                  : 'Heard'
+        }: ${value}`,
+        action: typed ? 'Fix it' : 'Try again',
     };
 });
+
+/*
+ * Closing lands in the field the reading belongs to — selected, so a typed
+ * number can simply be retyped — rather than on whatever opened the pop-up.
+ */
+function returnToField(event: Event): void {
+    const input = document.getElementById(
+        `capture-${props.outcome?.rejected[0]?.field}`,
+    );
+
+    if (input instanceof HTMLInputElement) {
+        event.preventDefault();
+        input.focus();
+        // Selected once the dialog has finished handing focus back, or the
+        // selection is lost and a new number is typed onto the old one.
+        requestAnimationFrame(() => input.select());
+    }
+}
 
 watch(
     () => props.outcome?.at,
@@ -66,6 +93,7 @@ watch(
             v-if="item"
             class="sm:max-w-md"
             :show-close-button="false"
+            @close-auto-focus="returnToField"
         >
             <DialogHeader class="items-center text-center sm:text-center">
                 <span
@@ -77,7 +105,7 @@ watch(
                 <DialogDescription class="text-body">
                     {{ item.detail }}
                 </DialogDescription>
-                <p class="ii-metadata mt-(--space-1)">{{ item.heard }}</p>
+                <p class="ii-metadata mt-(--space-1)">{{ item.said }}</p>
             </DialogHeader>
 
             <DialogFooter>
@@ -87,7 +115,7 @@ watch(
                     class="w-full"
                     @click="open = false"
                 >
-                    Try again
+                    {{ item.action }}
                 </Button>
             </DialogFooter>
         </DialogContent>
