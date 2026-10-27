@@ -7,7 +7,7 @@ import { describeFieldValue } from '@/lib/capture/lanes';
 /*
  * One line saying what the last capture did, so a value never just appears:
  * what was heard or read. A value a check refused is not repeated here — it
- * gets a pop-up of its own (CaptureRejectedDialog), because small print under
+ * gets a pop-up of its own (CaptureCheckDialog), because small print under
  * the fields was easy to miss.
  *
  * Neutral ink with a steel icon, never amber or rust: those mean service state,

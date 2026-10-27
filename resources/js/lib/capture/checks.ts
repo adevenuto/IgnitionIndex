@@ -54,6 +54,9 @@ export function nearEstimate(field: string, tolerance = 3000): CaptureCheck {
             ? {
                   field,
                   message: `Far from the estimate of ≈${formatNumber(projected)} mi. Check it is the odometer and not a trip meter.`,
+                  confirm: true,
+                  headline: `${formatNumber(value)} mi is much ${value > projected ? 'higher' : 'lower'} than expected`,
+                  detail: `From how this car is driven, it should read about ${formatNumber(projected)} mi by now. Readings this far off are usually a trip meter or a slipped digit.`,
               }
             : null;
     };

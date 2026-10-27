@@ -1,5 +1,6 @@
 import { computed, reactive, ref } from 'vue';
 import type {
+    CaptureVerdict,
     CaptureContext,
     CaptureLane,
     CaptureOutcome,
@@ -42,6 +43,8 @@ export function useCaptureFlow(
     const stepIndex = ref(0);
     /** The reader's own flags, kept until their field changes. */
     const serverFlags = empty<string | null>(null);
+    /** Values the person has said are right, by field, so they are asked once. */
+    const confirmed = empty<string | null>(null);
 
     const atReview = computed(() => stepIndex.value >= lane.steps.length);
     const step = computed(() => lane.steps[stepIndex.value] ?? null);
@@ -68,6 +71,7 @@ export function useCaptureFlow(
             {
                 message: string;
                 reject: boolean;
+                confirm: boolean;
                 headline?: string;
                 detail?: string;
             }
@@ -80,6 +84,7 @@ export function useCaptureFlow(
                 found[result.field] = {
                     message: result.message,
                     reject: result.reject ?? false,
+                    confirm: result.confirm ?? false,
                     headline: result.headline,
                     detail: result.detail,
                 };
@@ -171,42 +176,80 @@ export function useCaptureFlow(
 
         refreshFlags();
         note.value = reading.note;
-        outcome.value = { at: performance.now(), source, applied, rejected };
+        // Kept, but asked about: an unlikely value someone did not type
+        // themselves is the one most worth a second look.
+        const questioned = applied
+            .filter((key) => found[key]?.confirm)
+            .map((key) => verdict(key, found));
+
+        outcome.value = {
+            at: performance.now(),
+            source,
+            applied,
+            rejected,
+            questioned,
+        };
     }
 
     /** On to the first step not already filled, or review. */
-    /**
-     * A typed value a check would refuse — an odometer below the last
-     * reading — is kept in its field (the person may be mid-correction) but
-     * cannot be carried past its step: Next stops and says why, the same way
-     * a refused capture does.
-     */
-    function refusedOnStep(): CaptureOutcome['rejected'] {
-        const found = verdicts(values);
+    function verdict(
+        key: string,
+        found: ReturnType<typeof verdicts>,
+    ): CaptureVerdict {
+        return {
+            field: key,
+            value: Number(values[key]),
+            message: found[key].message,
+            headline: found[key].headline,
+            detail: found[key].detail,
+        };
+    }
 
-        return (step.value?.fields ?? [])
-            .filter((key) => values[key] !== '' && found[key]?.reject)
-            .map((key) => ({
-                field: key,
-                value: Number(values[key]),
-                message: found[key].message,
-                headline: found[key].headline,
-                detail: found[key].detail,
-            }));
+    /**
+     * What stops a step at Next. A value a check would refuse — an odometer
+     * below the last reading — is kept in its field (the person may be
+     * mid-correction) but cannot be carried past its step. One a check only
+     * questions is asked about once; after "yes" the same value passes.
+     */
+    function stoppedOnStep(): {
+        rejected: CaptureVerdict[];
+        questioned: CaptureVerdict[];
+    } {
+        const found = verdicts(values);
+        const filled = (step.value?.fields ?? []).filter(
+            (key) => values[key] !== '',
+        );
+
+        return {
+            rejected: filled
+                .filter((key) => found[key]?.reject)
+                .map((key) => verdict(key, found)),
+            questioned: filled
+                .filter(
+                    (key) =>
+                        found[key]?.confirm && confirmed[key] !== values[key],
+                )
+                .map((key) => verdict(key, found)),
+        };
     }
 
     function next(): void {
-        const refused = atReview.value ? [] : refusedOnStep();
+        if (!atReview.value) {
+            const stopped = stoppedOnStep();
 
-        if (refused.length > 0) {
-            outcome.value = {
-                at: performance.now(),
-                source: 'typed',
-                applied: [],
-                rejected: refused,
-            };
+            if (stopped.rejected.length > 0 || stopped.questioned.length > 0) {
+                outcome.value = {
+                    at: performance.now(),
+                    source: 'typed',
+                    applied: [],
+                    rejected: stopped.rejected,
+                    questioned: stopped.rejected.length
+                        ? []
+                        : stopped.questioned,
+                };
 
-            return;
+                return;
+            }
         }
 
         stepIndex.value = atReview.value
@@ -214,6 +257,13 @@ export function useCaptureFlow(
             : nextUnfinished(stepIndex.value);
         note.value = null;
         outcome.value = null;
+    }
+
+    /** "Yes, it's right": this value of these fields is not asked about again. */
+    function confirm(keys: string[]): void {
+        for (const key of keys) {
+            confirmed[key] = values[key];
+        }
     }
 
     function back(): void {
@@ -247,6 +297,7 @@ export function useCaptureFlow(
         set,
         apply,
         next,
+        confirm,
         back,
         edit,
     };

@@ -62,7 +62,12 @@ export type CaptureCheck = (
     field: string;
     message: string;
     reject?: boolean;
-    /** For a rejection: what the pop-up says, as a sentence and its reason. */
+    /**
+     * Neither refused nor merely flagged: plausible but unlikely, so the
+     * person is asked once, in a pop-up, whether it is right.
+     */
+    confirm?: boolean;
+    /** For a rejection or a question: what the pop-up says, as a sentence and its reason. */
     headline?: string;
     detail?: string;
 } | null;
@@ -81,6 +86,15 @@ export type CaptureReading = {
     note: string | null;
 };
 
+/** A value a check refused or questioned, with what the pop-up says about it. */
+export type CaptureVerdict = {
+    field: string;
+    value: number;
+    message: string;
+    headline?: string;
+    detail?: string;
+};
+
 /** What one capture did, for the confirmation under the fields. */
 export type CaptureOutcome = {
     /** Distinguishes one capture from the next, even when they fill the same field. */
@@ -89,13 +103,9 @@ export type CaptureOutcome = {
     /** Keys filled by it, in lane order. */
     applied: string[];
     /** Values it proposed that a check refused. */
-    rejected: {
-        field: string;
-        value: number;
-        message: string;
-        headline?: string;
-        detail?: string;
-    }[];
+    rejected: CaptureVerdict[];
+    /** Values it kept that a check wants confirmed before moving on. */
+    questioned: CaptureVerdict[];
 };
 
 /** A field's value as the inputs hold it: a string, '' when empty. */
