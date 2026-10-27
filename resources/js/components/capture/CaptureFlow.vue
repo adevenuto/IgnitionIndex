@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import CaptureConfirmation from '@/components/capture/CaptureConfirmation.vue';
+import CaptureRejectedDialog from '@/components/capture/CaptureRejectedDialog.vue';
 import CaptureFieldInput from '@/components/capture/CaptureFieldInput.vue';
 import CaptureStep from '@/components/capture/CaptureStep.vue';
 import ReviewCard from '@/components/capture/ReviewCard.vue';
@@ -247,4 +248,10 @@ function display(field: CaptureField): string | null {
             <slot name="review" />
         </template>
     </StepFlow>
+
+    <!-- A refused capture is said over the sheet, where it cannot be missed. -->
+    <CaptureRejectedDialog
+        :outcome="flow.outcome.value"
+        :fields="lane.fields"
+    />
 </template>

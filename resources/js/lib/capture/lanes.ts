@@ -58,7 +58,14 @@ export type CaptureContext = {
 export type CaptureCheck = (
     values: Record<string, string>,
     context: CaptureContext,
-) => { field: string; message: string; reject?: boolean } | null;
+) => {
+    field: string;
+    message: string;
+    reject?: boolean;
+    /** For a rejection: what the pop-up says, as a sentence and its reason. */
+    headline?: string;
+    detail?: string;
+} | null;
 
 export type CaptureLane = {
     id: CaptureLaneId;
@@ -82,7 +89,13 @@ export type CaptureOutcome = {
     /** Keys filled by it, in lane order. */
     applied: string[];
     /** Values it proposed that a check refused. */
-    rejected: { field: string; value: number; message: string }[];
+    rejected: {
+        field: string;
+        value: number;
+        message: string;
+        headline?: string;
+        detail?: string;
+    }[];
 };
 
 /** A field's value as the inputs hold it: a string, '' when empty. */

@@ -34,6 +34,8 @@ export function notBelowLast(field: string): CaptureCheck {
                   field,
                   message: `Lower than your last reading of ${formatNumber(last)} mi.`,
                   reject: true,
+                  headline: `${formatNumber(value)} mi is lower than your current mileage`,
+                  detail: `Your last reading was ${formatNumber(last)} mi, and an odometer only counts up. Please try again, or type it in.`,
               }
             : null;
     };

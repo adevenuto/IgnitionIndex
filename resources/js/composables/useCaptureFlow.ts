@@ -63,7 +63,15 @@ export function useCaptureFlow(
 
     /** Every check's verdict on a set of values, by field; the first one wins. */
     function verdicts(candidate: Record<string, string>) {
-        const found: Record<string, { message: string; reject: boolean }> = {};
+        const found: Record<
+            string,
+            {
+                message: string;
+                reject: boolean;
+                headline?: string;
+                detail?: string;
+            }
+        > = {};
 
         for (const check of lane.checks) {
             const result = check(candidate, context());
@@ -72,6 +80,8 @@ export function useCaptureFlow(
                 found[result.field] = {
                     message: result.message,
                     reject: result.reject ?? false,
+                    headline: result.headline,
+                    detail: result.detail,
                 };
             }
         }
@@ -140,6 +150,8 @@ export function useCaptureFlow(
                     field: field.key,
                     value: proposed[field.key],
                     message: found[field.key].message,
+                    headline: found[field.key].headline,
+                    detail: found[field.key].detail,
                 });
 
                 continue;
