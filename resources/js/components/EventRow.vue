@@ -3,7 +3,6 @@ import { DollarSign, Fuel, Gauge, Wrench } from '@lucide/vue';
 import { computed } from 'vue';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCents, formatDate, formatMiles } from '@/lib/format';
-import { laneTone } from '@/lib/lanes';
 import type { VehicleEvent } from '@/types/garage';
 
 /*
@@ -87,9 +86,12 @@ const secondary = computed(() =>
                 class="ease-standard group-hover:bg-hover-surface transition-colors duration-[var(--dur-fast)] group-hover:border-(--color-accent)"
             >
                 <CardContent class="flex items-start gap-3">
+                    <!--
+                        One neutral tile for every type: the icon says what the
+                        entry is, so four colours down a list only added noise.
+                    -->
                     <span
-                        class="flex size-10 shrink-0 items-center justify-center rounded-md"
-                        :class="laneTone(event.type).tile"
+                        class="flex size-10 shrink-0 items-center justify-center rounded-md bg-(--tile-slate-bg) text-(--tile-slate-ink)"
                     >
                         <component :is="icons[event.type]" class="size-5" />
                     </span>
