@@ -314,13 +314,14 @@ const {
                     :key="item.value"
                     :value="item.value"
                     :aria-label="item.label"
-                    class="ease-standard text-muted-foreground hover:bg-card hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground h-11 flex-1 rounded-md border border-transparent text-sm font-semibold transition-colors duration-[var(--dur-fast)] data-[state=on]:border-(--color-divider) data-[state=on]:shadow-sm"
+                    class="ease-standard text-muted-foreground hover:bg-card hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground h-11 flex-1 rounded-md border border-transparent text-sm font-semibold transition-colors duration-[var(--dur-fast)] data-[state=on]:border-(--color-divider) data-[state=on]:shadow-sm max-[25rem]:shrink max-[25rem]:px-1 max-[25rem]:[&_svg]:hidden"
                 >
                     <!--
                         One quiet segmented control: the chosen type is lifted
                         onto the card surface, never colour-coded per type —
                         four hues in one row read as noise rather than as a
-                        choice.
+                        choice. On a narrow phone (an SE) the icons go, so
+                        the four names fit on one row without spilling.
                     -->
                     <component :is="item.icon" />
                     {{ item.label }}
