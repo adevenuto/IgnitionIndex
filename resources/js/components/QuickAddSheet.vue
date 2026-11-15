@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useMediaQuery } from '@vueuse/core';
 import QuickAddForm from '@/components/QuickAddForm.vue';
+import VehicleBadge from '@/components/VehicleBadge.vue';
 import {
     Dialog,
     DialogContent,
@@ -66,6 +67,14 @@ const subtitle = () =>
         : props.vehicles.length > 1
           ? 'Choose a vehicle below'
           : (props.vehicles[0]?.name ?? '');
+
+/**
+ * With one car in play the header shows it as a badge, photo and paint and
+ * all; the plain line stays for screen readers. With several, the line says
+ * to choose one, and the form's picker does the rest.
+ */
+const badgeVehicle = () =>
+    props.vehicles.length === 1 ? props.vehicles[0] : null;
 </script>
 
 <template>
@@ -75,9 +84,16 @@ const subtitle = () =>
         >
             <DialogHeader class="shrink-0 px-4 pt-5 pb-(--space-4) text-left">
                 <DialogTitle class="text-h2">{{ title() }}</DialogTitle>
-                <DialogDescription class="text-body">
+                <DialogDescription
+                    :class="badgeVehicle() ? 'sr-only' : 'text-body'"
+                >
                     {{ subtitle() }}
                 </DialogDescription>
+                <VehicleBadge
+                    v-if="badgeVehicle()"
+                    :vehicle="badgeVehicle()!"
+                    class="mt-1 self-start"
+                />
             </DialogHeader>
 
             <QuickAddForm
@@ -102,9 +118,16 @@ const subtitle = () =>
                 class="shrink-0 pt-[calc(env(safe-area-inset-top)+1rem)] pr-16"
             >
                 <SheetTitle class="text-h2">{{ title() }}</SheetTitle>
-                <SheetDescription class="text-body">
+                <SheetDescription
+                    :class="badgeVehicle() ? 'sr-only' : 'text-body'"
+                >
                     {{ subtitle() }}
                 </SheetDescription>
+                <VehicleBadge
+                    v-if="badgeVehicle()"
+                    :vehicle="badgeVehicle()!"
+                    class="mt-1 self-start"
+                />
             </SheetHeader>
 
             <QuickAddForm

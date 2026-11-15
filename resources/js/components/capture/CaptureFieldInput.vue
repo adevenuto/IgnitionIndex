@@ -16,6 +16,10 @@ import type { CaptureField, Provenance } from '@/lib/capture/lanes';
  *
  * A value a capture just filled takes the steel border for a moment, so the
  * eye goes to what changed. Colour only — nothing in the system moves to say so.
+ *
+ * Next on a step with this field empty nudges it: the field is focused and a
+ * quiet line under it says what is wanted, until something is typed. It is a
+ * reminder, not an error, so it is neutral ink — no red border.
  */
 const props = defineProps<{
     field: CaptureField;
@@ -23,6 +27,8 @@ const props = defineProps<{
     flag: string | null;
     /** When a capture last filled this field, to mark it as just filled. */
     filledAt: number | null;
+    /** When Next last found this field empty. */
+    nudged?: number | null;
 }>();
 
 const value = defineModel<string>({ required: true });
@@ -36,6 +42,17 @@ const step = computed(() =>
     props.field.precision === 0 ? '1' : String(10 ** -props.field.precision),
 );
 const units = { mi: 'mi', gal: 'gal', usd: '$' } as const;
+
+const reminding = computed(() => props.nudged != null && value.value === '');
+const describedBy = computed(
+    () =>
+        [
+            props.flag && `${id.value}-flag`,
+            reminding.value && `${id.value}-hint`,
+        ]
+            .filter(Boolean)
+            .join(' ') || undefined,
+);
 
 const fresh = ref(false);
 let fade = 0;
@@ -78,7 +95,7 @@ onBeforeUnmount(() => window.clearTimeout(fade));
                 min="0"
                 :inputmode="field.precision === 0 ? 'numeric' : 'decimal'"
                 :placeholder="field.placeholder"
-                :aria-describedby="flag ? `${id}-flag` : undefined"
+                :aria-describedby="describedBy"
                 class="font-display text-readout md:text-readout h-18 [appearance:textfield] tabular-nums transition-[color,border-color,box-shadow] duration-[var(--dur-slow)] placeholder:text-(--color-neutral-500) placeholder-shown:text-(length:--text-h3) [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 :class="[
                     field.unit === 'usd' ? 'pl-10' : 'pr-16',
@@ -93,6 +110,15 @@ onBeforeUnmount(() => window.clearTimeout(fade));
                 >{{ units[field.unit] }}</span
             >
         </div>
+
+        <p
+            v-if="reminding"
+            :id="`${id}-hint`"
+            class="text-sm text-(--color-neutral-700)"
+            role="status"
+        >
+            Enter the {{ field.label.toLowerCase() }} to continue.
+        </p>
 
         <!-- Neutral, not amber or rust: those mean service state, and this is a question. -->
         <p

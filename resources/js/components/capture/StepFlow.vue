@@ -10,10 +10,12 @@ import { injectSheetChrome } from '@/composables/useSheetChrome';
  * titles, the content arrives through the slot, and the final position, one
  * past the last step, is review.
  *
- * Forward waits on the step: `canAdvance` is false until the step is filled,
- * so no one reaches the pump with no odometer behind them. It says where it
- * goes ("Next: At the pump"), and the flow decides how far — past any step a
- * capture has already filled.
+ * Forward waits on the step: until `canAdvance`, Next is dimmed, so no one
+ * reaches the pump with no odometer behind them. It is dimmed rather than
+ * disabled — a disabled button swallows the tap and says nothing — so a tap
+ * still reaches the flow, which takes the person to what is missing. It says
+ * where it goes ("Next: At the pump"), and the flow decides how far — past any
+ * step a capture has already filled.
  *
  * The bar has one segment per step, matching "Step 1 of 2"; review fills them
  * all. Inside the quick-add sheet (useSheetChrome) the progress goes into the
@@ -43,10 +45,14 @@ const headerEl = computed(() => chrome?.header.value ?? null);
 const footerEl = computed(() => chrome?.footer.value ?? null);
 
 const atReview = computed(() => props.index >= props.titles.length);
-const label = computed(() =>
+/** The step's name, large, with where it sits in the flow beside it. */
+const current = computed(() =>
+    atReview.value ? 'Review' : props.titles[props.index],
+);
+const counter = computed(() =>
     atReview.value
-        ? 'Review'
-        : `Step ${props.index + 1} of ${props.titles.length} · ${props.titles[props.index]}`,
+        ? 'Ready to save'
+        : `Step ${props.index + 1} of ${props.titles.length}`,
 );
 const nextLabel = computed(() => {
     const following = props.titles[props.index + 1];
@@ -66,15 +72,34 @@ watch(
 
 <template>
     <div class="flex flex-col gap-(--space-6)">
-        <Teleport v-if="headerEl" :to="headerEl">
-            <div class="grid gap-(--space-2)">
-                <p class="ii-eyebrow" aria-live="polite">{{ label }}</p>
+        <!-- Into the sheet's fixed header once it exists; here without one. -->
+        <Teleport
+            v-if="headerEl || !inSheet"
+            :to="headerEl ?? 'body'"
+            :disabled="!inSheet"
+        >
+            <div class="grid gap-(--space-3)">
+                <div
+                    class="flex items-baseline justify-between gap-(--space-3)"
+                    aria-live="polite"
+                >
+                    <p
+                        class="font-display text-foreground text-[17px] font-semibold"
+                    >
+                        {{ current }}
+                    </p>
+                    <p
+                        class="shrink-0 text-sm text-(--color-neutral-700) tabular-nums"
+                    >
+                        {{ counter }}
+                    </p>
+                </div>
                 <!-- One segment per step; filled up to here, and all of them at review. -->
-                <div class="flex gap-1" aria-hidden="true">
+                <div class="flex gap-1.5" aria-hidden="true">
                     <span
                         v-for="segment in titles.length"
                         :key="segment"
-                        class="h-1 flex-1 rounded-full transition-colors duration-[var(--dur-fast)]"
+                        class="h-1.5 flex-1 rounded-full transition-colors duration-[var(--dur-fast)]"
                         :class="
                             segment - 1 <= index
                                 ? 'bg-accent'
@@ -84,22 +109,6 @@ watch(
                 </div>
             </div>
         </Teleport>
-
-        <div v-if="!inSheet" class="grid gap-(--space-2)">
-            <p class="ii-eyebrow" aria-live="polite">{{ label }}</p>
-            <div class="flex gap-1" aria-hidden="true">
-                <span
-                    v-for="segment in titles.length"
-                    :key="segment"
-                    class="h-1 flex-1 rounded-full transition-colors duration-[var(--dur-fast)]"
-                    :class="
-                        segment - 1 <= index
-                            ? 'bg-accent'
-                            : 'bg-(--color-divider)'
-                    "
-                />
-            </div>
-        </div>
 
         <slot />
 
@@ -120,8 +129,8 @@ watch(
                     v-if="!atReview"
                     type="button"
                     size="lg"
-                    class="group flex-1"
-                    :disabled="!canAdvance"
+                    class="group flex-1 aria-disabled:opacity-60"
+                    :aria-disabled="!canAdvance"
                     @click="emit('next')"
                 >
                     {{ nextLabel }}
@@ -148,8 +157,8 @@ watch(
                 v-if="!atReview"
                 type="button"
                 size="lg"
-                class="group flex-1"
-                :disabled="!canAdvance"
+                class="group flex-1 aria-disabled:opacity-60"
+                :aria-disabled="!canAdvance"
                 @click="emit('next')"
             >
                 {{ nextLabel }}

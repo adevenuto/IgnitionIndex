@@ -76,6 +76,7 @@ export type VehicleDetail = {
     engine: string | null;
     color: string | null;
     photo_url: string | null;
+    photo_thumb_url: string | null;
     photo_color: string | null;
     last_odometer: number | null;
     last_odometer_at: string | null;
@@ -111,6 +112,12 @@ export type QuickAddVehicle = {
     last_odometer: number | null;
     /** The running estimate, offered as a suggestion; null with no reading yet. */
     projected_odometer?: number | null;
+    /** For the sheet's vehicle badge; absent where only the name is known. */
+    year?: number | null;
+    make?: string | null;
+    model?: string | null;
+    color?: string | null;
+    photo_thumb_url?: string | null;
 };
 
 /**
