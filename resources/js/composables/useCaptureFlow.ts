@@ -20,6 +20,10 @@ import { formatFieldValue } from '@/lib/capture/lanes';
  * Next then skips every step the capture already completed, which is how one
  * pump photo, or one sentence, still takes someone straight to review.
  *
+ * Next waits on the step: until every field on it is filled, `stepComplete`
+ * is false and next() does nothing, so the flow cannot run ahead of what the
+ * person has given it. Back and the review card's rows still move freely.
+ *
  * The lane's checks run on every change. A captured value a check rejects is
  * never filled in; a typed one is only flagged, since typing a lower odometer
  * is how a past mistake gets corrected.
@@ -48,6 +52,10 @@ export function useCaptureFlow(
 
     const atReview = computed(() => stepIndex.value >= lane.steps.length);
     const step = computed(() => lane.steps[stepIndex.value] ?? null);
+    /** Every field on the step showing is filled; review counts as complete. */
+    const stepComplete = computed(
+        () => atReview.value || isComplete(stepIndex.value),
+    );
 
     function isComplete(index: number): boolean {
         return lane.steps[index].fields.every((key) => values[key] !== '');
@@ -234,6 +242,10 @@ export function useCaptureFlow(
     }
 
     function next(): void {
+        if (!stepComplete.value) {
+            return;
+        }
+
         if (!atReview.value) {
             const stopped = stoppedOnStep();
 
@@ -293,6 +305,7 @@ export function useCaptureFlow(
         outcome,
         stepIndex,
         step,
+        stepComplete,
         atReview,
         set,
         apply,

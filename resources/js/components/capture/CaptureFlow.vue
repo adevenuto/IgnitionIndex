@@ -147,6 +147,32 @@ function display(field: CaptureField): string | null {
     return raw === '' ? null : describeFieldValue(field, Number(raw));
 }
 
+/**
+ * The field Next last found empty, and when. Said lightly: the field takes
+ * the focus and a line under it says what is wanted — no red, no shake.
+ */
+const nudge = ref<{ key: string; at: number } | null>(null);
+
+watch(flow.stepIndex, () => {
+    nudge.value = null;
+});
+
+/** Next, or — on a step not yet filled — straight to what is missing. */
+function onNext(): void {
+    const missing = flow.step.value?.fields.find(
+        (key) => flow.values[key] === '',
+    );
+
+    if (missing === undefined) {
+        flow.next();
+
+        return;
+    }
+
+    nudge.value = { key: missing, at: performance.now() };
+    document.getElementById(`capture-${missing}`)?.focus();
+}
+
 function onKeep(keys: string[]): void {
     const typed = flow.outcome.value?.source === 'typed';
 
@@ -171,8 +197,9 @@ function onKeep(keys: string[]): void {
     <StepFlow
         :titles="lane.steps.map((step) => step.title)"
         :index="flow.stepIndex.value"
+        :can-advance="flow.stepComplete.value"
         @back="flow.back()"
-        @next="flow.next()"
+        @next="onNext"
     >
         <CaptureStep
             v-if="flow.step.value"
@@ -197,7 +224,8 @@ function onKeep(keys: string[]): void {
                 @update:model-value="
                     flow.set(field.key, String($event), 'typed')
                 "
-                @enter="flow.next()"
+                :nudged="nudge?.key === field.key ? nudge.at : null"
+                @enter="onNext"
             />
 
             <template #status>

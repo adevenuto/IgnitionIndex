@@ -186,6 +186,10 @@ class VehicleController extends Controller
                 'photo_url' => $vehicle->primaryPhoto
                     ? route('vehicle-photos.show', $vehicle->primaryPhoto)
                     : null,
+                // The log sheet's vehicle badge is 40px: the thumbnail will do.
+                'photo_thumb_url' => $vehicle->primaryPhoto
+                    ? route('vehicle-photos.thumbnail', $vehicle->primaryPhoto)
+                    : null,
                 'photo_color' => $vehicle->primaryPhoto?->placeholder_color,
                 'last_odometer' => $vehicle->last_odometer,
                 'last_odometer_at' => $vehicle->last_odometer_at?->toDateString(),
