@@ -171,6 +171,7 @@ function onKeep(keys: string[]): void {
     <StepFlow
         :titles="lane.steps.map((step) => step.title)"
         :index="flow.stepIndex.value"
+        :can-advance="flow.stepComplete.value"
         @back="flow.back()"
         @next="flow.next()"
     >

@@ -5,7 +5,7 @@ import type { AcceptableValue } from 'reka-ui';
 import { computed, ref } from 'vue';
 import FuelFlow from '@/components/capture/FuelFlow.vue';
 import InputError from '@/components/InputError.vue';
-import { provideSheetFooter } from '@/composables/useSheetFooter';
+import { provideSheetChrome } from '@/composables/useSheetChrome';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -257,8 +257,15 @@ function deleteEntry(): void {
     });
 }
 
-/** The sheet's pinned footer: Save, plus whatever a stepped flow adds to it. */
-const footer = provideSheetFooter();
+/**
+ * The sheet's fixed header and pinned footer around a body that scrolls: a
+ * stepped flow puts its progress in one and Back and Next in the other.
+ */
+const {
+    header: chromeHeader,
+    body: chromeBody,
+    footer: chromeFooter,
+} = provideSheetChrome();
 </script>
 
 <template>
@@ -267,409 +274,443 @@ const footer = provideSheetFooter();
         v-bind="form"
         :options="{ preserveScroll: true }"
         :reset-on-success="!editing"
-        class="flex flex-col gap-5 px-4"
+        class="flex min-h-0 flex-1 flex-col"
         v-slot="{ errors, processing }"
         @success="emit('saved')"
     >
         <input type="hidden" name="type" :value="lane" />
 
-        <!-- An entry's type is fixed once logged, so editing shows it, not a choice. -->
-        <p
-            v-if="editing"
-            class="text-muted-foreground flex items-center gap-2 text-sm font-bold"
+        <!--
+            The header band: stays put while the body scrolls under it. The
+            entry types, and a stepped flow's progress, teleported in.
+        -->
+        <div
+            class="grid shrink-0 gap-(--space-4) border-b border-(--color-divider) px-4 pb-(--space-4)"
         >
-            <component :is="laneItem.icon" class="size-4" :stroke-width="1.5" />
-            {{ laneItem.label }} entry
-        </p>
-
-        <ToggleGroup
-            v-else
-            type="single"
-            :model-value="lane"
-            :spacing="1"
-            class="bg-muted w-full rounded-lg p-1"
-            aria-label="Entry type"
-            @update:model-value="onLaneChange"
-        >
-            <ToggleGroupItem
-                v-for="item in lanes"
-                :key="item.value"
-                :value="item.value"
-                :aria-label="item.label"
-                class="ease-standard text-muted-foreground hover:bg-card hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground h-11 flex-1 rounded-md border border-transparent text-sm font-semibold transition-colors duration-[var(--dur-fast)] data-[state=on]:border-(--color-divider) data-[state=on]:shadow-sm"
+            <!-- An entry's type is fixed once logged, so editing shows it, not a choice. -->
+            <p
+                v-if="editing"
+                class="text-muted-foreground flex items-center gap-2 text-sm font-bold"
             >
-                <!--
-                    One quiet segmented control: the chosen type is lifted onto
-                    the card surface, never colour-coded per type — four hues in
-                    one row read as noise rather than as a choice.
-                -->
-                <component :is="item.icon" />
-                {{ item.label }}
-            </ToggleGroupItem>
-        </ToggleGroup>
+                <component
+                    :is="laneItem.icon"
+                    class="size-4"
+                    :stroke-width="1.5"
+                />
+                {{ laneItem.label }} entry
+            </p>
 
-        <div v-if="!editing && vehicles.length > 1" class="grid gap-1.5">
-            <Label for="quick-add-vehicle">Vehicle</Label>
-            <Select v-model="selectedId">
-                <SelectTrigger id="quick-add-vehicle" class="w-full">
-                    <SelectValue placeholder="Choose a vehicle" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem
-                        v-for="option in vehicles"
-                        :key="option.id"
-                        :value="String(option.id)"
-                    >
-                        {{ option.name }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
+            <ToggleGroup
+                v-else
+                type="single"
+                :model-value="lane"
+                :spacing="1"
+                class="bg-muted w-full rounded-lg p-1"
+                aria-label="Entry type"
+                @update:model-value="onLaneChange"
+            >
+                <ToggleGroupItem
+                    v-for="item in lanes"
+                    :key="item.value"
+                    :value="item.value"
+                    :aria-label="item.label"
+                    class="ease-standard text-muted-foreground hover:bg-card hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground h-11 flex-1 rounded-md border border-transparent text-sm font-semibold transition-colors duration-[var(--dur-fast)] data-[state=on]:border-(--color-divider) data-[state=on]:shadow-sm"
+                >
+                    <!--
+                        One quiet segmented control: the chosen type is lifted
+                        onto the card surface, never colour-coded per type —
+                        four hues in one row read as noise rather than as a
+                        choice.
+                    -->
+                    <component :is="item.icon" />
+                    {{ item.label }}
+                </ToggleGroupItem>
+            </ToggleGroup>
+
+            <div ref="chromeHeader" class="contents" />
         </div>
 
-        <!-- The spine: every lane carries these two. -->
-        <template v-if="!assisted">
-            <div class="grid grid-cols-2 gap-3">
-                <div class="grid gap-1.5">
-                    <Label for="odometer">Odometer</Label>
-                    <Input
-                        id="odometer"
-                        name="odometer"
-                        type="number"
-                        inputmode="numeric"
-                        required
-                        :default-value="
-                            editing?.odometer ??
-                            vehicle?.last_odometer ??
-                            undefined
-                        "
-                        :placeholder="odometerPlaceholder"
-                    />
-                </div>
-                <div class="grid gap-1.5">
-                    <Label for="occurred_on">Date</Label>
-                    <Input
-                        id="occurred_on"
-                        name="occurred_on"
-                        v-model="occurredOn"
-                        type="date"
-                        required
-                    />
-                </div>
-            </div>
-            <div
-                v-if="isFirst || range"
-                class="text-muted-foreground -mt-3 grid gap-0.5 text-xs"
-            >
-                <p v-if="isFirst">
-                    Your earliest reading. Mileage is measured from here.
-                </p>
-                <p v-if="range">{{ range }}</p>
-            </div>
-            <InputError :message="errors.odometer" />
-            <InputError :message="errors.occurred_on" />
-        </template>
-
-        <!-- Fuel, assisted: steps with photo and voice, then review. -->
-        <FuelFlow
-            v-if="assisted"
-            :key="vehicle.id"
-            v-model:at-review="atReview"
-            :vehicle="vehicle"
-            :errors="errors"
-        />
-
-        <!-- Fuel: odometer + gallons + total cost is a complete entry. -->
-        <template v-else-if="lane === 'fuel'">
-            <div class="grid grid-cols-2 gap-3">
-                <div class="grid gap-1.5">
-                    <Label for="gallons">Gallons</Label>
-                    <Input
-                        id="gallons"
-                        name="gallons"
-                        type="number"
-                        step="0.001"
-                        inputmode="decimal"
-                        placeholder="12.4"
-                        :default-value="editing?.gallons ?? undefined"
-                    />
-                </div>
-                <div class="grid gap-1.5">
-                    <Label for="fuel-cost">Total cost</Label>
-                    <Input
-                        id="fuel-cost"
-                        name="cost"
-                        type="number"
-                        step="0.01"
-                        inputmode="decimal"
-                        placeholder="44.99"
-                        :default-value="dollars(editing?.cost_cents)"
-                    />
-                </div>
-            </div>
-            <InputError :message="errors.gallons" />
-
-            <div class="flex items-center gap-2.5">
-                <Checkbox
-                    id="full_tank"
-                    name="full_tank"
-                    value="1"
-                    :default-value="editing ? editing.full_tank === true : true"
-                />
-                <!-- Clicking the text toggles the box, so it says so. -->
-                <Label
-                    for="full_tank"
-                    class="text-body cursor-pointer font-normal"
-                >
-                    Filled the tank
-                    <span class="text-muted-foreground">
-                        — needed for MPG
-                    </span>
-                </Label>
-            </div>
-        </template>
-
-        <!-- Service: one shop visit, one or more jobs. -->
-        <template v-else-if="lane === 'visit'">
-            <div class="grid gap-3">
-                <div
-                    v-for="(item, index) in lineItems"
-                    :key="index"
-                    class="flex items-end gap-2"
-                >
-                    <div class="grid min-w-0 flex-1 gap-1.5">
-                        <Label :for="`line-${index}`">
-                            {{
-                                index === 0 ? 'Service' : `Service ${index + 1}`
-                            }}
-                        </Label>
-                        <Select
-                            v-model="item.service_type_id"
-                            :name="`line_items[${index}][service_type_id]`"
+        <!--
+            The body: the only part that scrolls. Up and down only —
+            overflow-x-hidden stops a sideways pan when any row runs a pixel
+            wide, overscroll-contain keeps the end of the scroll from dragging
+            the page behind it, and touch-pan-y tells a phone that a vertical
+            swipe is the only gesture here.
+        -->
+        <div
+            ref="chromeBody"
+            class="flex min-h-0 flex-1 touch-pan-y flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-(--space-6)"
+        >
+            <div v-if="!editing && vehicles.length > 1" class="grid gap-1.5">
+                <Label for="quick-add-vehicle">Vehicle</Label>
+                <Select v-model="selectedId">
+                    <SelectTrigger id="quick-add-vehicle" class="w-full">
+                        <SelectValue placeholder="Choose a vehicle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="option in vehicles"
+                            :key="option.id"
+                            :value="String(option.id)"
                         >
-                            <SelectTrigger :id="`line-${index}`" class="w-full">
+                            {{ option.name }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <!-- The spine: every lane carries these two. -->
+            <template v-if="!assisted">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="grid gap-1.5">
+                        <Label for="odometer">Odometer</Label>
+                        <Input
+                            id="odometer"
+                            name="odometer"
+                            type="number"
+                            inputmode="numeric"
+                            required
+                            :default-value="
+                                editing?.odometer ??
+                                vehicle?.last_odometer ??
+                                undefined
+                            "
+                            :placeholder="odometerPlaceholder"
+                        />
+                    </div>
+                    <div class="grid gap-1.5">
+                        <Label for="occurred_on">Date</Label>
+                        <Input
+                            id="occurred_on"
+                            name="occurred_on"
+                            v-model="occurredOn"
+                            type="date"
+                            required
+                        />
+                    </div>
+                </div>
+                <div
+                    v-if="isFirst || range"
+                    class="text-muted-foreground -mt-3 grid gap-0.5 text-xs"
+                >
+                    <p v-if="isFirst">
+                        Your earliest reading. Mileage is measured from here.
+                    </p>
+                    <p v-if="range">{{ range }}</p>
+                </div>
+                <InputError :message="errors.odometer" />
+                <InputError :message="errors.occurred_on" />
+            </template>
+
+            <!-- Fuel, assisted: steps with photo and voice, then review. -->
+            <FuelFlow
+                v-if="assisted"
+                :key="vehicle.id"
+                v-model:at-review="atReview"
+                :vehicle="vehicle"
+                :errors="errors"
+            />
+
+            <!-- Fuel: odometer + gallons + total cost is a complete entry. -->
+            <template v-else-if="lane === 'fuel'">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="grid gap-1.5">
+                        <Label for="gallons">Gallons</Label>
+                        <Input
+                            id="gallons"
+                            name="gallons"
+                            type="number"
+                            step="0.001"
+                            inputmode="decimal"
+                            placeholder="12.4"
+                            :default-value="editing?.gallons ?? undefined"
+                        />
+                    </div>
+                    <div class="grid gap-1.5">
+                        <Label for="fuel-cost">Total cost</Label>
+                        <Input
+                            id="fuel-cost"
+                            name="cost"
+                            type="number"
+                            step="0.01"
+                            inputmode="decimal"
+                            placeholder="44.99"
+                            :default-value="dollars(editing?.cost_cents)"
+                        />
+                    </div>
+                </div>
+                <InputError :message="errors.gallons" />
+
+                <div class="flex items-center gap-2.5">
+                    <Checkbox
+                        id="full_tank"
+                        name="full_tank"
+                        value="1"
+                        :default-value="
+                            editing ? editing.full_tank === true : true
+                        "
+                    />
+                    <!-- Clicking the text toggles the box, so it says so. -->
+                    <Label
+                        for="full_tank"
+                        class="text-body cursor-pointer font-normal"
+                    >
+                        Filled the tank
+                        <span class="text-muted-foreground">
+                            — needed for MPG
+                        </span>
+                    </Label>
+                </div>
+            </template>
+
+            <!-- Service: one shop visit, one or more jobs. -->
+            <template v-else-if="lane === 'visit'">
+                <div class="grid gap-3">
+                    <div
+                        v-for="(item, index) in lineItems"
+                        :key="index"
+                        class="flex items-end gap-2"
+                    >
+                        <div class="grid min-w-0 flex-1 gap-1.5">
+                            <Label :for="`line-${index}`">
+                                {{
+                                    index === 0
+                                        ? 'Service'
+                                        : `Service ${index + 1}`
+                                }}
+                            </Label>
+                            <Select
+                                v-model="item.service_type_id"
+                                :name="`line_items[${index}][service_type_id]`"
+                            >
+                                <SelectTrigger
+                                    :id="`line-${index}`"
+                                    class="w-full"
+                                >
+                                    <SelectValue placeholder="Choose…" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem
+                                        v-for="type in serviceTypes"
+                                        :key="type.id"
+                                        :value="String(type.id)"
+                                    >
+                                        {{ type.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="grid w-28 gap-1.5">
+                            <Label :for="`line-cost-${index}`">Cost</Label>
+                            <Input
+                                :id="`line-cost-${index}`"
+                                v-model="item.cost"
+                                :name="`line_items[${index}][cost]`"
+                                type="number"
+                                step="0.01"
+                                inputmode="decimal"
+                                placeholder="0.00"
+                            />
+                        </div>
+
+                        <Button
+                            v-if="lineItems.length > 1"
+                            type="button"
+                            variant="ghost"
+                            size="icon-tap"
+                            aria-label="Remove this service"
+                            @click="removeLineItem(index)"
+                        >
+                            <Trash2 />
+                        </Button>
+                    </div>
+                </div>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    class="self-start"
+                    @click="addLineItem"
+                >
+                    <Plus />
+                    Add another service
+                </Button>
+                <InputError :message="errors.line_items" />
+
+                <div class="grid gap-1.5">
+                    <Label for="location">Shop</Label>
+                    <Input
+                        id="location"
+                        name="location"
+                        placeholder="Corner Auto"
+                        :default-value="editing?.location ?? undefined"
+                    />
+                </div>
+            </template>
+
+            <!-- Expense: purely financial, still carries a reading. -->
+            <template v-else-if="lane === 'expense'">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="grid gap-1.5">
+                        <Label for="category">Category</Label>
+                        <Select
+                            name="category"
+                            :default-value="editing?.category ?? 'Insurance'"
+                        >
+                            <SelectTrigger id="category" class="w-full">
                                 <SelectValue placeholder="Choose…" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem
-                                    v-for="type in serviceTypes"
-                                    :key="type.id"
-                                    :value="String(type.id)"
+                                    v-for="category in expenseCategories"
+                                    :key="category"
+                                    :value="category"
                                 >
-                                    {{ type.name }}
+                                    {{ category }}
                                 </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
-
-                    <div class="grid w-28 gap-1.5">
-                        <Label :for="`line-cost-${index}`">Cost</Label>
+                    <div class="grid gap-1.5">
+                        <Label for="expense-cost">Cost</Label>
                         <Input
-                            :id="`line-cost-${index}`"
-                            v-model="item.cost"
-                            :name="`line_items[${index}][cost]`"
+                            id="expense-cost"
+                            name="cost"
                             type="number"
                             step="0.01"
                             inputmode="decimal"
-                            placeholder="0.00"
+                            placeholder="120.00"
+                            :default-value="dollars(editing?.cost_cents)"
                         />
                     </div>
-
-                    <Button
-                        v-if="lineItems.length > 1"
-                        type="button"
-                        variant="ghost"
-                        size="icon-tap"
-                        aria-label="Remove this service"
-                        @click="removeLineItem(index)"
-                    >
-                        <Trash2 />
-                    </Button>
                 </div>
-            </div>
+                <InputError :message="errors.category" />
+            </template>
 
+            <!-- Optional extras stay collapsed: the common case is 2-3 taps. -->
             <Button
+                v-if="!showDetails && !assisted"
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 class="self-start"
-                @click="addLineItem"
+                @click="showDetails = true"
             >
-                <Plus />
-                Add another service
+                Add notes{{ lane === 'fuel' ? '' : ' or cost' }}
             </Button>
-            <InputError :message="errors.line_items" />
 
-            <div class="grid gap-1.5">
-                <Label for="location">Shop</Label>
-                <Input
-                    id="location"
-                    name="location"
-                    placeholder="Corner Auto"
-                    :default-value="editing?.location ?? undefined"
-                />
-            </div>
-        </template>
-
-        <!-- Expense: purely financial, still carries a reading. -->
-        <template v-else-if="lane === 'expense'">
-            <div class="grid grid-cols-2 gap-3">
-                <div class="grid gap-1.5">
-                    <Label for="category">Category</Label>
-                    <Select
-                        name="category"
-                        :default-value="editing?.category ?? 'Insurance'"
-                    >
-                        <SelectTrigger id="category" class="w-full">
-                            <SelectValue placeholder="Choose…" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem
-                                v-for="category in expenseCategories"
-                                :key="category"
-                                :value="category"
-                            >
-                                {{ category }}
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div class="grid gap-1.5">
-                    <Label for="expense-cost">Cost</Label>
+            <template v-if="showDetails && !assisted">
+                <div v-if="lane === 'odometer'" class="grid gap-1.5">
+                    <Label for="misc-cost">Cost</Label>
                     <Input
-                        id="expense-cost"
+                        id="misc-cost"
                         name="cost"
                         type="number"
                         step="0.01"
                         inputmode="decimal"
-                        placeholder="120.00"
                         :default-value="dollars(editing?.cost_cents)"
                     />
                 </div>
-            </div>
-            <InputError :message="errors.category" />
-        </template>
+                <div class="grid gap-1.5">
+                    <Label for="notes">Notes</Label>
+                    <Textarea
+                        id="notes"
+                        name="notes"
+                        rows="3"
+                        placeholder="Optional"
+                        :default-value="editing?.notes ?? undefined"
+                    />
+                </div>
+            </template>
 
-        <!-- Optional extras stay collapsed: the common case is 2-3 taps. -->
-        <Button
-            v-if="!showDetails && !assisted"
-            type="button"
-            variant="ghost"
-            size="sm"
-            class="self-start"
-            @click="showDetails = true"
-        >
-            Add notes{{ lane === 'fuel' ? '' : ' or cost' }}
-        </Button>
-
-        <template v-if="showDetails && !assisted">
-            <div v-if="lane === 'odometer'" class="grid gap-1.5">
-                <Label for="misc-cost">Cost</Label>
-                <Input
-                    id="misc-cost"
-                    name="cost"
-                    type="number"
-                    step="0.01"
-                    inputmode="decimal"
-                    :default-value="dollars(editing?.cost_cents)"
-                />
-            </div>
-            <div class="grid gap-1.5">
-                <Label for="notes">Notes</Label>
-                <Textarea
-                    id="notes"
-                    name="notes"
-                    rows="3"
-                    placeholder="Optional"
-                    :default-value="editing?.notes ?? undefined"
-                />
-            </div>
-        </template>
-
-        <!--
+            <!--
             Set when the user re-submits after an implausible-jump
             warning, so the guardrail asks once rather than blocking.
         -->
-        <input
-            v-if="errors.odometer"
-            type="hidden"
-            name="confirm_odometer"
-            value="1"
-        />
+            <input
+                v-if="errors.odometer"
+                type="hidden"
+                name="confirm_odometer"
+                value="1"
+            />
 
-        <InputError :message="errors.type" />
+            <InputError :message="errors.type" />
 
-        <template v-if="!confirmingDelete">
-            <div v-if="editing" class="grid gap-1 self-start">
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    class="text-destructive hover:bg-destructive/10 self-start"
-                    :disabled="isOnly"
-                    :aria-describedby="isOnly ? 'only-reading' : undefined"
-                    @click="confirmingDelete = true"
-                >
-                    <Trash2 :stroke-width="1.5" />
-                    Delete entry
-                </Button>
-                <!-- Said up front, not after the click: there is nothing to try. -->
-                <p
-                    v-if="isOnly"
-                    id="only-reading"
-                    class="text-muted-foreground text-xs"
-                >
-                    This is the car's only reading. Correct it rather than
-                    deleting it.
-                </p>
-            </div>
-        </template>
+            <template v-if="!confirmingDelete">
+                <div v-if="editing" class="grid gap-1 self-start">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        class="text-destructive hover:bg-destructive/10 self-start"
+                        :disabled="isOnly"
+                        :aria-describedby="isOnly ? 'only-reading' : undefined"
+                        @click="confirmingDelete = true"
+                    >
+                        <Trash2 :stroke-width="1.5" />
+                        Delete entry
+                    </Button>
+                    <!-- Said up front, not after the click: there is nothing to try. -->
+                    <p
+                        v-if="isOnly"
+                        id="only-reading"
+                        class="text-muted-foreground text-xs"
+                    >
+                        This is the car's only reading. Correct it rather than
+                        deleting it.
+                    </p>
+                </div>
+            </template>
 
-        <div
-            v-else
-            class="flex flex-col gap-3 border-t border-(--color-divider) pt-4"
-        >
-            <div>
-                <p class="text-body font-bold">Delete this entry?</p>
-                <p class="text-muted-foreground text-sm">
-                    {{ deleteConsequence }}
-                </p>
-            </div>
-            <InputError :message="deleteError ?? undefined" />
-            <div class="flex justify-end gap-3">
-                <Button
-                    type="button"
-                    variant="secondary"
-                    :disabled="deleting"
-                    @click="
-                        confirmingDelete = false;
-                        deleteError = null;
-                    "
-                >
-                    Keep
-                </Button>
-                <Button
-                    type="button"
-                    variant="destructive"
-                    :disabled="deleting"
-                    @click="deleteEntry"
-                >
-                    Delete
-                </Button>
+            <div
+                v-else
+                class="flex flex-col gap-3 border-t border-(--color-divider) pt-4"
+            >
+                <div>
+                    <p class="text-body font-bold">Delete this entry?</p>
+                    <p class="text-muted-foreground text-sm">
+                        {{ deleteConsequence }}
+                    </p>
+                </div>
+                <InputError :message="deleteError ?? undefined" />
+                <div class="flex justify-end gap-3">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        :disabled="deleting"
+                        @click="
+                            confirmingDelete = false;
+                            deleteError = null;
+                        "
+                    >
+                        Keep
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        :disabled="deleting"
+                        @click="deleteEntry"
+                    >
+                        Delete
+                    </Button>
+                </div>
             </div>
         </div>
 
         <!--
-          The sheet's one footer, pinned to the bottom of its scroll so the way
-          on is always in reach. A stepped flow teleports Back and Next into the
+          The sheet's one footer, pinned below the body so the way on is
+          always in reach. A stepped flow teleports Back and Next into the
           mount point; Save joins them on review, or stands alone on a plain
           lane. While a delete is being confirmed, that card's own buttons are
           the only actions, so the footer steps aside.
         -->
         <div
             v-show="!confirmingDelete"
-            class="bg-background sticky bottom-0 z-10 -mx-4 mt-auto flex items-center gap-3 border-t border-(--color-divider) px-4 pt-(--space-4) pb-[max(var(--space-6),env(safe-area-inset-bottom))]"
+            class="bg-background flex shrink-0 items-center gap-3 border-t border-(--color-divider) px-4 pt-(--space-4) pb-[max(var(--space-6),env(safe-area-inset-bottom))]"
         >
-            <div ref="footer" class="contents" />
+            <div ref="chromeFooter" class="contents" />
             <Button
                 v-if="!assisted || atReview"
                 type="submit"

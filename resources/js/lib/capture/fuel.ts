@@ -24,7 +24,7 @@ export const fuelLane: CaptureLane = {
             label: 'Odometer',
             unit: 'mi',
             precision: 0,
-            placeholder: 'Reading',
+            placeholder: 'Enter odometer',
         },
         {
             key: 'gallons',
@@ -32,7 +32,7 @@ export const fuelLane: CaptureLane = {
             label: 'Gallons',
             unit: 'gal',
             precision: 3,
-            placeholder: '0.000',
+            placeholder: 'Enter gallons',
         },
         {
             key: 'total_cost',
@@ -40,31 +40,33 @@ export const fuelLane: CaptureLane = {
             label: 'Total cost',
             unit: 'usd',
             precision: 2,
-            placeholder: '0.00',
+            placeholder: 'Enter total',
         },
     ],
     steps: [
         {
             id: 'odometer',
             title: 'Odometer',
-            prompt: 'Snap the dash, or say the reading.',
+            heading: 'Tell us your new odometer reading',
+            description:
+                'The total miles on the dash right now, not a trip meter. It is how MPG and service reminders stay accurate.',
             fields: ['odometer'],
             cards: {
-                photo: 'Read the total miles off the dash',
                 voice: 'Say the reading, like "62,410"',
-                type: 'Key in the digits',
+                photo: 'Read the total miles off the dash',
             },
             reference: 'lastOdometer',
         },
         {
             id: 'pump',
             title: 'At the pump',
-            prompt: 'Snap the pump display, or say the gallons and the total.',
+            heading: 'How much fuel did you buy?',
+            description:
+                'The gallons and the total price, both shown on the pump display and on your receipt.',
             fields: ['gallons', 'total_cost'],
             cards: {
-                photo: 'Read gallons and total off the pump',
                 voice: 'Say both, like "12.5 gallons, $48.12"',
-                type: 'Key in gallons and total',
+                photo: 'Read gallons and total off the pump or receipt',
             },
         },
     ],

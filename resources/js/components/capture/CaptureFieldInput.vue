@@ -79,7 +79,7 @@ onBeforeUnmount(() => window.clearTimeout(fade));
                 :inputmode="field.precision === 0 ? 'numeric' : 'decimal'"
                 :placeholder="field.placeholder"
                 :aria-describedby="flag ? `${id}-flag` : undefined"
-                class="font-display text-readout md:text-readout h-18 [appearance:textfield] tabular-nums transition-[color,border-color,box-shadow] duration-[var(--dur-slow)] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                class="font-display text-readout md:text-readout h-18 [appearance:textfield] tabular-nums transition-[color,border-color,box-shadow] duration-[var(--dur-slow)] placeholder:text-(--color-neutral-500) placeholder-shown:text-(length:--text-h3) [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 :class="[
                     field.unit === 'usd' ? 'pl-10' : 'pr-16',
                     fresh && 'border-accent',

@@ -31,16 +31,27 @@ export type CaptureField = {
     placeholder: string;
 };
 
+/**
+ * The ways a step can be filled for the person, offered after the fields in
+ * this order. Typing is not one of them: the fields themselves come first.
+ */
+export type CaptureMethod = 'voice' | 'photo';
+
+export const CAPTURE_METHODS: CaptureMethod[] = ['voice', 'photo'];
+
 export type CaptureStep = {
     id: string;
+    /** The stepper's short name for it: "Odometer", "At the pump". */
     title: string;
-    /** One line under the title saying what a photo of it looks like. */
-    prompt: string;
+    /** What the step asks for, said to the person: the step's heading. */
+    heading: string;
+    /** A line under the heading saying what the number is and where to find it. */
+    description: string;
     /** Keys of the fields this step owns, in display order. */
     fields: string[];
     /** The line under each method card's title, said for this step. */
-    cards: { photo: string; voice: string; type: string };
-    /** A known value shown beside the title to check the new one against. */
+    cards: Record<CaptureMethod, string>;
+    /** A known value shown beside the heading to check the new one against. */
     reference?: 'lastOdometer';
 };
 

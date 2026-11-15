@@ -36,6 +36,12 @@ import type {
  * flash of the wrong variant. The breakpoint pairs exactly with Tailwind's `md`
  * (and with the sidebar's 767.98px cutoff) so there is no width where neither
  * matches.
+ *
+ * Both are three bands — a fixed header, a body that scrolls, a pinned footer
+ * (QuickAddForm, useSheetChrome) — so the entry types and a flow's progress
+ * never scroll away. On a phone the sheet takes the whole screen: the steps
+ * are long enough to need it, and a sheet that grows and shrinks between
+ * steps moves its own header out from under the thumb.
  */
 const props = defineProps<{
     vehicles: QuickAddVehicle[];
@@ -62,18 +68,12 @@ const subtitle = () =>
           : (props.vehicles[0]?.name ?? '');
 </script>
 
-<!--
-  Scrolls up and down only. overflow-x-hidden stops a sideways pan when any
-  row runs a pixel wide; overscroll-contain keeps the end of the scroll from
-  dragging the page (or the sheet itself) behind it; touch-pan-y tells a
-  phone that a vertical swipe is the only gesture here.
--->
 <template>
     <Dialog v-if="isDesktop" v-model:open="open">
         <DialogContent
-            class="max-h-[85vh] gap-0 overflow-x-hidden overflow-y-auto overscroll-contain p-0 sm:max-w-2xl"
+            class="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
         >
-            <DialogHeader class="px-4 pt-5 pb-0 text-left">
+            <DialogHeader class="shrink-0 px-4 pt-5 pb-(--space-4) text-left">
                 <DialogTitle class="text-h2">{{ title() }}</DialogTitle>
                 <DialogDescription class="text-body">
                     {{ subtitle() }}
@@ -95,10 +95,12 @@ const subtitle = () =>
     <Sheet v-else v-model:open="open">
         <SheetContent
             side="bottom"
-            class="max-h-[90svh] touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain rounded-t-xl"
+            class="top-0 h-dvh gap-0 overflow-hidden border-t-0 [&_[data-slot=sheet-close]]:top-[calc(env(safe-area-inset-top)+0.75rem)]"
         >
-            <!-- pr clears the 44px close button in the corner. -->
-            <SheetHeader class="pr-16 pb-0">
+            <!-- pr clears the 44px close button; pt clears the notch. -->
+            <SheetHeader
+                class="shrink-0 pt-[calc(env(safe-area-inset-top)+1rem)] pr-16"
+            >
                 <SheetTitle class="text-h2">{{ title() }}</SheetTitle>
                 <SheetDescription class="text-body">
                     {{ subtitle() }}

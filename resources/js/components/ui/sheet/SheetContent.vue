@@ -52,6 +52,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       <slot />
 
       <DialogClose
+        data-slot="sheet-close"
         class="bg-muted text-foreground focus-visible:ring-ring/50 absolute top-3 right-3 flex size-11 cursor-pointer items-center justify-center rounded-full transition-colors duration-[var(--dur-fast)] outline-none hover:bg-(--color-neutral-300) focus-visible:ring-[3px] active:bg-(--color-neutral-400) disabled:pointer-events-none"
       >
         <!-- 44px, the minimum comfortable touch target, on a filled disc so it reads as a button. -->

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, nextTick, watch } from 'vue';
 import { Button } from '@/components/ui/button';
-import { injectSheetFooter } from '@/composables/useSheetFooter';
+import { injectSheetChrome } from '@/composables/useSheetChrome';
 
 /*
  * A stepper and nothing else: where you are, how far there is to go, and the
@@ -10,31 +10,37 @@ import { injectSheetFooter } from '@/composables/useSheetFooter';
  * titles, the content arrives through the slot, and the final position, one
  * past the last step, is review.
  *
- * Forward is offered on every step, filled or not. Every field can be left
- * for review, so a step never traps anyone behind a capture that failed. It
- * says where it goes ("Next: At the pump"), and the flow decides how far —
- * past any step a capture has already filled.
+ * Forward waits on the step: `canAdvance` is false until the step is filled,
+ * so no one reaches the pump with no odometer behind them. It says where it
+ * goes ("Next: At the pump"), and the flow decides how far — past any step a
+ * capture has already filled.
  *
  * The bar has one segment per step, matching "Step 1 of 2"; review fills them
- * all. The way back and forward goes into the sheet's pinned footer
- * (useSheetFooter), beside Save on review, so the whole sheet has one bar at
- * the bottom. Outside such a sheet it pins itself instead.
+ * all. Inside the quick-add sheet (useSheetChrome) the progress goes into the
+ * sheet's fixed header and Back and Next into its pinned footer, so only the
+ * step itself scrolls. Outside such a sheet both render here instead.
  */
-const props = defineProps<{
-    titles: string[];
-    /** 0-based; titles.length means review. */
-    index: number;
-}>();
+const props = withDefaults(
+    defineProps<{
+        titles: string[];
+        /** 0-based; titles.length means review. */
+        index: number;
+        /** The step showing is complete enough to leave forwards. */
+        canAdvance?: boolean;
+    }>(),
+    { canAdvance: true },
+);
 
 const emit = defineEmits<{
     back: [];
     next: [];
 }>();
 
-const footer = injectSheetFooter();
-const inSheet = footer !== null;
-/** The footer's mount point, once the sheet has rendered it. */
-const footerEl = computed(() => footer?.value ?? null);
+const chrome = injectSheetChrome();
+const inSheet = chrome !== null;
+/** The mount points, once the sheet has rendered them. */
+const headerEl = computed(() => chrome?.header.value ?? null);
+const footerEl = computed(() => chrome?.footer.value ?? null);
 
 const atReview = computed(() => props.index >= props.titles.length);
 const label = computed(() =>
@@ -47,13 +53,40 @@ const nextLabel = computed(() => {
 
     return following ? `Next: ${following}` : 'Review';
 });
+
+// A new step starts at its heading, not wherever the last one was scrolled to.
+watch(
+    () => props.index,
+    async () => {
+        await nextTick();
+        chrome?.body.value?.scrollTo({ top: 0 });
+    },
+);
 </script>
 
 <template>
     <div class="flex flex-col gap-(--space-6)">
-        <div class="grid gap-(--space-2)">
+        <Teleport v-if="headerEl" :to="headerEl">
+            <div class="grid gap-(--space-2)">
+                <p class="ii-eyebrow" aria-live="polite">{{ label }}</p>
+                <!-- One segment per step; filled up to here, and all of them at review. -->
+                <div class="flex gap-1" aria-hidden="true">
+                    <span
+                        v-for="segment in titles.length"
+                        :key="segment"
+                        class="h-1 flex-1 rounded-full transition-colors duration-[var(--dur-fast)]"
+                        :class="
+                            segment - 1 <= index
+                                ? 'bg-accent'
+                                : 'bg-(--color-divider)'
+                        "
+                    />
+                </div>
+            </div>
+        </Teleport>
+
+        <div v-if="!inSheet" class="grid gap-(--space-2)">
             <p class="ii-eyebrow" aria-live="polite">{{ label }}</p>
-            <!-- One segment per step; filled up to here, and all of them at review. -->
             <div class="flex gap-1" aria-hidden="true">
                 <span
                     v-for="segment in titles.length"
@@ -88,6 +121,7 @@ const nextLabel = computed(() => {
                     type="button"
                     size="lg"
                     class="group flex-1"
+                    :disabled="!canAdvance"
                     @click="emit('next')"
                 >
                     {{ nextLabel }}
@@ -115,6 +149,7 @@ const nextLabel = computed(() => {
                 type="button"
                 size="lg"
                 class="group flex-1"
+                :disabled="!canAdvance"
                 @click="emit('next')"
             >
                 {{ nextLabel }}
